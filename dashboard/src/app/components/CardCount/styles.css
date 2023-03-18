@@ -1,0 +1,30 @@
+.card-count {
+  min-height: 100px;
+  box-shadow: var(--box-shadow);
+  margin-top: 0.5rem;
+  cursor: pointer;
+  height: 105px;
+}
+
+.card-count h1 {
+  font-size: 14px;
+}
+
+.card-count .total {
+  font-size: 24px;
+  /* font-weight: 700; */
+  color: var(--first-color);
+  float: right;
+  margin-bottom: 0;
+  margin-top: 15px;
+}
+
+@media (max-width: 767px) {
+  .card-count .total {
+    font-size: 18px;
+  }
+
+  .card-count {
+    min-height: 110px;
+  }
+}

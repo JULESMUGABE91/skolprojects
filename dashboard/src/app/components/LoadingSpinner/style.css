@@ -1,0 +1,13 @@
+.spin-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 0;
+}
+
+.spin-container span {
+  width: 5rem;
+  height: 5rem;
+}

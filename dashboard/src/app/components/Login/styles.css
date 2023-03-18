@@ -1,0 +1,31 @@
+.login-container {
+  height: 100vh;
+}
+
+.login-container .walkthrough .illustration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+}
+
+.login-container .walkthrough .illustration img.ill02 {
+  width: 150px;
+}
+
+.login-container .walkthrough .illustration img.ill03 {
+  width: 180px;
+}
+
+.login-container .form-container .card-footer .role span:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.login-container .form-container .card-footer .separator {
+  margin: 0 1rem;
+}
+
+.form-logo-header img {
+  width: 60px;
+}

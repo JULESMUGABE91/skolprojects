@@ -1,0 +1,120 @@
+.dashboard-navbar {
+  height: 3.9rem;
+  display: flex;
+  align-items: center;
+  background-color: var(--body-color-lighter);
+  margin-bottom: 1rem;
+  box-shadow: var(--box-shadow);
+}
+
+.navbar_scrolled_style {
+  background-color: var(--body-color-lighter);
+}
+
+.dashboard-navbar .d-container {
+  /* flex: 1; */
+  padding: 0 1rem;
+  /* background-color: blue; */
+}
+
+.dashboard-navbar .d-left {
+  flex: 1;
+}
+
+.dashboard-navbar .d-left .d-toggle {
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.dashboard-navbar .d-left i {
+  font-size: 1.4rem;
+}
+
+.dashboard-navbar .d-left {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.dashboard-navbar .d-left h1 {
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.dashboard-navbar .d-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.dashboard-navbar .d-container .d-menu-item {
+  position: relative;
+  margin: 0 1rem;
+}
+
+.dashboard-navbar .d-container .d-menu-item a {
+  display: flex;
+  align-items: center;
+}
+
+.dashboard-navbar .d-container .d-menu-item a i {
+  font-size: 1.4rem;
+  position: relative;
+}
+
+.dashboard-navbar .d-container .d-menu-item a .notification-count {
+  position: absolute;
+  top: -6px;
+  background-color: var(--color-danger);
+  border-radius: 25px;
+  font-size: 12px;
+  color: var(--body-color-lighter);
+  font-weight: 700;
+  right: -3px;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--body-bg-color);
+  padding: 0 0.2rem;
+}
+
+.user-photo {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .dashboard-navbar .d-left h1 {
+    /* font-size: 14px;
+    white-space: nowrap; */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+    width: 115px;
+    min-width: 1px;
+  }
+
+  .username-nav {
+    display: none;
+  }
+
+  .user-photo {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    opacity: 0.5;
+    font-size: 12px;
+  }
+}

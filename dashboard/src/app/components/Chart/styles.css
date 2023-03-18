@@ -1,0 +1,21 @@
+.card-analytics .chart-list {
+  margin: 0;
+  padding: 0;
+  margin-top: 1rem;
+}
+
+.card-analytics .chart-list li {
+  list-style: none;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.card-analytics .chart-list li .title {
+  flex: 1;
+}
+
+.card-analytics .chart-list li .number {
+  color: var(--first-color);
+  font-weight: 600;
+}

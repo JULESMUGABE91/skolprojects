@@ -1,0 +1,11 @@
+.modal-header {
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-footer {
+  padding-right: 1rem !important;
+}
+
+.modal_title {
+  font-size: 16px;
+}

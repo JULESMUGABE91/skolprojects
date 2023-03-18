@@ -1,0 +1,42 @@
+.table-filters {
+  margin-bottom: 2rem;
+}
+
+.table-card-header {
+  background-color: var(--gray-light);
+}
+
+.sort-btn {
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+  opacity: 0.3;
+}
+
+.sort-btn i {
+  font-size: 19px;
+  padding: 0;
+  margin: 0;
+}
+
+.sort-btn:hover,
+.sort-btn:active {
+  opacity: 1;
+  color: var(--color-secondary);
+}
+
+td {
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.table > :not(:last-child) > :last-child > * {
+  border-bottom-color: var(--border);
+}
+
+th {
+}
+
+td {
+  vertical-align: middle;
+}

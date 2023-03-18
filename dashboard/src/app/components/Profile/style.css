@@ -1,0 +1,65 @@
+.nav-tabs {
+  z-index: 999999;
+}
+.tab {
+  border-bottom: 1px solid var(--border);
+  margin-top: 0;
+}
+
+.tab .nav-item button,
+.tab .nav-item {
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.nav-tabs .nav-link {
+  opacity: 0.6;
+  border: 0;
+  border-radius: 0;
+}
+
+.nav-tabs .nav-item.show .nav-link,
+.nav-tabs .nav-link.active {
+  border: 0;
+  border-radius: 0;
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--first-color);
+  opacity: 1;
+  border-bottom: 2px solid var(--first-color);
+}
+
+.notification-control-box {
+  display: flex;
+  justify-items: center;
+  margin-top: 15px;
+}
+
+.notification-info {
+  flex: 1;
+  display: flex;
+}
+
+.notification-info h1 {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.notification-info p {
+  opacity: 0.8;
+}
+
+.icon-notification {
+  width: 30px;
+  height: 30px;
+  margin-right: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-notification i {
+  font-size: 24px;
+  opacity: 0.5;
+}

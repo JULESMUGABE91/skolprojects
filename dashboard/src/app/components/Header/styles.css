@@ -1,0 +1,29 @@
+.main-filters {
+  min-height: 3rem;
+}
+
+.main-filters .btn {
+  /* font-weight: 300; */
+  font-size: 13px;
+  padding: 0.35rem 1rem;
+}
+
+@media screen and (max-width: 767px) {
+  .main-filters {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .row.main-filters::-webkit-scrollbar {
+    display: none;
+  }
+  .row.main-filters .dropdown,
+  .row.main-filters .btn-group,
+  .row.main-filters .btn-group-vertical {
+    position: static;
+  }
+}
