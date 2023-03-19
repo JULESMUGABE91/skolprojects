@@ -124,7 +124,7 @@ class Login extends React.Component {
 
   onVerify = async () => {
     await this.validateForm();
-    const { error, phone, selected_country } = this.state;
+    const { error, phone, selected_country, otp_code } = this.state;
 
     if (Object.keys(error).length === 0) {
       this.setState({
@@ -140,6 +140,7 @@ class Login extends React.Component {
         url: `${ENDPOINT}/otp/verify`,
         data: {
           phone: formatted_phone,
+          otp_code,
         },
       };
 
@@ -159,8 +160,11 @@ class Login extends React.Component {
 
   onAuth = async () => {
     await this.validateForm();
-    const { params } = this.props;
-    const { phone } = params;
+    const { phone, selected_country } = this.state;
+
+    const formatted_phone = this.formattedPhone(
+      selected_country.value + "" + parseInt(phone)
+    );
 
     this.setState({
       isSubmitting: true,
@@ -170,7 +174,7 @@ class Login extends React.Component {
       method: "POST",
       url: `${ENDPOINT}/user/phone-auth`,
       data: {
-        phone,
+        phone: formatted_phone,
         isPhoneVerified: true,
       },
     };
@@ -259,7 +263,7 @@ class Login extends React.Component {
                       <>
                         <Input
                           placeholder="OTP Code"
-                          value={this.state.password}
+                          value={this.state.otp_code}
                           onChange={(e) => this.onChangeText("otp_code", e)}
                           error={this.state.error.otp_code}
                           className="form-control-lg"

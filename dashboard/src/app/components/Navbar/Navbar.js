@@ -17,7 +17,7 @@ class Navbar extends React.Component {
 
     const navbar_dashboard = document.getElementById("dashboard-navbar");
 
-    if (navbar_dashboard.classList) {
+    if (navbar_dashboard?.classList) {
       let nav_class_list = navbar_dashboard.classList;
 
       if (innerWidth < 750 && scrollY > 0) {
