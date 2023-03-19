@@ -64,7 +64,7 @@ class Login extends React.Component {
 
       const options = {
         method: "POST",
-        url: `${ENDPOINT}/user/phone-auth`,
+        url: `${ENDPOINT}/otp/send`,
         data: {
           phone: formatted_phone,
         },
@@ -91,7 +91,7 @@ class Login extends React.Component {
   reSendOTP(phone) {
     const options = {
       method: "POST",
-      url: ENDPOINT + "/user/phone-auth",
+      url: ENDPOINT + "/otp/send",
       data: {
         phone,
       },
@@ -137,7 +137,7 @@ class Login extends React.Component {
 
       const options = {
         method: "POST",
-        url: `${ENDPOINT}/user/phone-auth`,
+        url: `${ENDPOINT}/otp/verify`,
         data: {
           phone: formatted_phone,
         },
@@ -145,7 +145,7 @@ class Login extends React.Component {
 
       axios(options)
         .then((data) => {
-          this.onSuccess(data.data);
+          this.onAuth();
         })
         .catch((error) => {
           this.setState({
@@ -155,6 +155,42 @@ class Login extends React.Component {
           toastMessage("error", error);
         });
     }
+  };
+
+  onAuth = async () => {
+    await this.validateForm();
+    const { params } = this.props;
+    const { phone } = params;
+
+    this.setState({
+      isSubmitting: true,
+    });
+
+    const options = {
+      method: "POST",
+      url: `${ENDPOINT}/user/phone-auth`,
+      data: {
+        phone,
+        isPhoneVerified: true,
+      },
+    };
+    axios(options)
+      .then((data) => {
+        this.onSuccess(data.data);
+
+        this.setState({
+          isSubmitting: false,
+          otp_code: "",
+          phone: "",
+        });
+      })
+      .catch((error) => {
+        this.setState({
+          isSubmitting: false,
+        });
+
+        toastMessage("Something went wrong please try again");
+      });
   };
 
   onSuccess = async (data) => {
