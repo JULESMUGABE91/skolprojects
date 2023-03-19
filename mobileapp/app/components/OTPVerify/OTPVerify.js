@@ -9,7 +9,7 @@ import {Button} from '../Button';
 import {Text} from '../Text';
 import {Input} from '../Input';
 import {Back} from '../Back';
-import {ROOT_API} from '../../constants/strings';
+import {APP_ID, ROOT_API} from '../../constants/strings';
 import toastMessage from '../../utils/toastMessage';
 import LocalStorage from '../../utils/storage';
 class OTPVerify extends React.Component {
@@ -50,11 +50,11 @@ class OTPVerify extends React.Component {
   }
 
   onSubmit = async () => {
-    await this.validateResendForm();
+    await this.validateForm();
 
     const {error, otp_code} = this.state;
     const {params} = this.props;
-    const {phone, token} = params;
+    const {phone} = params;
 
     if (Object.keys(error).length === 0) {
       this.setState({
@@ -63,18 +63,15 @@ class OTPVerify extends React.Component {
 
       const options = {
         method: 'POST',
-        url: `${ROOT_API}/user/otp-verify`,
+        url: `${ROOT_API}/otp/verify`,
         data: {
           otp_code,
-          isPhoneVerified: true,
-        },
-        headers: {
-          authorization: 'Bearer ' + token,
+          phone,
         },
       };
       axios(options)
         .then(data => {
-          this.onSuccess();
+          this.onAuth();
         })
         .catch(error => {
           const {language} = this.props;
@@ -89,11 +86,49 @@ class OTPVerify extends React.Component {
     }
   };
 
-  onSuccess = async () => {
+  onAuth = async () => {
+    await this.validateForm();
     const {params} = this.props;
-    const {badge} = params;
+    const {phone} = params;
 
-    await new LocalStorage().set(params);
+    this.setState({
+      isSubmitting: true,
+    });
+
+    const options = {
+      method: 'POST',
+      url: `${ROOT_API}/user/phone-auth`,
+      data: {
+        phone,
+        organization: APP_ID,
+        isPhoneVerified: true,
+      },
+    };
+    axios(options)
+      .then(data => {
+        this.onSuccess(data.data);
+
+        this.setState({
+          isSubmitting: false,
+          otp_code: '',
+        });
+      })
+      .catch(error => {
+        const {language} = this.props;
+        const {phone_auth_failed} = languages[language];
+
+        this.setState({
+          isSubmitting: false,
+        });
+
+        toastMessage(phone_auth_failed);
+      });
+  };
+
+  onSuccess = async data => {
+    const {badge} = data;
+
+    await new LocalStorage().set({user_id: data._id, ...data});
 
     if (badge === 'Explorer' || badge === 'Explorer')
       return this.props.navigation.navigate('StepOne');

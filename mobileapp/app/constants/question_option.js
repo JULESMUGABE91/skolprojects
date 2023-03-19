@@ -74,6 +74,22 @@ export const questionOptions = [
     },
   },
   {
+    title: 'Interviewer Name',
+    icon: 'card-text-outline',
+    config: {
+      input: 'interviewer_name',
+      type: 'option_setting',
+    },
+  },
+  {
+    title: 'Interviewer ID',
+    icon: 'card-text-outline',
+    config: {
+      input: 'interviewer_id',
+      type: 'option_setting',
+    },
+  },
+  {
     title: 'Declaration',
     icon: 'card-text-outline',
     config: {

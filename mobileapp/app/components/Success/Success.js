@@ -32,12 +32,12 @@ class Success extends React.Component {
               </View>
             </View>
             <View style={styles.description_c}>
-              <Text style={styles.win_desc}>
+              {/* <Text style={styles.win_desc}>
                 You will get a rewards in the amount of{' '}
                 <Text type="bold" primary>
                   10 Points!
                 </Text>
-              </Text>
+              </Text> */}
               <Text style={styles.thanks}>Thank you for your time!</Text>
             </View>
 

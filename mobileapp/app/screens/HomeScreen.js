@@ -65,7 +65,6 @@ class HomeScreen extends React.Component {
   };
 
   handleOpenModal(modal) {
-    console.log(modal);
     if (!modal) return;
 
     if (!this.refs[modal]) return;

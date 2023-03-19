@@ -18,6 +18,9 @@ const questionSchema = new Schema(
       ref: "Surveys",
       required: true,
     },
+    position: {
+      type: "Number",
+    },
     question: {
       type: "String",
       required: true,

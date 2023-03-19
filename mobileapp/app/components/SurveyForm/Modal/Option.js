@@ -23,6 +23,7 @@ const Option = props => {
                 props.onPress({
                   ...props.selected_item,
                   config: item?.config || {},
+                  index: i,
                 })
               }>
               <View style={styles.item_menu}>

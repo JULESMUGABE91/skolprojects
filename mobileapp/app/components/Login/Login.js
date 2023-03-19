@@ -76,17 +76,15 @@ class Login extends React.Component {
 
       const options = {
         method: 'POST',
-        url: `${ROOT_API}/user/phone-auth`,
+        url: `${ROOT_API}/otp/send`,
         data: {
           phone: formatted_phone,
-          organization: APP_ID,
         },
       };
       axios(options)
         .then(data => {
           this.props.navigation.navigate('OTPCode', {
-            ...data.data,
-            user_id: data.data._id,
+            phone: formatted_phone,
           });
 
           this.setState({

@@ -7,7 +7,6 @@ import styles from './styles';
 import {languages} from '../../constants/localization';
 import {Button} from '../Button';
 import {Text} from '../Text';
-import {Input} from '../Input';
 import {Back} from '../Back';
 import uuid4 from '../../utils/uuid4';
 import {CQuestions} from '.';
@@ -15,11 +14,8 @@ import {APP_ID, ROOT_API} from '../../constants/strings';
 import toastMessage from '../../utils/toastMessage';
 import LocalStorage from '../../utils/storage';
 import Modal from 'react-native-modalbox';
-import OtherOption from './Modal/OtherOption';
 import EStyleSheet from 'react-native-extended-stylesheet';
-import OptionSetting from './Modal/OptionSetting';
 import CreateDropDown from './Modal/CreateDropDown';
-import QuestionMenu from './Modal/QuestionMenu';
 import {Loading} from '../Loading';
 import Option from './Modal/Option';
 import {optionsOptions, questionOptions} from '../../constants/question_option';
@@ -45,21 +41,61 @@ class QuestionForm extends React.Component {
       questions: [],
       selected_item: {},
       isLoading: true,
+      orders: [],
     };
   }
 
   componentDidMount = async () => {
     const user = await new LocalStorage().get();
 
-    let questions = [];
+    await this.setState({user});
 
-    if (this.props?.params?.questions) {
-      if (this.props?.params?.questions?.length !== 0) {
-        questions = this.props?.params?.questions;
-      }
+    if (this.props?.params?.survey_id) {
+      // if (this.props?.params?.questions?.length !== 0) {
+      //   questions = this.props?.params?.questions;
+      // }
+      this.getQuestions(this.props?.params?.survey_id);
     }
 
-    this.setState({user, questions, isLoading: false});
+    // this.setState({user, questions, isLoading: false});
+  };
+
+  getQuestions = async survey => {
+    const {user} = this.state;
+    try {
+      this.setState({isLoading: true});
+
+      const options = {
+        method: 'POST',
+        url: `${ROOT_API}/question/fetch`,
+        data: {
+          organization: APP_ID,
+          survey,
+        },
+        headers: {
+          authorization: 'Bearer ' + user.token,
+        },
+      };
+
+      const data = await axios(options);
+
+      let results = [],
+        orders = [];
+
+      for (let [i, el] of data.data.entries()) {
+        if (!el.position) {
+          el.position = i;
+        }
+        results.push(el);
+        orders.push({
+          title: i + '',
+        });
+      }
+
+      this.setState({questions: results, isLoading: false, orders});
+    } catch (error) {
+      this.setState({isLoading: false});
+    }
   };
 
   onChangeText(field, v) {
@@ -76,8 +112,6 @@ class QuestionForm extends React.Component {
   addRemoveQuestion(params) {
     let {questions} = this.state;
     let {question_index, config, action} = params;
-
-    console.log(question_index);
 
     if (
       action === 'remove' &&
@@ -99,6 +133,7 @@ class QuestionForm extends React.Component {
         setting: {
           isRequired: true,
         },
+        position: questions.length,
       });
     } else {
       questions = [
@@ -115,6 +150,7 @@ class QuestionForm extends React.Component {
           setting: {
             isRequired: true,
           },
+          position: questions.length,
         },
       ];
     }
@@ -123,6 +159,46 @@ class QuestionForm extends React.Component {
 
     this.handleCloseModal('question_menu_modal');
   }
+
+  handleRemoveQuestionFromRemote = async params => {
+    try {
+      let {questions, user} = this.state;
+      let {question_index} = params;
+
+      const question = questions[question_index];
+
+      if (question.createdAt) {
+        this.setState({isLoading: true});
+        const options = {
+          method: 'POST',
+          url: `${ROOT_API}/question/delete`,
+          data: {
+            id: question._id,
+          },
+          headers: {
+            authorization: 'Bearer ' + user.token,
+          },
+        };
+
+        questions.splice(question_index, 1);
+
+        const data = await axios(options);
+        this.getQuestions(question.survey._id);
+
+        this.setState({isLoading: false});
+      } else {
+        questions.splice(question_index, 1);
+      }
+
+      this.setState({questions});
+    } catch (error) {
+      toastMessage(
+        'Question failed to be deleted, please your internet and try again',
+      );
+
+      this.setState({isLoading: false});
+    }
+  };
 
   addRemoveOption(params) {
     let {question_index, option_index, question_id, type} = params;
@@ -353,6 +429,35 @@ class QuestionForm extends React.Component {
     this.setState(questions);
   }
 
+  elementMoveToPosition(arr, old_index, new_index) {
+    console.log({arr, old_index, new_index});
+    while (old_index < 0) {
+      old_index += arr.length;
+    }
+    while (new_index < 0) {
+      new_index += arr.length;
+    }
+    if (new_index >= arr.length) {
+      var k = new_index - arr.length + 1;
+      while (k--) {
+        arr.push(undefined);
+      }
+    }
+    arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);
+
+    console.log('====================================');
+    console.log(arr);
+    console.log('====================================');
+    return arr;
+  }
+
+  handleChangePosition(params) {
+    let {questions} = this.state,
+      {question_index} = params;
+
+    this.handleOpenQuestionMenuModal({modal: 'positionModal', question_index});
+  }
+
   validateForm() {
     let {error, questions} = this.state;
 
@@ -415,6 +520,7 @@ class QuestionForm extends React.Component {
           method: 'POST',
           url: `${ROOT_API}/question${route}`,
           data: {
+            position: question.position,
             survey: survey_id,
             question: question.question,
             id: question._id,
@@ -473,7 +579,11 @@ class QuestionForm extends React.Component {
         backgroundColor: bgColor,
       },
 
-      createDropdownModal: {},
+      positionModal: {
+        height: height / 1.5,
+        ...modal_radius,
+        backgroundColor: bgColor,
+      },
 
       questionMenuModal: {
         height: 150,
@@ -489,7 +599,7 @@ class QuestionForm extends React.Component {
     });
 
     console.log('====================================');
-    console.log(this.state.questions);
+    console.log(this.state.selected_item);
     console.log('====================================');
 
     return (
@@ -542,17 +652,17 @@ class QuestionForm extends React.Component {
                         modal: 'optionSettingModal',
                       })
                     }
-                    // handleOpenOtherOptionModal={params =>
-                    //   this.handleOpenModal('otherOptionModal', params)
-                    // }
-                    // handleOpenOptionSettingModal={params =>
-                    //   this.handleOpenModal('optionSettingModal', params)
-                    // }
+                    handleRemoveQuestionFromRemote={i =>
+                      this.handleRemoveQuestionFromRemote(i)
+                    }
                     onSetQuestionSetting={params =>
                       this.onSetQuestionSetting(params)
                     }
                     handleOpenQuestionMenuModal={params =>
                       this.handleOpenQuestionMenuModal(params)
+                    }
+                    handleChangePosition={params =>
+                      this.handleChangePosition(params)
                     }
                   />
 
@@ -653,6 +763,25 @@ class QuestionForm extends React.Component {
             handleCloseModal={() =>
               this.handleCloseModal('question_menu_modal')
             }
+          />
+        </Modal>
+        <Modal
+          style={modal_styles.positionModal}
+          ref="positionModal"
+          position={'bottom'}
+          coverScreen
+          onClosingState={() => this.handleCloseModal('positionModal')}>
+          <Option
+            menus={this.state.orders}
+            onPress={params =>
+              this.elementMoveToPosition(
+                this.state.questions,
+                params.position,
+                params.index,
+              )
+            }
+            selected_item={this.state.selected_item}
+            handleCloseModal={() => this.handleCloseModal('positionModal')}
           />
         </Modal>
       </>

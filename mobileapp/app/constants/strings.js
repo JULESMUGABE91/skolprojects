@@ -7,7 +7,7 @@ export const APPLE_STORE = '';
 export const APP_ID = '63fdf074095f8bc0e023ee15';
 export const ORGANIZATION_NAME = 'Skol';
 export const GOOGLE_API = 'AIzaSyC_Mjs-z9BUQeDKE9rc_lH5HGMCiWTGAmw';
-export const URL = 'http://146.190.152.81:9000';
+export const URL = 'http://192.168.1.65:9000';
 export const ROOT_API = URL + '/api/v1';
 
 export const survey_loader = [

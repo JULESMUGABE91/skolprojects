@@ -19,5 +19,7 @@ export const inputs = [
   'respondent_age',
   'respondent_textinput',
   'respondent_number',
+  'interviewer_name',
+  'interviewer_id',
 ];
 export const dropdown = ['dropdown'];

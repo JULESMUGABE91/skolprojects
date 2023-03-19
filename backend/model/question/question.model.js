@@ -56,7 +56,8 @@ const findQuestion = async (params) => {
       path: "survey",
       model: surveyMongo,
       select: { title: 1 },
-    });
+    })
+    .sort({ position: 1 });
 };
 
 const findQuestionById = async (_id) => {

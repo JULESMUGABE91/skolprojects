@@ -1,4 +1,5 @@
 const { isValidObjectId } = require("mongoose");
+const { gender, regions } = require("../../constant/string");
 const questionMongo = require("../question/question.mongo");
 const { createReward, findReward } = require("../reward/reward.model");
 const surveyMongo = require("../survey/survey.mongo");
@@ -322,6 +323,23 @@ const fetchRespondents = async (params) => {
   };
 };
 
+const getKey = (common, option) => {
+  let key = "";
+
+  for (let el of common) {
+    let option_key = option.option.replace(" ", "").replace(" ", "");
+
+    if (
+      option_key?.toLowerCase() ===
+      el?.label?.replace(" ", "").replace(" ", "").toLowerCase()
+    ) {
+      key = el.value;
+    }
+  }
+
+  return key;
+};
+
 const fetchRespondentsByGender = async (params) => {
   let { survey, organization } = params;
 
@@ -331,11 +349,11 @@ const fetchRespondentsByGender = async (params) => {
     total_respondent = await fetchRespondents(params);
 
   for (let el of answersData) {
-    if (el.question.type === "respondent_gender") {
+    if (el.question && el.question.type === "respondent_gender") {
       const { answers } = el;
 
       for (let option of answers) {
-        const key = option.option.replace(" ", "") || option.value;
+        const key = getKey(gender, option);
 
         if (!groupGender[key]) {
           groupGender[key] = {
@@ -366,21 +384,23 @@ const fetchRespondentsByRegion = async (params) => {
     total_respondent = await fetchRespondents(params);
 
   for (let el of answersData) {
-    if (el.question.type === "respondent_region") {
+    if (el.question && el.question.type === "respondent_region") {
       const { answers } = el;
 
       for (let region of el.question.options) {
-        const key = region.option || region.value;
+        const key = getKey(regions, region);
 
-        if (!groupRegion[key]) {
-          groupRegion[key] = {
-            count: 0,
-          };
-        }
+        if (key && key !== "") {
+          if (!groupRegion[key]) {
+            groupRegion[key] = {
+              count: 0,
+            };
+          }
 
-        for (let option of answers) {
-          if (option._id === region._id) {
-            groupRegion[key].count += 1;
+          for (let option of answers) {
+            if (option._id === region._id) {
+              groupRegion[key].count += 1;
+            }
           }
         }
       }
@@ -405,7 +425,7 @@ const fetchRespondentsByAgeGroup = async (params) => {
     total_respondent = await fetchRespondents(params);
 
   for (let el of answersData) {
-    if (el.question.type === "respondent_age_group") {
+    if (el.question && el.question.type === "respondent_age_group") {
       const { answers } = el;
 
       for (let age of el.question.options) {

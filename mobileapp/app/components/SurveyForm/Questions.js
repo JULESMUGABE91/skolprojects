@@ -8,8 +8,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import Options from './Options';
 
 const CQuestions = props => {
-  const {language, questions} = props;
-  const {enter_question} = languages[language];
+  const {questions} = props;
 
   return (
     <View>
@@ -53,7 +52,7 @@ const CQuestions = props => {
                     <>
                       <TouchableOpacity
                         onPress={() =>
-                          props.handleOpenQuestionMenuModal({
+                          props.handleRemoveQuestionFromRemote({
                             question_index: 1,
                             type: 'question_menu',
                             action: 'remove',
@@ -108,6 +107,7 @@ const CQuestions = props => {
                 handleOpenOtherOptionModal={props.onPressOther}
                 handleOpenOptionSettingModal={props.onPressOptionsModal}
                 handleOpenQuestionMenuModal={props.handleOpenQuestionMenuModal}
+                handleChangePosition={props.handleChangePosition}
               />
             </View>
           </>

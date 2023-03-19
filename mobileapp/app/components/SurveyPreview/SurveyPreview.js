@@ -143,12 +143,6 @@ class SurveyPreview extends React.Component {
     });
   }
 
-  findProgressBarWidth(layout) {
-    this.setState({
-      progress_bar_witth: layout.width,
-    });
-  }
-
   onPressOptionOption = async params => {
     let {questions} = this.state;
     const {question_index} = params;
@@ -181,6 +175,15 @@ class SurveyPreview extends React.Component {
       } else if (setting?.isMultiAnswers) {
         responses.push(option);
       } else {
+        // remove selection
+        for (let op of questions[question_index]?.options || []) {
+          delete op.selection;
+
+          //uncheck dropdown
+          for (let dop of op?.dropdown_options || []) {
+            delete dop.checked;
+          }
+        }
         questions[question_index].responses = [option];
       }
     }
@@ -242,6 +245,10 @@ class SurveyPreview extends React.Component {
         ].responses.entries()) {
           if (response._id === option._id) {
             questions[question_index].responses.splice(response_index, 1);
+
+            if (questions[question_index].responses.length === 0) {
+              delete questions[question_index].responses;
+            }
           } else {
             questions[question_index].responses.push(option);
           }
@@ -732,14 +739,6 @@ class SurveyPreview extends React.Component {
                                       }
                                     }
                                   }
-
-                                  console.log(
-                                    '====================================',
-                                  );
-                                  console.log({input: option});
-                                  console.log(
-                                    '====================================',
-                                  );
                                   return (
                                     <View
                                       key={q}

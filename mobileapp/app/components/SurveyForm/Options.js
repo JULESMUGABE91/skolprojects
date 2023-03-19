@@ -34,6 +34,18 @@ const renderOptionButton = ({
       </TouchableOpacity>
       {/* <TouchableOpacity
         onPress={() =>
+          props.handleChangePosition({
+            question_index,
+          })
+        }>
+        <View style={styles.q_a_btns_btn}>
+          <Text type="bold" primary>
+            Change Position
+          </Text>
+        </View>
+      </TouchableOpacity> */}
+      {/* <TouchableOpacity
+        onPress={() =>
           props.handleOpenOtherOptionModal({
             question_index,
             type: 'question_other_option',
