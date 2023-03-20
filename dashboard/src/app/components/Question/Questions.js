@@ -159,9 +159,20 @@ class Questions extends React.Component {
   }
 
   onRowPressed = async (item) => {
-    await this.props.dispatch(onFilter({ organization: item }));
+    try {
+      await this.props.dispatch(
+        onFilter({
+          question: {
+            label: item.question,
+            value: item._id,
+          },
+        })
+      );
 
-    window.location.href = "/dashboard/home/all_surveys";
+      window.location.href = "/dashboard/surveys/answers";
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   render() {
@@ -181,20 +192,31 @@ class Questions extends React.Component {
     ];
 
     return (
-      <div>
-        <Table
-          data={this.state.data}
-          isSearch
-          search_text={this.state.search_text}
-          handleSearch={this.handleSearch.bind(this)}
-          isLoading={this.state.isLoading}
-          headers={headers}
-          handleAddPressed={this.handleShowModal.bind(
-            this,
-            "showModal",
-            "Organization"
-          )}
-        />
+      <div className="card">
+        <div className="card-body">
+          <Table
+            data={this.state.data}
+            isSearch
+            search_text={this.state.search_text}
+            handleSearch={this.handleSearch.bind(this)}
+            isLoading={this.state.isLoading}
+            headers={headers}
+            filters={[
+              {
+                title: "View Insights",
+                onPress: () => {
+                  window.location.href = "/dashboard/surveys/answers";
+                },
+              },
+            ]}
+            // handleAddPressed={this.handleShowModal.bind(
+            //   this,
+            //   "showModal",
+            //   "Organization"
+            // )}
+            rowPress={(item) => this.onRowPressed(item)}
+          />
+        </div>
       </div>
     );
   }
