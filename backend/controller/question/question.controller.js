@@ -65,9 +65,6 @@ const deleteInfo = async (req, res) => {
 
     res.status(200).json(questionInfo);
   } catch (error) {
-    console.log("====================================");
-    console.log(error.stack);
-    console.log("====================================");
     res.status(400).json(error.stack);
   }
 };

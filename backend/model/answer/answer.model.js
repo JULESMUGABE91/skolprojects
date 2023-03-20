@@ -206,111 +206,99 @@ const findAnswersFromDifferentLocation = async (params) => {
 };
 
 const findInsightAnswers = async (params) => {
-  let { organization, survey } = params;
-
   const answers = await findAnswer({
-    organization,
-    survey,
+    ...params,
     sort: "asc",
   });
 
-  const group_answers_question = await groupAnswersByQuestion(answers);
+  const total_respondent = await fetchRespondents(params);
 
-  return group_answers_question;
+  const question_answers = await getQuestionAnswers(answers, total_respondent);
+
+  return question_answers;
 };
 
-const groupAnswersByQuestion = async (answers) => {
-  let group_per_question = {};
+const getQuestionAnswers = async (data, total_respondent) => {
+  let answers = {};
 
-  for (let el of answers) {
-    if (el.question) {
-      const q_key = el.question.question;
+  for (let item of data) {
+    const question = item?.question?.question;
+    console.log(item);
+    const exclude = [
+      "respondent_name",
+      "respondent_address",
+      "respondent_email",
+      "respondent_phone_number",
+      "respondent_id",
+      "interviewer_name",
+      "interviewer_id",
+    ];
 
-      if (!group_per_question[q_key]) {
-        group_per_question[q_key] = [];
+    if (question && !exclude.includes(item.question.type)) {
+      if (!answers[question]) {
+        answers[question] = {};
       }
 
-      group_per_question[q_key].push(el);
-    }
-  }
-  const results = await groupByAnswer(group_per_question);
+      for (let option of item?.question?.options || []) {
+        const key_option = option.option;
 
-  return results;
-};
-
-const groupByAnswer = async (group_per_question) => {
-  let results = {};
-
-  for (let question of Object.keys(group_per_question)) {
-    if (Object.values(group_per_question).length > 0) {
-      for (let answer of group_per_question[question]) {
-        let { answers, survey, user } = answer;
-
-        if (!results[question]) {
-          results[question] = {};
+        if (!answers[question][key_option]) {
+          answers[question][key_option] = {
+            count: 0,
+          };
         }
 
-        for (let item of answers) {
-          if (
-            item.type === "checkbox"
-            // || item.type === "textinput"
-          ) {
-            //close question
-            //each group response
-            let key =
-              item.type === "textinput"
-                ? item.option + "_" + item.value
-                : item.option;
+        for (let answer of item.answers) {
+          const answer_option = answer.option;
 
-            if (!results[question][key]) {
-              results[question][key] = {
-                count: 0,
-              };
+          if (key_option === answer_option) {
+            if (answer.selection) {
+              answers[question]["question_type"] = "dropdown";
+              answers[question]["total_respondent"] = total_respondent.total;
+              for (let selection of answer.selection || []) {
+                if (!answers[question][key_option]["data"]) {
+                  answers[question][key_option]["data"] = {};
+                }
+                if (!answers[question][key_option]["data"][selection.value]) {
+                  answers[question][key_option]["data"][selection.value] = {
+                    count: 0,
+                  };
+                }
+                answers[question][key_option]["data"][selection.value][
+                  "count"
+                ] += 1;
+              }
             }
 
-            results[question][key]["count"] += 1;
-
-            if (!results[question][key]["respondent"]) {
-              results[question][key]["respondent"] = [];
-            }
-
-            if (
-              !results[question][key]["respondent"].includes(user.toString())
-            ) {
-              results[question][key]["respondent"].push(user.toString());
-            }
+            answers[question][key_option]["count"] += 1;
           }
-          // else if (item.type === "dropdown") {
-          //   if (!results[question][item.option]) {
-          //     results[question][item.option] = {
-          //       type: "dropdown",
-          //     };
-          //   }
-
-          //   for (let el of item?.selection || []) {
-          //     if (!results[question][item.option][el._id]) {
-          //       results[question][item.option][el._id] = {
-          //         count: 0,
-          //         option: el.value,
-          //       };
-          //     }
-
-          //     results[question][item.option][el._id]["count"] += 1;
-          //   }
-          // }
         }
       }
+
+      answers[question] = percentagePerAnswer(
+        answers[question],
+        total_respondent
+      );
     }
   }
 
-  return results;
+  return answers;
+};
+
+const percentagePerAnswer = (answers, total_respondent) => {
+  for (let el of Object.keys(answers)) {
+    answers[el]["percentage"] = Math.round(
+      (answers[el].count / total_respondent.total) * 100
+    );
+  }
+
+  return answers;
 };
 
 const fetchRespondents = async (params) => {
-  let data = [],
-    { survey, organization } = params;
+  let data = [];
 
-  const answers = await findAnswer({ survey, organization });
+  const answers = await findAnswer(params);
 
   for (let answer of answers) {
     if (!data.includes(answer.identifier)) {
