@@ -19,3 +19,14 @@
   color: var(--first-color);
   font-weight: 600;
 }
+
+.chart-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.chart-list li {
+  display: flex;
+  align-items: center;
+  min-height: 50px;
+}

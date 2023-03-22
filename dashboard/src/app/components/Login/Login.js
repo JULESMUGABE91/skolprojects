@@ -27,6 +27,10 @@ class Login extends React.Component {
 
     delete error[name];
 
+    if (name === "phone" && text !== "") {
+      text = parseInt(text);
+    }
+
     this.setState({
       [name]: text,
       error,
@@ -231,7 +235,7 @@ class Login extends React.Component {
         <div className="container">
           <div
             className="row align-items-center justify-content-center gap-5"
-            style={{ height: "100vh" }}
+            style={{ height: "70vh" }}
           >
             <center className="form-logo-header">
               <img src={logo} />

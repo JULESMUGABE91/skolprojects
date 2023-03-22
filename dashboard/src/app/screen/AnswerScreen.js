@@ -1,5 +1,5 @@
 import React from "react";
-import { Answers } from "../components/Answer";
+import { AnswerInsight } from "../components/Chart";
 import { Home } from "./common";
 
 class AnswerScreen extends React.Component {
@@ -7,7 +7,7 @@ class AnswerScreen extends React.Component {
     return (
       <div>
         <Home organization survey question />
-        <Answers />
+        <AnswerInsight />
       </div>
     );
   }

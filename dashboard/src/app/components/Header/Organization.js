@@ -158,7 +158,7 @@ class Organization extends React.Component {
                     </a>
                   )}
               </div>
-              {this.state.data.map((item, i) => {
+              {this.state.data?.map((item, i) => {
                 return (
                   <div className="cdropdown-item" key={i}>
                     <Checkbox

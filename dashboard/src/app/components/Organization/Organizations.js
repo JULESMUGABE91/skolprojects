@@ -240,7 +240,7 @@ class Organizations extends React.Component {
         <Table
           data={this.state.data}
           isSearch
-          showAdd
+          showAdd={this.state.user.account_type === "super_admin"}
           page={this.state.page}
           limit={this.state.limit}
           search_text={this.state.search_text}
