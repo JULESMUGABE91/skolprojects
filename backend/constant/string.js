@@ -21,36 +21,36 @@ const gender = [
 
 const regions = [
   {
-    label: "Urban Kigali",
-    value: "Urban Kigali",
+    label: "Kigali Urban",
+    value: "Kigali Urban",
   },
   {
-    label: "Urban Upcountry",
-    value: "Urban Upcountry",
+    label: "Kigali Rural",
+    value: "Kigali Rural",
   },
   {
-    label: "Rural Kigali",
-    value: "Rural Kigali",
+    label: "Regional Urban",
+    value: "Regional Urban",
   },
   {
-    label: "Rural Upcountry",
-    value: "Rural Upcountry",
+    label: "Regional Rural",
+    value: "Regional Rural",
   },
   {
     label: "Kigali y'umugi",
-    value: "Urban Kigali",
+    value: "Kigali Urban",
   },
   {
     label: "Umugi w'akarere",
-    value: "Urban Upcountry",
+    value: "Regional Urban",
   },
   {
     label: "Kigali mu nyengero",
-    value: "Rural Kigali",
+    value: "Regional Urban",
   },
   {
     label: "Icyaro cy'akarere",
-    value: "Rural Upcountry",
+    value: "Regional Rural",
   },
 ];
 
