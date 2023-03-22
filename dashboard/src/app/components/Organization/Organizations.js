@@ -72,10 +72,6 @@ class Organizations extends React.Component {
       },
     };
 
-    console.log("====================================");
-    console.log(options);
-    console.log("====================================");
-
     axios(options)
       .then((res) => {
         let data = res.data;

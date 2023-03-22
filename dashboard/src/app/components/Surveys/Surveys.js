@@ -7,6 +7,8 @@ import "./styles.css";
 import { getStorage } from "../../utils/storage";
 import { connect } from "react-redux";
 import { onFilter } from "../../action/Filters";
+import { Modal } from "../Modal";
+import SurveyForm from "./SurveyForm";
 
 let copyData = [];
 
@@ -136,6 +138,67 @@ class Surveys extends React.Component {
     window.location.href = "/dashboard/surveys/questions";
   };
 
+  handleShowModal(modal, modalTitle, selected_data = {}) {
+    this.setState({
+      [modal]: true,
+      modalTitle: modalTitle,
+      selected_data,
+    });
+  }
+
+  handleCloseModal(modal) {
+    this.setState({
+      [modal]: false,
+    });
+  }
+
+  handleDelete(item) {
+    if (window.confirm("Are you sure want to delete?")) {
+      this.setState({ selected_data: item }, () => {
+        let { data } = this.state;
+
+        data.splice(data.indexOf(item), 1);
+
+        this.setState({ data });
+
+        this.onDeleteSurvey();
+      });
+    }
+  }
+
+  onDeleteSurvey() {
+    const { selected_data, user } = this.state;
+
+    let url = ENDPOINT + "/survey/delete";
+
+    const options = {
+      method: "POST",
+      url,
+      data: {
+        id: selected_data._id,
+      },
+      headers: {
+        authorization: "Bearer " + user.token,
+      },
+    };
+
+    axios(options)
+      .then((res) => {
+        this.setState({
+          isLoading: false,
+        });
+
+        toastMessage("success", "Survey deleted successful");
+      })
+      .catch((error) => {
+        this.setState({
+          isLoading: false,
+        });
+
+        toastMessage("error", error);
+      });
+  }
+
   render() {
     let headers = [
       {
@@ -151,6 +214,14 @@ class Surveys extends React.Component {
         key: "point",
       },
       {
+        title: "Description",
+        key: "description",
+      },
+      {
+        title: "Introduction",
+        key: "introduction",
+      },
+      {
         title: "Created By",
         key: "user.firstname",
       },
@@ -159,6 +230,10 @@ class Surveys extends React.Component {
         key: "createdAt",
         isMoment: true,
         formatTime: "lll",
+      },
+      {
+        title: "Action",
+        key: "action",
       },
     ];
 
@@ -174,7 +249,35 @@ class Surveys extends React.Component {
           isLoading={this.state.isLoading}
           rowPress={(item) => this.onRowPressed(item)}
           headers={headers}
+          showAdd
+          addButtonText="Add Survey"
+          handleAddPressed={() =>
+            this.handleShowModal("showAddModal", "New Survey")
+          }
+          actions={[
+            {
+              name: "Edit",
+              onPress: (item) =>
+                this.handleShowModal("showAddModal", "Edit", item),
+            },
+            {
+              name: "Delete",
+              onPress: this.handleDelete.bind(this),
+            },
+          ]}
         />
+        <Modal
+          handleClose={this.handleCloseModal.bind(this, "showAddModal")}
+          show={this.state.showAddModal}
+          title={this.state.modalTitle}
+          showHeaderBottomBorder={false}
+        >
+          <SurveyForm
+            handleCloseModal={this.handleCloseModal.bind(this, "showAddModal")}
+            getData={this.getData.bind(this)}
+            {...this.state.selected_data}
+          />
+        </Modal>
       </div>
     );
   }

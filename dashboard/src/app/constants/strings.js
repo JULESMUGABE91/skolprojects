@@ -32,3 +32,14 @@ export const colors = [
   "#339989",
   "#B9770E",
 ];
+
+export const audiences = [
+  {
+    label: "Private",
+    value: "Private",
+  },
+  {
+    label: "Public",
+    value: "Public",
+  },
+];
