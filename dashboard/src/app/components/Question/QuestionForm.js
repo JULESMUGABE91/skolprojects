@@ -493,7 +493,11 @@ class QuestionForm extends React.Component {
     return selected_format;
   }
 
-  validateQuestion() {}
+  validateQuestion() {
+    let { questions } = this.state;
+
+    this.setState({ questions });
+  }
 
   handleUpdateQuestionRemote = async (question, index) => {
     const error_question = await this.validateQuestion(question, index);
