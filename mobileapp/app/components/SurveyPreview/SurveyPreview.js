@@ -114,6 +114,14 @@ class SurveyPreview extends React.Component {
     this.refs[modal].close();
   }
 
+  handleStartInterview() {
+    this.handleCloseModal('introductionmodal');
+
+    this.setState({
+      start_interview: new Date().getTime(),
+    });
+  }
+
   onNext = async () => {
     const {survey, current_question_index} = this.state;
 
@@ -353,7 +361,7 @@ class SurveyPreview extends React.Component {
 
       this.setState({isSubmitting: true});
 
-      const {user, survey, questions} = this.state;
+      const {user, survey, questions, start_interview} = this.state;
 
       const identifier = survey._id + '__' + uuid4();
 
@@ -368,6 +376,8 @@ class SurveyPreview extends React.Component {
           organization: APP_ID,
           status: params?.status || undefined,
           last_question: params?.last_question || undefined,
+          start_interview,
+          end_interview: new Date().getTime(),
         });
       }
 
@@ -934,7 +944,7 @@ class SurveyPreview extends React.Component {
               this.handleCloseModal('introductionmodal');
               this.props.navigation.goBack();
             }}
-            handleCloseModal={() => this.handleCloseModal('introductionmodal')}
+            handleStart={() => this.handleStartInterview()}
           />
         </Modal>
         <Modal

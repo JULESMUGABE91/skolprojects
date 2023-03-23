@@ -23,7 +23,7 @@ import {optionsOptions, questionOptions} from '../../constants/question_option';
 const {height} = Dimensions.get('screen');
 
 const question_format = {
-  _id: uuid4(),
+  _id: uu(),
   type: 'input',
   options: [],
   setting: {

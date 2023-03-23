@@ -1,0 +1,18 @@
+.card-primary {
+  border: 2px solid var(--border);
+}
+
+.option_form {
+  display: flex;
+  /* align-items: center; */
+}
+
+.question_menus {
+  display: flex;
+  align-items: center;
+}
+
+.remote_btn {
+  display: flex;
+  align-items: center;
+}

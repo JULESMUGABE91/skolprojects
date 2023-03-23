@@ -26,11 +26,7 @@ class SurveyForm extends React.Component {
   componentDidMount = async () => {
     await this.getUserLoggedInInfo();
 
-    let { filters } = this.props;
-
-    if (filters && filters.organization) {
-      this.setState({ organization: filters.organization });
-    }
+    this.initActivity();
   };
 
   getUserLoggedInInfo = async () => {
@@ -39,6 +35,52 @@ class SurveyForm extends React.Component {
       user,
     });
   };
+
+  initActivity() {
+    try {
+      let {
+          filters,
+          _id,
+          available,
+          status,
+          organization,
+          title,
+          description,
+          point,
+          introduction,
+        } = this.props,
+        _available = availables[0];
+
+      if (filters && filters.organization) {
+        this.setState({ organization: filters.organization });
+      }
+
+      for (let el of availables) {
+        if (el.value === available) {
+          _available = el;
+        }
+      }
+
+      if (_id) {
+        this.setState({
+          title,
+          _id,
+          description,
+          introduction,
+          point,
+          available: _available,
+          organization:
+            organization === filters.organization.value && filters.organization,
+          audience: {
+            value: status,
+            label: status,
+          },
+        });
+      }
+    } catch (error) {
+      toastMessage("error", error);
+    }
+  }
 
   onChangeText(name, e) {
     let error = this.state.error;
@@ -106,7 +148,6 @@ class SurveyForm extends React.Component {
       if (_id && _id !== "") {
         url = ENDPOINT + "/survey/update";
         data.id = _id;
-        method = "PUT";
       }
 
       const options = {
@@ -117,6 +158,8 @@ class SurveyForm extends React.Component {
           authorization: "Bearer " + user.token,
         },
       };
+
+      console.log(options);
 
       axios(options)
         .then((data) => {
@@ -131,6 +174,9 @@ class SurveyForm extends React.Component {
           this.props.getData(true);
         })
         .catch((error) => {
+          console.log("====================================");
+          console.log(error);
+          console.log("====================================");
           this.setState({
             isSubmitting: false,
           });

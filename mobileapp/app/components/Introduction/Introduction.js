@@ -94,7 +94,7 @@ class Introduction extends React.Component {
           <Text style={styles.intro}>{this.state.intro}</Text>
         </View>
         <View style={styles.footer}>
-          <Button text="Start Survey" onPress={this.props.handleCloseModal} />
+          <Button text="Start Survey" onPress={this.props.handleStart} />
         </View>
       </View>
     );

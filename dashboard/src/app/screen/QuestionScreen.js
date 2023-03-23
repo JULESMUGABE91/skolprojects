@@ -1,5 +1,5 @@
 import React from "react";
-import { Questions } from "../components/Question";
+import { QuestionForm } from "../components/Question";
 import { Home } from "./common";
 
 class QuestionScreen extends React.Component {
@@ -7,7 +7,7 @@ class QuestionScreen extends React.Component {
     return (
       <div>
         <Home organization survey />
-        <Questions />
+        <QuestionForm />
       </div>
     );
   }
