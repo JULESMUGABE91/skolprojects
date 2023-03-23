@@ -871,18 +871,18 @@ class SurveyPreview extends React.Component {
             )}
           </VirtualizedList>
           <View style={styles.btns_container}>
-            {((this.state.current_question_index === 0 &&
-              this.state?.user?.account_type === 'super_admin') ||
-              this.state?.user?.account_type === 'admin') && (
-              <View style={{flex: 1, marginRight: 15}}>
-                <Button
-                  type="bordered"
-                  text="View Actions"
-                  onPress={() => this.handleOpenModal('menuModal')}
-                  primaryText
-                />
-              </View>
-            )}
+            {this.state.current_question_index === 0 &&
+              (this.state?.user?.account_type === 'super_admin' ||
+                this.state?.user?.account_type === 'admin') && (
+                <View style={{flex: 1, marginRight: 15}}>
+                  <Button
+                    type="bordered"
+                    text="View Actions"
+                    onPress={() => this.handleOpenModal('menuModal')}
+                    primaryText
+                  />
+                </View>
+              )}
             {this.state.current_question_index > 0 && (
               <View style={{flex: 1, marginRight: 15}}>
                 <Button

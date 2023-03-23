@@ -46,6 +46,13 @@ class Success extends React.Component {
                 text="Take another Survey"
                 onPress={() => this.props.navigation.navigate('Home')}
               />
+
+              <Button
+                text="Close"
+                type="transparent"
+                texBlack
+                onPress={() => this.props.navigation.navigate('Home')}
+              />
             </View>
           </View>
         </View>
