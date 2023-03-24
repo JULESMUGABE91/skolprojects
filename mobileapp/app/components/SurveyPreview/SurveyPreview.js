@@ -405,9 +405,6 @@ class SurveyPreview extends React.Component {
 
       this.props.navigation.navigate('Success', data.data);
     } catch (error) {
-      console.log('====================================');
-      console.log({error});
-      console.log('====================================');
       toastMessage(error);
       this.setState({isSubmitting: false, isFetched: false});
     }
