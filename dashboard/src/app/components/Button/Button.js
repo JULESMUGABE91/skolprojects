@@ -30,8 +30,8 @@ const Button = (props) => {
       }`}
       id={props.id ? props.id : "dropdownMenuButton1"}
       data-bs-toggle="dropdown"
-      aria-expanded="false"
-      data-bs-auto-close={props.autoCloseType}
+      // aria-expanded="false"
+      // data-bs-auto-close={props.autoCloseType}
     >
       {props.isSubmitting ? (
         <i className="bx bx-loader bx-spin"></i>

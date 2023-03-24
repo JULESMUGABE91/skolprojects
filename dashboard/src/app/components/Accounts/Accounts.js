@@ -37,6 +37,7 @@ class SubAccounts extends React.Component {
 
   getAccounts(isLoading) {
     const { user, page, limit } = this.state;
+    const { filters } = this.props;
 
     this.setState({
       isLoading,
@@ -47,17 +48,17 @@ class SubAccounts extends React.Component {
       limit,
     };
 
-    let url = "";
+    let url = ENDPOINT + "/get_user_subaccount";
 
-    if (user.account_type === "user_account") {
-      url = ENDPOINT + "/get_user_subaccount";
-
+    if (
+      user.account_type === "user_account" ||
+      user.account_type === "normal"
+    ) {
       body.user_id = [user.id];
-      body.ref_account = [user.id];
     }
 
-    if (user.account_type === "admin_account") {
-      url = ENDPOINT + "/get_user_account";
+    if (user.account_type === "admin") {
+      body.organization = filters.organization.value;
     }
 
     const options = {

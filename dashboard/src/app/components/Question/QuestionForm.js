@@ -7,86 +7,78 @@ import {
   questionOptions,
 } from "../../constants/question_option";
 import toastMessage from "../../utils/toastMessage";
+import { ENDPOINT } from "../../constants/api";
+import axios from "axios";
+import { connect } from "react-redux";
+import { getStorage } from "../../utils/storage";
+import { LoadingSpinner } from "../LoadingSpinner";
 
 class QuestionForm extends React.Component {
   state = {
-    questions: [
-      {
-        _id: "6405e5dd19d3ebf306d17010",
-        organization: {
-          $oid: "63fdf074095f8bc0e023ee15",
-        },
-        user: {
-          $oid: "63ff92050efe12a037d368d1",
-        },
-        survey: {
-          $oid: "63ffb22a731970d4c34689d2",
-        },
-        question:
-          "Noneho ngiye kukwereka ikarita ivuga ku nzoga zitandukanye, watubwira ku gipimo kuva 1 kugeza 5 icyo ubitekerezaho. Tuzagerageza kureba niba ubyumva",
-        options: [
-          {
-            type: "dropdown",
-            _id: "75rtq1678107595626",
-            option: "Umugore cyane",
-            dropdown_options: [
-              {
-                _id: "h1g8z1679462453995",
-                value: "Barack Obama ",
-              },
-            ],
-          },
-          {
-            type: "dropdown",
-            _id: "jqtgf1678107644069",
-            option: "Urebye ni abagore",
-            dropdown_options: [
-              {
-                _id: "h1g8z1679462453995",
-                value: "Barack Obama ",
-              },
-            ],
-          },
-          {
-            type: "dropdown",
-            _id: "eskxu1678107662434",
-            option: "Hagati no hagati umugabo cyane",
-            dropdown_options: [
-              {
-                _id: "h1g8z1679462453995",
-                value: "Barack Obama ",
-              },
-            ],
-          },
-          {
-            type: "dropdown",
-            _id: "spll61678107700290",
-            option: "Urebye ni umugabo ",
-            dropdown_options: [
-              {
-                _id: "h1g8z1679462453995",
-                value: "Barack Obama ",
-              },
-            ],
-          },
-        ],
-        setting: {
-          isRequired: true,
-          isMultiAnswers: false,
-        },
-        type: "input",
-        point: 3.3,
-        createdAt: {
-          $date: "2023-03-06T13:08:45.716Z",
-        },
-        updatedAt: {
-          $date: "2023-03-22T09:20:37.975Z",
-        },
-        __v: 0,
-        position: 17,
-      },
-    ],
+    questions: [],
     isSubmitting: false,
+    user: {},
+  };
+
+  componentDidMount = async () => {
+    await this.getUserLoggedInInfo();
+
+    this.getQuestions(true);
+  };
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.filters !== this.props.filters) {
+      this.getQuestions(false);
+    }
+  }
+
+  getUserLoggedInInfo = async () => {
+    const user = await getStorage();
+    this.setState({
+      user,
+    });
+  };
+
+  getQuestions = async (isLoading) => {
+    const { filters } = this.props;
+    const { user } = this.state;
+
+    try {
+      if (!filters.survey || (filters.survey && !filters.survey.value)) {
+        return toastMessage("error", "Survey is missing, please select survey");
+      }
+
+      this.setState({
+        isLoading,
+      });
+
+      const options = {
+        method: "POST",
+        url: `${ENDPOINT}/question/fetch`,
+        data: {
+          survey: filters.survey.value,
+        },
+        headers: {
+          authorization: `Bearer ${user.token}`,
+        },
+      };
+
+      const data = await axios(options);
+
+      this.setState({
+        questions: data.data,
+        isLoading: false,
+      });
+    } catch (error) {
+      this.setState({ isLoading: false });
+
+      toastMessage(
+        "error",
+        "Error to fetch questions from " +
+          filters.survey.label +
+          ", please check your internet and try again"
+      );
+    }
   };
 
   returnInitialQuestionFormat() {
@@ -132,6 +124,8 @@ class QuestionForm extends React.Component {
     questions.push(question_format);
 
     this.setState({ questions });
+
+    toastMessage("success", "New question added successfully ");
   }
 
   handleAddOption(question_index) {
@@ -194,7 +188,7 @@ class QuestionForm extends React.Component {
       if (!questions[question_index]["options"]) {
         questions[question_index]["options"] = [];
       } else {
-        questions[question_index]["options"].splice(option_index);
+        questions[question_index]["options"].splice(option_index, 1);
       }
 
       this.setState({ questions });
@@ -227,6 +221,24 @@ class QuestionForm extends React.Component {
         "Can't delete dropdown menu " + menu_index + " -- Error: " + error
       );
     }
+  }
+
+  handleRemoveQuestion(index) {
+    let { questions } = this.state;
+
+    if (
+      window.confirm(
+        "Are you sure want to delete this question, NOTE: There is no undo, it will be deleted permanently"
+      )
+    ) {
+      if (questions[index].createdAt) {
+        this.handleDeleteQuestionRemote(questions[index]._id);
+      }
+
+      questions.splice(index, 1);
+    }
+
+    this.setState({ questions });
   }
 
   onChangeQuestion({ index, value, field }) {
@@ -286,11 +298,12 @@ class QuestionForm extends React.Component {
               <Input
                 label="Order:"
                 className="form-control-lg"
-                value={question.position + 1}
+                value={question.position}
                 onChange={(value) =>
                   this.onChangeQuestion({ index, field: "position", value })
                 }
-                error={question.error}
+                error={question.error_order}
+                type="number"
               />
             </div>
             <div className="col-md-6">
@@ -318,8 +331,13 @@ class QuestionForm extends React.Component {
                 onChange={(value) =>
                   this.onChangeQuestion({ index, field: "type", value })
                 }
-                error={question.error}
               />
+            </div>
+            <div
+              className="remove_question"
+              onClick={() => this.handleRemoveQuestion(index)}
+            >
+              <i className="bx bx-x" />
             </div>
           </div>
           {question?.options?.map((option, o) => {
@@ -338,28 +356,17 @@ class QuestionForm extends React.Component {
                 icon="bx-plus"
               />
             </div>
-            {question.createdAt && (
-              <div className="remote_btn">
-                <div>
-                  <Button
-                    className="btn-primary"
-                    onPress={() =>
-                      this.handleUpdateQuestionRemote(question, index)
-                    }
-                    text="Update"
-                    icon="bx-check"
-                  />
-                </div>
-                <div style={{ marginLeft: 15 }}>
-                  <Button
-                    className="btn-danger"
-                    onPress={() => this.handleDeleteQuestionRemote(question)}
-                    text="Delete"
-                    icon="bx-trash"
-                  />
-                </div>
+            <div className="remote_btn">
+              <div>
+                <Button
+                  className="btn-primary"
+                  onPress={() => this.handleSubmit(question, index)}
+                  text="Save"
+                  icon="bx-check"
+                  isSubmitting={this.state["isSubmitting_" + question._id]}
+                />
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
@@ -493,24 +500,173 @@ class QuestionForm extends React.Component {
     return selected_format;
   }
 
-  validateQuestion() {
+  validateQuestion(question, index) {
     let { questions } = this.state;
+    let { options } = question;
+    let { filters } = this.props;
 
-    this.setState({ questions });
+    let errors_count = 0;
+
+    question = this.validateOption(question);
+
+    if (!filters.survey || (filters.survey && !filters.survey.value)) {
+      errors_count += 1;
+
+      toastMessage("error", "Survey is mandatory, please select");
+    }
+
+    if (
+      !filters.organization ||
+      (filters.organization && !filters.organization.value)
+    ) {
+      errors_count += 1;
+
+      toastMessage("error", "Organization is mandatory, please select");
+    }
+
+    if (question.question === "") {
+      question.error = "Question must no be empty";
+
+      errors_count += 1;
+    }
+
+    if (question.order === "") {
+      question.error_order = "Please enter order number";
+
+      errors_count += 1;
+    }
+
+    for (let option of options) {
+      if (option.error && option.error !== "") {
+        errors_count += 1;
+      }
+    }
+
+    questions[index] = question;
+
+    console.log("====================================");
+    console.log({ questions, index });
+    console.log("====================================");
+
+    // this.setState({ questions });
+
+    return errors_count;
   }
 
-  handleUpdateQuestionRemote = async (question, index) => {
-    const error_question = await this.validateQuestion(question, index);
+  validateOption(question) {
+    let { options } = question;
+
+    for (let option of options) {
+      if (
+        question.type === "dropdown" &&
+        (!option.dropdown_options ||
+          (option.dropdown_options && option.dropdown_options.length === 0))
+      ) {
+        option.error = "Please add at least 1 option ";
+      }
+
+      if (option.option === "") {
+        option.error = "Question option is mandatory";
+      }
+    }
+
+    question.options = options.slice(0);
+
+    return question;
+  }
+
+  handleSubmit = async (question, index) => {
+    const question_errors = await this.validateQuestion(question, index);
+
+    try {
+      if (question_errors !== 0) return;
+
+      this.setState({ ["isSubmitting_" + question._id]: true });
+
+      const { user } = this.state;
+      const { filters } = this.props;
+
+      let route = "/add";
+      let action = "saved";
+
+      let request_body = {
+        position: question.position,
+        survey: filters.survey.value,
+        question: question.question,
+        options: question.options,
+        type: question.type,
+        setting: question.setting,
+        organization: filters.organization.value,
+        available: true,
+        point: question.point || 0,
+      };
+
+      if (question.createdAt && question._id) {
+        request_body.id = question._id;
+
+        route = "/update";
+        action = "updated";
+      }
+
+      const options = {
+        method: "POST",
+        url: `${ENDPOINT}/question${route}`,
+        data: request_body,
+        headers: {
+          authorization: `Bearer ${user.token}`,
+        },
+      };
+
+      await axios(options);
+
+      this.setState({
+        ["isSubmitting_" + question._id]: false,
+      });
+
+      toastMessage("success", `Data has been ${action} successful`);
+
+      this.getQuestions(false);
+    } catch (error) {
+      toastMessage("error", error.response.data);
+      this.setState({
+        ["isSubmitting_" + question._id]: false,
+        isFetched: false,
+      });
+    }
   };
 
-  handleDeleteQuestionRemote = async (question) => {};
+  handleDeleteQuestionRemote = async (id) => {
+    const { user } = this.state;
+    try {
+      const options = {
+        method: "POST",
+        url: `${ENDPOINT}/question/delete`,
+        data: {
+          id,
+        },
+        headers: {
+          authorization: `Bearer ${user.token}`,
+        },
+      };
+
+      await axios(options);
+
+      toastMessage("success", "Question deleted successfully");
+    } catch (error) {
+      toastMessage(
+        "error",
+        "Question delete failed -- ERROR " + error?.response?.data
+      );
+    }
+  };
 
   render() {
-    console.log("====================================");
-    console.log(this.state.questions);
-    console.log("====================================");
     return (
       <div className="form-container">
+        {this.state.isLoading && <LoadingSpinner />}
+        {this.state.questions.map((question, q) => {
+          return this.renderQuestion(question, q);
+        })}
         <div className="card mb-2">
           <div className="card-body">
             <div className="q-header">
@@ -526,12 +682,14 @@ class QuestionForm extends React.Component {
             </div>
           </div>
         </div>
-        {this.state.questions.map((question, q) => {
-          return this.renderQuestion(question, q);
-        })}
       </div>
     );
   }
 }
-
-export default QuestionForm;
+const mapPropsToState = (state) => {
+  const { filters } = state.Filters;
+  return {
+    filters,
+  };
+};
+export default connect(mapPropsToState)(QuestionForm);

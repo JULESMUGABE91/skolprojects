@@ -373,7 +373,7 @@ class Table extends React.Component {
                                         ? rowPress(item)
                                         : null
                                     }
-                                    title={text}
+                                    // title={text}
                                     style={{
                                       whiteSpace: "nowrap",
                                       textOverflow: "ellipsis",
