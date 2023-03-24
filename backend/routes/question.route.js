@@ -5,6 +5,7 @@ const app = express();
 const question = require("../controller/question/question.controller");
 
 app.post("/question/add", protect, (req, res) => {
+  console.log(req.body);
   question.addInfo(req, res);
 });
 

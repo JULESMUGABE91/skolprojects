@@ -25,6 +25,7 @@ const addInfo = async (req, res) => {
   });
 
   if (error) return res.status(400).json({ error: error.details[0].message });
+
   try {
     const questionInfo = await createQuestion({
       user,
@@ -35,8 +36,8 @@ const addInfo = async (req, res) => {
 
     res.status(200).json(questionInfo);
   } catch (error) {
-    console.log(error);
-    res.status(400).json(error);
+    console.log(error.stack);
+    res.status(400).json(error.stack);
   }
 };
 

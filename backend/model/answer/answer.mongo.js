@@ -67,6 +67,12 @@ const surveySchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Questions",
     },
+    start_interview: {
+      type: Number,
+    },
+    end_interview: {
+      type: Number,
+    },
   },
   { timestamps: true }
 );
