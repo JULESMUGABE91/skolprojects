@@ -86,7 +86,7 @@ export const optionsOptions = [
   },
   {
     label: "TextInput",
-    value: "input",
+    value: "textinput",
   },
   {
     label: "Number",

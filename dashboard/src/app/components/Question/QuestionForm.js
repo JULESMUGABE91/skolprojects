@@ -99,7 +99,7 @@ class QuestionForm extends React.Component {
       type: optionsOptions[0].value,
       option: "",
       checked: true,
-      input: "input",
+      input: "textinput",
     };
   }
 
