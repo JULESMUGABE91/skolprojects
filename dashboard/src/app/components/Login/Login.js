@@ -202,31 +202,37 @@ class Login extends React.Component {
   };
 
   onSuccess = async (data) => {
-    await setStorage({
-      ...data,
-    });
+    try {
+      await setStorage({
+        ...data,
+      });
 
-    if (Object.keys(data?.organization || {}).length !== 0) {
-      let org_obj = {
-        label: data.organization.name,
-        value: data.organization._id,
-      };
+      console.log(data);
 
-      await this.props.dispatch(onFilter({ organization: org_obj }));
+      if (Object.keys(data?.organization || {}).length !== 0) {
+        let org_obj = {
+          label: data.organization.name,
+          value: data.organization._id,
+        };
 
-      window.location.href = "/dashboard/home";
+        await this.props.dispatch(onFilter({ organization: org_obj }));
 
-      return;
+        window.location.href = "/dashboard/home";
+
+        return;
+      }
+
+      if (data.account_type === "super_admin") {
+        return (window.location.href = "/dashboard/home");
+      }
+
+      toastMessage(
+        "error",
+        "Your account does not allowed to access zawadi dashboard"
+      );
+    } catch (error) {
+      toastMessage("error", "Something went wrong " + error);
     }
-
-    if (data.account_type === "super_admin") {
-      return (window.location.href = "/dashboard/home");
-    }
-
-    toastMessage(
-      "error",
-      "Your account does not allowed to access zawadi dashboard"
-    );
   };
 
   render() {
