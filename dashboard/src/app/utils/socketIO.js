@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const socket = io("https://cleankigaliapi.huzalabs.com", {
+const socket = io("https://myskol.rw/api", {
   transports: ["websocket"],
 });
 
