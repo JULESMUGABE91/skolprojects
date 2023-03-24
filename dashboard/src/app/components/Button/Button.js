@@ -22,7 +22,6 @@ const renderSelectedText = (items) => {
 };
 
 const Button = (props) => {
-  console.log(props.id);
   if (props.id) {
     return (
       <button
@@ -30,9 +29,9 @@ const Button = (props) => {
         className={`btn ${props.className} ${
           props.isSubmitting && "btn-disabled"
         }`}
-        id={"dropdownMenuButton1"}
-        // data-bs-toggle="dropdown"
-        // aria-expanded="false"
+        id={props.id}
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
         data-bs-auto-close={props.autoCloseType}
       >
         {props.isSubmitting ? (
@@ -64,9 +63,6 @@ const Button = (props) => {
           props.isSubmitting && "btn-disabled"
         }`}
         id={props.id}
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
-        data-bs-auto-close={props.autoCloseType}
       >
         {props.isSubmitting ? (
           <i className="bx bx-loader bx-spin"></i>
