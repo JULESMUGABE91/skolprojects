@@ -126,7 +126,8 @@ class Login extends React.Component {
     return formatted;
   }
 
-  onVerify = async () => {
+  onVerify = async (e) => {
+    e.preventDefault();
     await this.validateForm();
     const { error, phone, selected_country, otp_code } = this.state;
 
