@@ -64,11 +64,15 @@ class AppEntry extends React.Component {
 
   render() {
     if (this.state.shouldRender) {
-      const bgColorDark = EStyleSheet.value('$bgColorDark');
+      const bgColorDark = EStyleSheet.value('$accentColor');
 
       return (
         <Container>
-          <StatusBar barStyle={'light-content'} backgroundColor={bgColorDark} />
+          <StatusBar
+            translucent
+            barStyle={'light-content'}
+            backgroundColor={bgColorDark}
+          />
           <RootNavigator
             user={this.state.user}
             {...this.props}
