@@ -61,7 +61,7 @@ class HomeScreen extends React.Component {
       } else {
         clearTimeout(time);
       }
-    }, 10000);
+    }, 5000);
   };
 
   handleOpenModal(modal) {
@@ -121,6 +121,16 @@ class HomeScreen extends React.Component {
   }
 
   onPressSurvey = async data => {
+
+    const {my_location} = this.props;
+
+    if (!my_location || !my_location.name || my_location.name === '') {
+      toastMessage('Please allow MySkol to access your location to continue');
+      this.handleOpenModal('locationmodal');
+
+      return;
+    }
+
     await this.props.dispatch(onAddAnsweringSurvey(data));
 
     this.props.navigation.navigate('SurveyPreview', {data});

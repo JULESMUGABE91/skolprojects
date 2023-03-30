@@ -1,9 +1,8 @@
 // window.navigator.userAgent = 'react-native';
 import io from 'socket.io-client';
-import {URL} from '../constants/strings';
 
-const socket = io.connect(URL, {
-  // transports: ['websocket'],
+const socket = io.connect('http://146.190.152.81:9000', {
+  transports: ['websocket'],
 });
 
 socket.on('connect', socket => {

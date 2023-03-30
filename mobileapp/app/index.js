@@ -70,7 +70,7 @@ class AppEntry extends React.Component {
         <Container>
           <StatusBar
             translucent
-            barStyle={'light-content'}
+            barStyle={'dark-content'}
             backgroundColor={bgColorDark}
           />
           <RootNavigator

@@ -36,16 +36,15 @@
 		</dict>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>MySkol need access of your camera</string>
+	<string>MySkol need access of your camera, To personnalize your profile you should give MySkol access to your camera. It is only taking a photo of your choice</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>MySkol need your location</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>MySkol need to access your location</string>
+	<string>MySkol need to access your location, It is useful for us to know where you are taken the survey from in order to make sure we will alllocate our products and solutions to the exact places</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>MySkol need to access your location</string>
+	<string>MySkol need to access your location, It is useful for us to know where you are taken the survey from in order to make sure we will alllocate our products and solutions to the exact places</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>MySkol need to access your photo library</string>
-	<string></string>
+	<string>MySkol need to access your photo library, To personnalize your profile you should give MySkol access to your photo library</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Lato-Black.ttf</string>
