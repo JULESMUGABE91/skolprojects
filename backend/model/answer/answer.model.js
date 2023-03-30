@@ -26,23 +26,19 @@ const createBulkAnswer = async (params) => {
   let answers = [];
 
   for (let el of questions) {
-    const answer = await findAnswer({ identifier: el.identifier });
+    const answerInfo = await answerMongo.create({
+      ...el,
+      ...organization,
+      survey,
+      identifier,
+      user,
+    });
 
-    if (answer.length === 0) {
-      const answerInfo = await answerMongo.create({
-        ...el,
-        ...organization,
-        survey,
-        identifier,
-        user,
-      });
+    const savedAnswer = await findAnswerById(answerInfo._id);
 
-      const savedAnswer = await findAnswerById(answerInfo._id);
+    // markQuestion(savedAnswer.organization, savedAnswer.question, params.user);
 
-      // markQuestion(savedAnswer.organization, savedAnswer.question, params.user);
-
-      answers.push(savedAnswer);
-    }
+    answers.push(savedAnswer);
   }
 
   return answers;

@@ -19,7 +19,13 @@ app.use(
 
 app.use(morgan("combined"));
 
-app.use(bodyParser.urlencoded({ extended: false, limit: "50mb" }));
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+    limit: "50mb",
+    parameterLimit: 50000,
+  })
+);
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(
   multipart({ uploadDir: "./assets", maxFieldsSize: 4 * 1024 * 1024 + "MB" })
