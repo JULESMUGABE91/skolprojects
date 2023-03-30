@@ -4,42 +4,34 @@ import "leaflet/dist/leaflet.css";
 import "react-leaflet-markercluster/dist/styles.min.css";
 import "./styles.css";
 import MapDataLoader from "./MapLoader";
-import BinMarker from "./BinMarker";
+import MapMarker from "./MapMarker";
 import MarkerClusterGroup from "react-leaflet-markercluster";
 import L from "leaflet";
-import levelPerPercentage from "../../utils/levelPerPercentage";
 
 const Map = (props) => {
-  const createClusterCustomIcon = function (cluster, bins) {
-    let levels = [];
-
-    for (let i = 0; i < bins.length; i++) {
-      levels.push(bins[i].level_percentage);
-    }
-
-    const max = Math.max(...levels);
-    const { color } = levelPerPercentage(max);
-
+  const createClusterCustomIcon = function (cluster, answer) {
     return L.divIcon({
-      html: `<div class='marker-cluster-child' style='background-color:${color}'><span>${cluster.getChildCount()}</span></div>`,
+      html: `<div class='marker-cluster-child' style='background-color:${
+        answer.status === "incomplete" ? "#FD0C0C" : "#000000"
+      } '><span>${cluster.getChildCount()}</span></div>`,
       className: "marker-cluster-custom",
       iconSize: L.point(40, 40, true),
     });
   };
 
-  let group_bins_by_address = {};
+  let group_answer_by_surveyor = {};
 
   for (let i = 0; i < props.data.length; i++) {
-    const address = props.data[i].address && props.data[i].address.sector;
+    const user = props.data[i].user._id;
 
-    if (!group_bins_by_address[address]) {
-      group_bins_by_address[address] = [];
+    if (!group_answer_by_surveyor[user]) {
+      group_answer_by_surveyor[user] = [];
     }
 
-    group_bins_by_address[address].push(props.data[i]);
+    group_answer_by_surveyor[user].push(props.data[i]);
   }
 
-  const addresses = Object.keys(group_bins_by_address);
+  const users = Object.keys(group_answer_by_surveyor);
 
   return (
     <div className="open-street-map-container">
@@ -56,19 +48,20 @@ const Map = (props) => {
         />
         {props.data &&
           props.data.length > 0 &&
-          addresses.map((addr, a) => {
+          users.map((user, a) => {
             return (
               <MarkerClusterGroup
                 key={a}
                 spiderfyDistanceMultiplier={1}
                 showCoverageOnHover={false}
-                maxClusterRadius={35}
+                zoomToBoundsOnClick
+                maxClusterRadius={17}
                 iconCreateFunction={(e) =>
-                  createClusterCustomIcon(e, group_bins_by_address[addr])
+                  createClusterCustomIcon(e, group_answer_by_surveyor[user])
                 }
               >
-                {group_bins_by_address[addr].map((marker, m) => {
-                  return <BinMarker marker={marker} key={m} />;
+                {group_answer_by_surveyor[user].map((marker, m) => {
+                  return <MapMarker marker={marker} key={m} />;
                 })}
               </MarkerClusterGroup>
             );

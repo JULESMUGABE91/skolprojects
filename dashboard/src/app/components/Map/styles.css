@@ -47,14 +47,14 @@
   font-size: 13px;
 }
 
-.bin-marker {
+.map-marker {
   width: 40px;
   height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #7a7d7a;
+  background-color: var(--first-color);
   color: white;
   font-weight: 600;
   font-size: 9px;
@@ -75,8 +75,8 @@
 
 .marker-cluster-child {
   width: 40px;
-  height: 32px;
-  border-radius: 5px;
+  height: 40px;
+  border-radius: 50%;
   border: 3px solid rgb(255, 255, 255);
   box-shadow: var(--box-shadow);
   display: flex;
@@ -87,7 +87,7 @@
   border-top: 3px solid white;
 }
 
-.marker-cluster-child::after {
+/* .marker-cluster-child::after {
   content: "";
   position: absolute;
   background-color: black;
@@ -97,9 +97,9 @@
   left: 0;
   width: 42px;
   margin-left: -0.25rem;
-}
+} */
 
-.marker-cluster-child::before {
+/* .marker-cluster-child::before {
   content: "";
   position: absolute;
   background-color: black;
@@ -107,9 +107,9 @@
   top: -10px;
   right: 0;
   left: 0;
-}
+} */
 
-.bin-marker i {
+.map-marker i {
   color: var(--body-color-lighter);
   font-size: 25px;
 }
@@ -144,8 +144,8 @@
   margin-bottom: 0.4rem;
 }
 
-.mid_low_level {
-  background-color: rgb(121, 2, 121);
+.incomplete {
+  background-color: #fd0c0c
 }
 
 .mid_high_level {
