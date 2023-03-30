@@ -8,6 +8,8 @@ import { getStorage } from "../../utils/storage";
 import { onFilter } from "../../action/Filters";
 import { connect } from "react-redux";
 import formatSelectData from "../../utils/formatSelectData";
+import UpdateUser from "./UpdateUser";
+import { Modal } from "../Modal";
 
 let copyData = [];
 
@@ -78,20 +80,6 @@ class Users extends React.Component {
       });
   }
 
-  handleShowModal(modal, modalTitle, selected_data = {}) {
-    this.setState({
-      [modal]: true,
-      modalTitle: modalTitle,
-      selected_data,
-    });
-  }
-
-  handleCloseModal(modal) {
-    this.setState({
-      [modal]: false,
-    });
-  }
-
   handlePagination(page) {
     this.setState(
       {
@@ -134,6 +122,20 @@ class Users extends React.Component {
 
     this.setState({
       data: array,
+    });
+  }
+
+  handleShowModal(modal, modalTitle, selected_data = {}) {
+    this.setState({
+      [modal]: true,
+      modalTitle: modalTitle,
+      selected_data,
+    });
+  }
+
+  handleCloseModal(modal) {
+    this.setState({
+      [modal]: false,
     });
   }
 
@@ -190,7 +192,22 @@ class Users extends React.Component {
           handleSearch={this.handleSearch.bind(this)}
           isLoading={this.state.isLoading}
           headers={headers}
+          rowPress={(item) => {
+            this.handleShowModal("showModal", "Account", item);
+          }}
         />
+        <Modal
+          handleClose={this.handleCloseModal.bind(this, "showModal")}
+          show={this.state.showModal}
+          title={this.state.modalTitle}
+          showHeaderBottomBorder={false}
+        >
+          <UpdateUser
+            handleCloseModal={this.handleCloseModal.bind(this, "showModal")}
+            getData={this.getData.bind(this)}
+            {...this.state.selected_data}
+          />
+        </Modal>
       </div>
     );
   }

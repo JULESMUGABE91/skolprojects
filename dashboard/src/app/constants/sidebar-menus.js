@@ -10,6 +10,11 @@ export const menus = [
     route: "/dashboard/home/organizations",
   },
   {
+    group: "Live Map",
+    icon: "bxs-map",
+    route: "/dashboard/home/map",
+  },
+  {
     group: "Surveys",
     icon: "bx-time-five",
     access: [{ isOrgRequired: true }],

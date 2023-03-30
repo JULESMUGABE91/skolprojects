@@ -1,3 +1,4 @@
 import Users from "./Users";
+import UpdateUser from "./UpdateUser";
 
-export { Users };
+export { Users, UpdateUser };

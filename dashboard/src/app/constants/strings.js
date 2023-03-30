@@ -43,3 +43,21 @@ export const audiences = [
     value: "Public",
   },
 ];
+
+export const ACCESS = [
+  {
+    label: "Super Admin",
+    value: "super_admin",
+    permission: ["super_admin"],
+  },
+  {
+    label: "Admin",
+    value: "admin",
+    permission: ["super_admin", "admin"],
+  },
+  {
+    label: "Surveyor",
+    value: "sub_admin",
+    permission: ["super_admin", "admin"],
+  },
+];
