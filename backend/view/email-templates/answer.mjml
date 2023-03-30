@@ -1,0 +1,35 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-image width="50px" src="https://trendtype.com/wp-content/uploads/2019/05/Skol.jpg"></mj-image>
+        <mj-divider border-color="#F45E43"></mj-divider>
+        <mj-text font-size="14px" color="#000" font-family="helvetica">
+
+          <h3>
+            Skol experience in English
+          </h3>
+
+          <h4>Surveyor</h4>
+
+          <p>Kibugenza Didier</p>
+          <p>Phone: 250787393488</p>
+        </mj-text>
+        <mj-divider border-color="#F45E43"></mj-divider>
+        <mj-text font-size="18px" color="#F45E43" font-family="helvetica">
+          <p>Q1:Do yoy have 15 min to answer the questions</p>
+        </mj-text>
+        <mj-table>
+          <tr style="border-bottom:1px solid #ecedee;text-align:left;padding-left:15px;">
+            <th style="padding: 0 15px 0 0;">Option</th>
+            <th style="padding: 0 15px;">Answer</th>
+          </tr>
+          <tr>
+            <td style="padding: 0 15px 0 0;">Yes</td>
+            <td style="padding: 0 15px;">YES</td>
+          </tr>
+        </mj-table>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

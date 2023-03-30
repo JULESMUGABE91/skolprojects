@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
-const hbs = require("nodemailer-express-handlebars");
 const path = require("path");
+const { nodemailerMjmlPlugin } = require("nodemailer-mjml");
 
 const OAuth2 = google.auth.OAuth2;
 
@@ -14,8 +14,7 @@ const oauth2Client = new OAuth2(
 );
 
 oauth2Client.setCredentials({
-  refresh_token:
-    "1//04jQIlzusZZ8gCgYIARAAGAQSNwF-L9Ir7g1CEy6sDJboyVSmbHH8CszdiUtRNu0D0sXW9W3FR_QqZafPdcrpyjzKoPjoYFayHxk",
+  refresh_token: process.env.EMAIL_REFRESH_TOKEN,
 });
 const accessToken = oauth2Client.getAccessToken();
 
@@ -40,17 +39,26 @@ const send = () => {
 };
 
 const sendEmail = async (params) => {
-  const { to, subject, message } = params;
+  const { to, subject, message, template, data } = params;
 
   try {
     let transporter = send(process.env.EMAIL_FROM, subject, message, to);
+
+    transporter.use(
+      "compile",
+      nodemailerMjmlPlugin({
+        templateFolder: path.join(__dirname, "../view/email-templates"),
+      })
+    );
 
     let mailOptions = {
       from: process.env.EMAIL_FROM,
       to,
       subject,
-      html: message,
+      templateName: template,
+      templateData: data,
     };
+
     transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
         return {
@@ -69,4 +77,4 @@ const sendEmail = async (params) => {
   }
 };
 
-module.exports = { sendEmail, sendEmailTemplate };
+module.exports = { sendEmail };

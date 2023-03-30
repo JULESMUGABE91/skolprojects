@@ -1,4 +1,4 @@
-const { isValidObjectId } = require("mongoose");
+const { isValidObjectId, default: mongoose } = require("mongoose");
 const { gender, regions } = require("../../constant/string");
 const questionMongo = require("../question/question.mongo");
 const { createReward, findReward } = require("../reward/reward.model");
@@ -223,7 +223,6 @@ const getQuestionAnswers = async (data, total_respondent) => {
 
   for (let item of data) {
     const question = item?.question?.question;
-    console.log(item);
     const exclude = [
       "respondent_name",
       "respondent_address",
@@ -451,6 +450,34 @@ const fetchByStatus = async (params) => {
   return { count: answersData.length };
 };
 
+const fetchAndGroupByUser = async (params) => {
+  let { survey, organization, user } = params;
+
+  let match = {};
+
+  if (organization) {
+    match.organization = mongoose.Types.ObjectId(organization);
+  }
+
+  if (survey) {
+    match.survey = mongoose.Types.ObjectId(survey);
+  }
+
+  if (user) {
+    match.user = mongoose.Types.ObjectId(user);
+  }
+
+  const answersData = await answerMongo.aggregate([
+    { $match: { ...match } },
+    { $group: { _id: "$identifier", doc: { $first: "$$ROOT" } } },
+    { $replaceRoot: { newRoot: "$doc" } },
+  ]);
+
+  await answerMongo.populate(answersData, { path: "user" });
+
+  return answersData;
+};
+
 module.exports = {
   createAnswer,
   findAndUpdateAnswer,
@@ -467,4 +494,5 @@ module.exports = {
   fetchRespondentsByRegion,
   fetchByStatus,
   fetchRespondentsByAgeGroup,
+  fetchAndGroupByUser,
 };

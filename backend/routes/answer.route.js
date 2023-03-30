@@ -12,12 +12,12 @@ app.post("/answer/add/bulk", protect, (req, res) => {
   answer.addBulkInfo(req, res);
 });
 
-app.post("/answer/fetch", protect, (req, res) => {
-  answer.fetchInfo(req, res);
+app.post("/answer/http", protect, (req, res) => {
+  answer.httpFetchInfo(req, res);
 });
 
 app.post("/answer/survey", protect, (req, res) => {
-  answer.fetchSurveyAnsweredInfo(req, res);
+  answer.httpSurveyAnsweredInfo(req, res);
 });
 
 app.post("/answer/delete", protect, (req, res) => {
@@ -29,35 +29,39 @@ app.post("/answer/update", protect, (req, res) => {
 });
 
 app.post("/answer/same_location", protect, (req, res) => {
-  answer.fetchAnsweredFromSameLocation(req, res);
+  answer.httpAnsweredFromSameLocation(req, res);
 });
 
 app.post("/answer/different_location", protect, (req, res) => {
-  answer.fetchAnsweredFromDifferentLocation(req, res);
+  answer.httpAnsweredFromDifferentLocation(req, res);
 });
 
 app.post("/answer/insight", protect, (req, res) => {
-  answer.fetchAnswersPerQuestion(req, res);
+  answer.httpAnswersPerQuestion(req, res);
 });
 
 app.post("/answer/respondent", protect, (req, res) => {
-  answer.fetchRespondent(req, res);
+  answer.httpRespondent(req, res);
 });
 
 app.post("/answer/respondent/gender", protect, (req, res) => {
-  answer.fetchRespondentPerGender(req, res);
+  answer.httpRespondentPerGender(req, res);
 });
 
 app.post("/answer/respondent/region", protect, (req, res) => {
-  answer.fetchRespondentPerRegion(req, res);
+  answer.httpRespondentPerRegion(req, res);
 });
 
 app.post("/answer/respondent/age_group", protect, (req, res) => {
-  answer.fetchRespondentPerAgeGroup(req, res);
+  answer.httpRespondentPerAgeGroup(req, res);
 });
 
 app.post("/answer/status", protect, (req, res) => {
-  answer.fetchBySurveyStatus(req, res);
+  answer.httpAnswerByStatus(req, res);
+});
+
+app.post("/answer/group_user", protect, (req, res) => {
+  answer.httpGroupByUser(req, res);
 });
 
 module.exports = app;

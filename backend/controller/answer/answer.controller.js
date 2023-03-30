@@ -19,6 +19,7 @@ const {
   fetchRespondentsByRegion,
   fetchRespondentsByAgeGroup,
   fetchByStatus,
+  fetchAndGroupByUser,
 } = require("../../model/answer/answer.model");
 const {
   validateAnswer,
@@ -109,7 +110,7 @@ const deleteInfo = async (req, res) => {
   }
 };
 
-const fetchInfo = async (req, res) => {
+const httpFetchInfo = async (req, res) => {
   try {
     const answerInfo = await findAnswer(req.body);
 
@@ -119,7 +120,7 @@ const fetchInfo = async (req, res) => {
   }
 };
 
-const fetchSurveyAnsweredInfo = async (req, res) => {
+const httpSurveyAnsweredInfo = async (req, res) => {
   try {
     const answerInfo = await findMySurvey(req.body);
 
@@ -129,7 +130,7 @@ const fetchSurveyAnsweredInfo = async (req, res) => {
   }
 };
 
-const fetchAnsweredFromSameLocation = async (req, res) => {
+const httpAnsweredFromSameLocation = async (req, res) => {
   try {
     const answerInfo = await findAnswersFromSameLocation(req.body);
 
@@ -139,7 +140,7 @@ const fetchAnsweredFromSameLocation = async (req, res) => {
   }
 };
 
-const fetchAnsweredFromDifferentLocation = async (req, res) => {
+const httpAnsweredFromDifferentLocation = async (req, res) => {
   try {
     const answerInfo = await findAnswersFromDifferentLocation(req.body);
 
@@ -149,18 +150,17 @@ const fetchAnsweredFromDifferentLocation = async (req, res) => {
   }
 };
 
-const fetchAnswersPerQuestion = async (req, res) => {
+const httpAnswersPerQuestion = async (req, res) => {
   try {
     const answerInfo = await findInsightAnswers(req.body);
 
     res.status(200).json(answerInfo);
   } catch (error) {
-    console.log(error);
     res.status(400).json(error.stack);
   }
 };
 
-const fetchRespondent = async (req, res) => {
+const httpRespondent = async (req, res) => {
   try {
     const answerInfo = await fetchRespondents(req.body);
 
@@ -170,7 +170,7 @@ const fetchRespondent = async (req, res) => {
   }
 };
 
-const fetchRespondentPerGender = async (req, res) => {
+const httpRespondentPerGender = async (req, res) => {
   try {
     const answerInfo = await fetchRespondentsByGender(req.body);
 
@@ -180,7 +180,7 @@ const fetchRespondentPerGender = async (req, res) => {
   }
 };
 
-const fetchRespondentPerRegion = async (req, res) => {
+const httpRespondentPerRegion = async (req, res) => {
   try {
     const answerInfo = await fetchRespondentsByRegion(req.body);
 
@@ -190,7 +190,7 @@ const fetchRespondentPerRegion = async (req, res) => {
   }
 };
 
-const fetchRespondentPerAgeGroup = async (req, res) => {
+const httpRespondentPerAgeGroup = async (req, res) => {
   try {
     const answerInfo = await fetchRespondentsByAgeGroup(req.body);
 
@@ -200,9 +200,19 @@ const fetchRespondentPerAgeGroup = async (req, res) => {
   }
 };
 
-const fetchBySurveyStatus = async (req, res) => {
+const httpAnswerByStatus = async (req, res) => {
   try {
     const answerInfo = await fetchByStatus(req.body);
+
+    res.status(200).json(answerInfo);
+  } catch (error) {
+    res.status(400).json(error.stack);
+  }
+};
+
+const httpGroupByUser = async (req, res) => {
+  try {
+    const answerInfo = await fetchAndGroupByUser(req.body);
 
     res.status(200).json(answerInfo);
   } catch (error) {
@@ -214,15 +224,16 @@ module.exports = {
   addInfo,
   deleteInfo,
   updateInfo,
-  fetchInfo,
-  fetchSurveyAnsweredInfo,
-  fetchAnsweredFromSameLocation,
-  fetchAnsweredFromDifferentLocation,
-  fetchAnswersPerQuestion,
-  fetchRespondent,
+  httpFetchInfo,
+  httpSurveyAnsweredInfo,
+  httpAnsweredFromSameLocation,
+  httpAnsweredFromDifferentLocation,
+  httpAnswersPerQuestion,
+  httpRespondent,
   addBulkInfo,
-  fetchRespondentPerGender,
-  fetchRespondentPerRegion,
-  fetchBySurveyStatus,
-  fetchRespondentPerAgeGroup,
+  httpRespondentPerGender,
+  httpRespondentPerRegion,
+  httpAnswerByStatus,
+  httpRespondentPerAgeGroup,
+  httpGroupByUser,
 };
