@@ -26,19 +26,23 @@ const createBulkAnswer = async (params) => {
   let answers = [];
 
   for (let el of questions) {
-    const answerInfo = await answerMongo.create({
-      ...el,
-      ...organization,
-      survey,
-      identifier,
-      user,
-    });
+    const answer = await findAnswer({ identifier: el.identifier });
 
-    const savedAnswer = await findAnswerById(answerInfo._id);
+    if (answer.length === 0) {
+      const answerInfo = await answerMongo.create({
+        ...el,
+        ...organization,
+        survey,
+        identifier,
+        user,
+      });
 
-    // markQuestion(savedAnswer.organization, savedAnswer.question, params.user);
+      const savedAnswer = await findAnswerById(answerInfo._id);
 
-    answers.push(savedAnswer);
+      // markQuestion(savedAnswer.organization, savedAnswer.question, params.user);
+
+      answers.push(savedAnswer);
+    }
   }
 
   return answers;
@@ -64,6 +68,7 @@ const findAnswer = async (params) => {
     end_date,
     questions,
     status,
+    identifier,
   } = params;
   let filters = {};
 
@@ -81,6 +86,10 @@ const findAnswer = async (params) => {
 
   if (user) {
     filters.user = user;
+  }
+
+  if (identifier) {
+    filters.identifier = identifier;
   }
 
   if (start_date && end_date) {
