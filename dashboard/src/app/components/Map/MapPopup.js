@@ -5,6 +5,7 @@ import moment from "moment";
 import { Link } from "react-router-dom";
 
 const MapPopup = (props) => {
+  console.log(props);
   return (
     <Popup>
       <div className="bin-popup">
@@ -24,16 +25,16 @@ const MapPopup = (props) => {
           </div>
           <div className="item">
             <span>
-              Start Location:{" "}
-              <b>{props?.start_location?.address || "Unknown"}</b>
+              Location:{" "}
+              <b>{props?.data?.start_location?.address || "Unknown"}</b>
             </span>
           </div>
-          <div className="item">
+          {/* <div className="item">
             <span>
               End Location:{" "}
               <b>{props.data?.end_location?.address || "Unknown"}</b>
             </span>
-          </div>
+          </div> */}
 
           <div className="item">
             <span>

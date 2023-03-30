@@ -34,7 +34,7 @@ app.use(express.static(__dirname + "/assets"));
 
 app.use("/api/v1", api);
 
-app.get("/invite", async (req, res) => {
+app.get("/api/invite", async (req, res) => {
   res.sendFile(path.join(__dirname + "/view/invite.html"));
 
   const { org = "", uid = "", ref } = req.query;
