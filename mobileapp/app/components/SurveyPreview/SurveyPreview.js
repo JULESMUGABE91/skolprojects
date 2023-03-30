@@ -6,6 +6,7 @@ import {
   View,
   Dimensions,
   ActivityIndicator,
+  SafeAreaView,
 } from 'react-native';
 import {Text} from '../Text';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -59,6 +60,10 @@ class SurveyPreview extends React.Component {
         this.handleOpenModal('introductionmodal');
       }
     });
+
+    if (this.state.current_question_index === 0) {
+      this.setState({start_interview: new Date().getTime()});
+    }
   };
 
   getData = async () => {
@@ -517,9 +522,6 @@ class SurveyPreview extends React.Component {
 
       this.props.navigation.goBack();
     } catch (error) {
-      console.log('====================================');
-      console.log(error);
-      console.log('====================================');
       this.setState({isCancelling: false});
       toastMessage(
         'Cancel this survey has been failed, please your internet and try again',
@@ -604,22 +606,25 @@ class SurveyPreview extends React.Component {
                     </View>
                   </View>
 
-                  {this.state.current_question_index > 0 && (
-                    <View style={styles.close_container}>
-                      <TouchableOpacity onPress={() => this.handleCancel()}>
-                        <View>
-                          {this.state.isCancelling ? (
-                            <ActivityIndicator />
-                          ) : (
-                            <MaterialCommunityIcons
-                              name="close"
-                              style={styles.close_icon}
-                            />
-                          )}
-                        </View>
-                      </TouchableOpacity>
-                    </View>
-                  )}
+                  <View style={styles.close_container}>
+                    <TouchableOpacity
+                      onPress={() =>
+                        this.state.current_question_index > 0
+                          ? this.handleCancel()
+                          : this.props.navigation.goBack()
+                      }>
+                      <View>
+                        {this.state.isCancelling ? (
+                          <ActivityIndicator />
+                        ) : (
+                          <MaterialCommunityIcons
+                            name="close"
+                            style={styles.close_icon}
+                          />
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             </View>
@@ -934,15 +939,17 @@ class SurveyPreview extends React.Component {
           position={'top'}
           coverScreen
           onClosingState={() => this.handleCloseModal('introductionmodal')}>
-          <Introduction
-            navigation={this.props.navigation}
-            intro={this.state?.survey?.introduction}
-            goBack={() => {
-              this.handleCloseModal('introductionmodal');
-              this.props.navigation.goBack();
-            }}
-            handleStart={() => this.handleStartInterview()}
-          />
+          <SafeAreaView style={{flex: 1}}>
+            <Introduction
+              navigation={this.props.navigation}
+              intro={this.state?.survey?.introduction}
+              goBack={() => {
+                this.handleCloseModal('introductionmodal');
+                this.props.navigation.goBack();
+              }}
+              handleStart={() => this.handleStartInterview()}
+            />
+          </SafeAreaView>
         </Modal>
         <Modal
           style={modal_styles.dropdownmodal}

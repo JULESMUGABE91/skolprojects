@@ -30,7 +30,11 @@ class LoginScreen extends React.Component {
     const accentColor = EStyleSheet.value('$accentColor');
     return (
       <Container>
-        <StatusBar barStyle={'dark-content'} backgroundColor={accentColor} />
+        <StatusBar
+          translucent
+          barStyle={'dark-content'}
+          backgroundColor={accentColor}
+        />
         <Login navigation={this.props.navigation} route={this.state.route} />
       </Container>
     );

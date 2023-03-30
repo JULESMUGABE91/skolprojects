@@ -16,7 +16,7 @@ import {APP_ID, USER_PHOTO_PLACEHOLDER, URL} from '../../constants/strings';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import axios from 'axios';
-import {ROOT_API, DOMAIN_NAME} from '../../constants/strings';
+import {ROOT_API} from '../../constants/strings';
 import toastMessage from '../../utils/toastMessage';
 import generateOTP from '../../utils/generateOTP';
 import {Button} from '../Button';
@@ -55,9 +55,9 @@ class Profile extends React.Component {
     this.setState(
       {
         user,
-        link: `${DOMAIN_NAME}/invite?org=${APP_ID}&uid=${
-          user._id
-        }&ref=${generateOTP(4)}`,
+        link: `${URL}/invite?org=${APP_ID}&uid=${user._id}&ref=${generateOTP(
+          4,
+        )}`,
       },
       () => {
         this.getRewards(true);
