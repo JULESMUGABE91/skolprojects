@@ -26,6 +26,7 @@ const {
   validateBulkAnswer,
 } = require("../../validation/answer.validation.js");
 const socket = require("../../utils/socket");
+const { httpAnswerPDFReport } = require("../report/report.controller");
 
 const addInfo = async (req, res) => {
   const { answers, question, survey, organization, identifier } = req.body;
@@ -60,12 +61,16 @@ const addBulkInfo = async (req, res) => {
 
   const user = req.user.id;
 
-  const { error } = validateBulkAnswer({
-    questions,
+  const common = {
     user,
     identifier,
     survey,
     organization,
+  };
+
+  const { error } = validateBulkAnswer({
+    questions,
+    ...common,
   });
 
   if (error) return res.status(400).json({ error: error.details[0].message });
@@ -75,6 +80,8 @@ const addBulkInfo = async (req, res) => {
       user,
       ...req.body,
     });
+
+    await httpAnswerPDFReport(common);
 
     res.status(200).json(answerInfo);
   } catch (error) {

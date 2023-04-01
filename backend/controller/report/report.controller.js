@@ -11,11 +11,12 @@ const moment = require("moment");
 
 const httpAnswerPDFReport = async (req, res) => {
   try {
-    const file = await generateAnswerPDFReport(req.body);
+    const body = req.body || req;
+    const file = await generateAnswerPDFReport(body);
 
-    await handleAttachmentEmail({ ...req.body, file });
+    await handleAttachmentEmail({ ...body, file });
 
-    res.status(200).json(file);
+    return res ? res.status(200).json(file) : file;
   } catch (error) {
     res.status(400).json(error.stack);
   }

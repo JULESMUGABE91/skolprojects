@@ -17,10 +17,11 @@ const {
 const socket = require("../../utils/socket");
 
 const httpCreate = async (req, res) => {
-  const { email } = req.body;
+  const { email, organization } = req.body;
 
   const { error } = validateAdminEmail({
     email,
+    organization,
   });
 
   if (error) return res.status(400).json({ error: error.details[0].message });
