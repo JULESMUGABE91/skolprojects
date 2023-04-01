@@ -49,7 +49,7 @@ const Header = (props) => {
                   <Survey />
                 </ul>
               )}
-              {item.isDropdown && item.name === "user_account" && (
+              {item.isDropdown && item.name === "user" && (
                 <ul
                   className="dropdown-menu col-xs-12"
                   aria-labelledby="dropdownMenuClickableInside"

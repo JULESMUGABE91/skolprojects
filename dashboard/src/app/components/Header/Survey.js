@@ -25,7 +25,7 @@ class Survey extends React.Component {
   };
 
   componentDidUpdate(prevProps) {
-    if (prevProps.filters !== this.props.filters) {
+    if (prevProps.filters.organization !== this.props.filters.organization) {
       this.getData(true);
     }
   }

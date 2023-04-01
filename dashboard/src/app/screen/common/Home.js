@@ -28,22 +28,20 @@ class Home extends React.Component {
 
     await this.setState({ user });
 
-    this.getAccounts(true);
-    this.getIncomplete(true);
-    this.getSurveys(true);
     this.getRespondent(true);
-    this.getQuestion(true);
-    this.getSurveyed(true);
+    // this.getSurveys(true);
+    // this.getQuestion(true);
+    // this.getSurveyed(true);
+    // this.getIncomplete(true);
   };
 
   componentDidUpdate(prevProps) {
     if (this.state.user.token && prevProps.filters !== this.props.filters) {
-      this.getAccounts(true);
       this.getRespondent(true);
-      this.getSurveys(true);
-      this.getQuestion(true);
-      this.getSurveyed(true);
-      this.getIncomplete(true);
+      // this.getSurveys(true);
+      // this.getQuestion(true);
+      // this.getSurveyed(true);
+      // this.getIncomplete(true);
     }
   }
 
@@ -58,6 +56,10 @@ class Home extends React.Component {
       request_body.survey = this.props?.filters?.survey.value;
     }
 
+    if (this.props?.filters && this.props?.filters?.user) {
+      request_body.user = this.props?.filters?.user.value;
+    }
+
     return request_body;
   }
 
@@ -68,7 +70,7 @@ class Home extends React.Component {
 
     const options = {
       method: "POST",
-      url: ENDPOINT + "/answer/status",
+      url: ENDPOINT + "/answer/fetch",
       data: {
         status: "incomplete",
         ...this.returnFilters(),
@@ -80,12 +82,12 @@ class Home extends React.Component {
 
     axios(options)
       .then((res) => {
-        const total_incomplete = res.data.count;
-        this.setState({ total_incomplete, isLoadingStatus });
+        const total_incomplete = res.data.length;
+        this.setState({ total_incomplete, isLoadingStatus: false });
       })
       .catch((error) => {
         toastMessage("error", error);
-        this.setState({ isLoadingStatus });
+        this.setState({ isLoadingStatus: false });
       });
   }
 
@@ -106,11 +108,11 @@ class Home extends React.Component {
     axios(options)
       .then((res) => {
         const total_respondent = res.data.total;
-        this.setState({ total_respondent, isLoadingRespondent });
+        this.setState({ total_respondent, isLoadingRespondent: false });
       })
       .catch((error) => {
         toastMessage("error", error);
-        this.setState({ isLoadingRespondent });
+        this.setState({ isLoadingRespondent: false });
       });
   }
 
@@ -136,12 +138,14 @@ class Home extends React.Component {
       });
   }
 
-  getSurveys() {
+  getSurveys(isLoadingSurvey) {
     const { user } = this.state;
+
+    this.setState({ isLoadingSurvey });
 
     const options = {
       method: "POST",
-      url: ENDPOINT + "/survey/fetch",
+      url: ENDPOINT + "/answer/fetch",
       data: this.returnFilters(),
       headers: {
         authorization: "Bearer " + user.token,
@@ -150,21 +154,30 @@ class Home extends React.Component {
 
     axios(options)
       .then((res) => {
-        const total_survey = res.data.length;
-        this.setState({ total_survey });
+        const total_surveys = res.data.length;
+        this.setState({ total_surveys, isLoadingSurvey: false });
       })
       .catch((error) => {
         toastMessage("error", error);
+        this.setState({ isLoadingSurvey: false });
       });
   }
 
-  getQuestion() {
+  getQuestion(isLoadingQuestion) {
     const { user } = this.state;
+
+    this.setState({
+      isLoadingQuestion,
+    });
+
+    let request_body = this.returnFilters();
+
+    delete request_body.user;
 
     const options = {
       method: "POST",
       url: ENDPOINT + "/question/fetch",
-      data: this.returnFilters(),
+      data: request_body,
       headers: {
         authorization: "Bearer " + user.token,
       },
@@ -173,15 +186,20 @@ class Home extends React.Component {
     axios(options)
       .then((res) => {
         const total_question = res.data.length;
-        this.setState({ total_question });
+        this.setState({ total_question, isLoadingQuestion: false });
       })
       .catch((error) => {
         toastMessage("error", error);
+        this.setState({
+          isLoadingQuestion: false,
+        });
       });
   }
 
   getSurveyed() {
     const { user } = this.state;
+
+    this.setState({ isLoadingSurveyed: true });
 
     const options = {
       method: "GET",
@@ -193,14 +211,17 @@ class Home extends React.Component {
         authorization: "Bearer " + user.token,
       },
     };
+    console.log(options);
 
     axios(options)
       .then((res) => {
         const total_surveyed = res.data.length;
-        this.setState({ total_surveyed });
+        this.setState({ total_surveyed, isLoadingSurveyed: false });
       })
       .catch((error) => {
         toastMessage("error", error);
+
+        this.setState({ isLoadingSurveyed: false });
       });
   }
 
@@ -224,6 +245,19 @@ class Home extends React.Component {
           this.props.filters.organization &&
           this.props.filters.organization.value
             ? this.props.filters.organization.label
+            : ["All"],
+        clickBehaviorId: "dropdownMenuClickableInside",
+        autoCloseType: "outside",
+      });
+    }
+
+    if (this.props.user) {
+      list_filters.push({
+        name: "user",
+        isDropdown: true,
+        selected:
+          this.props.filters && this.props.filters.user
+            ? this.props.filters.user.label
             : ["All"],
         clickBehaviorId: "dropdownMenuClickableInside",
         autoCloseType: "outside",
@@ -260,21 +294,6 @@ class Home extends React.Component {
       });
     }
 
-    if (this.props.user_account) {
-      list_filters.push({
-        name: "user_account",
-        isDropdown: true,
-        selected:
-          this.props.filters &&
-          this.props.filters.users &&
-          this.props.filters.users.length > 0
-            ? this.props.filters.users
-            : ["All"],
-        clickBehaviorId: "dropdownMenuClickableInside",
-        autoCloseType: "outside",
-      });
-    }
-
     if (this.props.date) {
       list_filters.push({
         name: "date",
@@ -297,22 +316,39 @@ class Home extends React.Component {
             <div className="col-6 col-md-3">
               <CardCount
                 title="Total Respondent"
-                total={this.state.total_respondent}
+                total={
+                  this.state.isLoadingRespondent
+                    ? "..."
+                    : this.state.total_respondent
+                }
               />
             </div>
             <div className="col-6 col-md-3">
-              <CardCount title="Total Survey" total={this.state.total_survey} />
+              <CardCount
+                title="Total Survey"
+                total={
+                  this.state.isLoadingSurvey ? "..." : this.state.total_surveys
+                }
+              />
             </div>
             <div className="col-6 col-md-3">
               <CardCount
                 title="Total Questions"
-                total={this.state.total_question}
+                total={
+                  this.state.isLoadingQuestion
+                    ? "..."
+                    : this.state.total_question
+                }
               />
             </div>
             <div className="col-6 col-md-3">
               <CardCount
                 title="Incomplete Survey"
-                total={this.state.total_incomplete}
+                total={
+                  this.state.isLoadingStatus
+                    ? "..."
+                    : this.state.total_incomplete
+                }
               />
             </div>
           </div>

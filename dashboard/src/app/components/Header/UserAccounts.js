@@ -27,12 +27,28 @@ class Location extends React.Component {
     this.getAccounts(true);
   };
 
+  componentDidUpdate = async (prevProps) => {
+    if (prevProps.filters.organization !== this.props.filters.organization) {
+      this.getAccounts(true);
+    }
+  };
+
   getUserLoggedInInfo = async () => {
     const user = await getStorage();
     this.setState({
       user,
     });
   };
+
+  returnFilters() {
+    let request_body = {};
+
+    if (this.props?.filters && this.props?.filters?.organization) {
+      request_body.organization = this.props?.filters?.organization.value;
+    }
+
+    return request_body;
+  }
 
   getAccounts(isLoading) {
     const { user } = this.state;
@@ -41,25 +57,13 @@ class Location extends React.Component {
       isLoading,
     });
 
-    let url = "",
-      body = {};
-
-    if (user.account_type === "user_account") {
-      url = ENDPOINT + "/get_user_subaccount";
-
-      body.user_id = [user.id];
-      body.ref_account = [user.id];
-    }
-
-    if (user.account_type === "admin_account") {
-      url = ENDPOINT + "/get_user_account";
-    }
+    let url = ENDPOINT + "/user/fetch";
 
     const options = {
       method: "POST",
       url,
       data: {
-        ...body,
+        ...this.returnFilters(),
       },
       headers: {
         authorization: "Bearer " + user.token,
@@ -72,6 +76,8 @@ class Location extends React.Component {
           accounts: res.data,
           isLoading: false,
         });
+
+        copyAccounts = res.data.slice(0);
       })
       .catch((error) => {
         this.setState({
@@ -82,23 +88,11 @@ class Location extends React.Component {
       });
   }
 
-  handleCheck(location) {
-    let selected_account = this.state.selected_account;
-
-    let index = selected_account.indexOf(location);
-
-    if (index !== -1) {
-      selected_account.splice(index, 1);
-    } else {
-      selected_account.push(location);
-    }
-    this.setState(
-      {
-        selected_account,
-      },
-      () => {
-        this.props.dispatch(onFilter({ users: selected_account }));
-      }
+  handleCheck(item) {
+    this.props.dispatch(
+      onFilter({
+        user: { label: item.firstname + " " + item.lastname, value: item._id },
+      })
     );
   }
 
@@ -111,14 +105,15 @@ class Location extends React.Component {
 
     for (let i = 0; i < copyAccounts.length; i++) {
       if (
-        copyAccounts[i].toUpperCase().indexOf(search_text.toUpperCase()) !== -1
+        JSON.stringify(copyAccounts[i])
+          .toUpperCase()
+          .indexOf(search_text.toUpperCase()) !== -1
       ) {
         array.push(copyAccounts[i]);
       }
     }
-
     this.setState({
-      recent_location: array,
+      accounts: array,
     });
   }
 
@@ -152,27 +147,14 @@ class Location extends React.Component {
                   className="cdropdown-content"
                 >
                   <h1 className="separator-title">Accounts</h1>
-                  {/* {this.props.filters &&
-                    this.props.filters.locations &&
-                    this.props.filters.locations.length > 0 && (
-                      <a
-                        href="#"
-                        className="text-danger"
-                        onClick={this.onResetCheck.bind(this)}
-                      >
-                        <b>{`Clear (${this.props.filters.locations.length})`}</b>
-                      </a>
-                    )} */}
                 </div>
                 {this.state.accounts.map((item, i) => {
                   return (
                     <div className="cdropdown-item" key={i}>
                       <Checkbox
                         name={item.email}
-                        handleCheck={this.handleCheck.bind(this, item.email)}
-                        checked={this.state.selected_account.includes(
-                          item.email
-                        )}
+                        handleCheck={() => this.handleCheck(item)}
+                        checked={item._id === this.props?.filters?.user?.value}
                       />
                     </div>
                   );

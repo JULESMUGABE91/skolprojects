@@ -23,40 +23,12 @@ class Sidebar extends React.Component {
 
       this.handleAccessMenu(denied_menu);
     }
-
-    this.getNotificationCounts();
-
     document.addEventListener(
       "click",
       this.handleClickOutside.bind(this),
       true
     );
-  };
-
-  getNotificationCounts = async () => {
-    const user = await getStorage();
-
-    const options = {
-      method: "POST",
-      url: ENDPOINT + "/get_notification_count_info",
-
-      headers: {
-        authorization: "Bearer " + user.token,
-      },
-    };
-
-    axios(options)
-      .then((res) => {
-        this.props.dispatch(onAddCounts(res.data.data));
-
-        this.setState({
-          ...res.data.data,
-        });
-      })
-      .catch((error) => {
-        console.log(error.response);
-      });
-  };
+  }
 
   handleAccessMenu(denied_menu) {
     let group_menus = {};

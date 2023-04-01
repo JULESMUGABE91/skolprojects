@@ -5,15 +5,13 @@ import toastMessage from "../../utils/toastMessage";
 import Table from "../Table/Table";
 import "./styles.css";
 import { getStorage } from "../../utils/storage";
-import { onFilter } from "../../action/Filters";
 import { connect } from "react-redux";
-import formatSelectData from "../../utils/formatSelectData";
-import UpdateUser from "./UpdateUser";
 import { Modal } from "../Modal";
+import NewAdminEmail from "./NewAdminEmail";
 
 let copyData = [];
 
-class Users extends React.Component {
+class AdminEmail extends React.Component {
   state = {
     data: [],
     isLoading: true,
@@ -54,10 +52,10 @@ class Users extends React.Component {
       isLoading,
     });
 
-    let url = ENDPOINT + "/user/fetch";
+    let url = ENDPOINT + "/user/admin_email_info";
 
     const options = {
-      method: "POST",
+      method: "GET",
       url,
       data: this.returnFilters(),
       headers: {
@@ -150,47 +148,61 @@ class Users extends React.Component {
     });
   }
 
+  onDelete = async (selected_data) => {
+    if (window.confirm("Do you want to delete")) {
+      let { data, user } = this.state;
+
+      this.setState({
+        data,
+        isDeleting: true,
+      });
+
+      let url = ENDPOINT + "/user/admin_email_info";
+
+      const options = {
+        method: "DELETE",
+        url,
+        data: { id: selected_data._id },
+        headers: {
+          authorization: "Bearer " + user.token,
+        },
+      };
+
+      axios(options)
+        .then((res) => {
+          const index = data.indexOf(selected_data);
+
+          data.splice(index, 1);
+
+          this.setState({
+            isDeleting: false,
+          });
+
+          toastMessage("success", "DATA was deleted successful");
+        })
+        .catch((error) => {
+          this.setState({
+            isDeleting: false,
+          });
+
+          toastMessage("error", error);
+        });
+    }
+  };
+
   render() {
     let headers = [
-      {
-        title: "First Name",
-        key: "firstname",
-      },
-      {
-        title: "Last Name",
-        key: "lastname",
-      },
       {
         title: "Email Address",
         key: "email",
       },
       {
-        title: "Phone Number",
-        key: "phone",
+        title: "Organization",
+        key: "organization.name",
       },
       {
-        title: "Account Type",
-        key: "account_type",
-      },
-      {
-        title: "Province",
-        key: "province",
-      },
-      {
-        title: "District",
-        key: "district",
-      },
-      {
-        title: "Sector",
-        key: "sector",
-      },
-      {
-        title: "Cell",
-        key: "cell",
-      },
-      {
-        title: "Village",
-        key: "village",
+        title: "Action",
+        key: "action",
       },
     ];
 
@@ -204,8 +216,24 @@ class Users extends React.Component {
           isLoading={this.state.isLoading}
           headers={headers}
           rowPress={(item) => {
-            this.handleShowModal("showModal", "Account", item);
+            this.handleShowModal("showModal", "Add", item);
           }}
+          showAdd
+          addButtonText="Add Email"
+          handleAddPressed={(item) =>
+            this.handleShowModal("showModal", "Edit", item)
+          }
+          actions={[
+            {
+              name: "Edit",
+              onPress: (item) =>
+                this.handleShowModal("showModal", "Edit", item),
+            },
+            {
+              name: "Delete",
+              onPress: (item) => this.onDelete(item),
+            },
+          ]}
         />
         <Modal
           handleClose={this.handleCloseModal.bind(this, "showModal")}
@@ -213,7 +241,7 @@ class Users extends React.Component {
           title={this.state.modalTitle}
           showHeaderBottomBorder={false}
         >
-          <UpdateUser
+          <NewAdminEmail
             handleCloseModal={this.handleCloseModal.bind(this, "showModal")}
             getData={this.getData.bind(this)}
             {...this.state.selected_data}
@@ -231,4 +259,4 @@ const mapPropsToState = (state) => {
   };
 };
 
-export default connect(mapPropsToState)(Users);
+export default connect(mapPropsToState)(AdminEmail);
