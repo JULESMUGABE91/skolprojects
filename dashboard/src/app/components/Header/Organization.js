@@ -114,7 +114,7 @@ class Organization extends React.Component {
   }
 
   onResetCheck() {
-    this.props.dispatch(onFilter({ organization: [] }));
+    this.props.dispatch(onFilter({ organization: {} }));
 
     this.setState({
       selected_item: [],
@@ -148,13 +148,13 @@ class Organization extends React.Component {
                 <h1 className="separator-title">Organization</h1>
                 {this.props.filters &&
                   this.props.filters.organization &&
-                  this.props.filters.organization.length > 0 && (
+                  this.props.filters.organization.value && (
                     <a
                       href="#"
                       className="text-danger"
                       onClick={this.onResetCheck.bind(this)}
                     >
-                      <b>{`Clear (${this.props.filters.organization.length})`}</b>
+                      <b>{`Clear`}</b>
                     </a>
                   )}
               </div>

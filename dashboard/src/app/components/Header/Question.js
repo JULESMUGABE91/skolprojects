@@ -125,7 +125,7 @@ class Question extends React.Component {
   }
 
   onResetCheck() {
-    this.props.dispatch(onFilter({ question: [] }));
+    this.props.dispatch(onFilter({ question: {} }));
 
     this.setState({
       selected_item: [],

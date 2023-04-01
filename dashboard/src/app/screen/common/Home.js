@@ -29,19 +29,19 @@ class Home extends React.Component {
     await this.setState({ user });
 
     this.getRespondent(true);
-    // this.getSurveys(true);
-    // this.getQuestion(true);
-    // this.getSurveyed(true);
-    // this.getIncomplete(true);
+    this.getSurveys(true);
+    this.getQuestion(true);
+    this.getSurveyed(true);
+    this.getIncomplete(true);
   };
 
   componentDidUpdate(prevProps) {
     if (this.state.user.token && prevProps.filters !== this.props.filters) {
       this.getRespondent(true);
-      // this.getSurveys(true);
-      // this.getQuestion(true);
-      // this.getSurveyed(true);
-      // this.getIncomplete(true);
+      this.getSurveys(true);
+      this.getQuestion(true);
+      this.getSurveyed(true);
+      this.getIncomplete(true);
     }
   }
 

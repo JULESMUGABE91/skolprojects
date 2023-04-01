@@ -118,7 +118,7 @@ class Location extends React.Component {
   }
 
   onResetCheck() {
-    this.props.dispatch(onFilter({ locations: [] }));
+    this.props.dispatch(onFilter({ user: {} }));
 
     this.setState({ selected_account: [] });
   }
@@ -147,6 +147,17 @@ class Location extends React.Component {
                   className="cdropdown-content"
                 >
                   <h1 className="separator-title">Accounts</h1>
+                  {this.props.filters &&
+                    this.props.filters.user &&
+                    this.props.filters.user.value && (
+                      <a
+                        href="#"
+                        className="text-danger"
+                        onClick={this.onResetCheck.bind(this)}
+                      >
+                        <b>{`Clear`}</b>
+                      </a>
+                    )}
                 </div>
                 {this.state.accounts.map((item, i) => {
                   return (

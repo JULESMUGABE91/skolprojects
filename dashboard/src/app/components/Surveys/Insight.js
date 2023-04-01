@@ -41,6 +41,10 @@ class Insight extends React.Component {
       request_body.survey = this.props?.filters?.survey.value;
     }
 
+    if (this.props?.filters && this.props?.filters?.user) {
+      request_body.user = this.props?.filters?.user.value;
+    }
+
     return request_body;
   }
 
@@ -64,11 +68,13 @@ class Insight extends React.Component {
       },
     };
 
+    console.log(options)
+
     axios(options)
       .then((res) => {
         let data = res.data;
 
-        const chart_data = this.formatHorizontalBarChat(data);
+        const chart_data = this.formatHorizontalBarChart(data);
 
         this.setState({
           chart_data,
@@ -84,14 +90,13 @@ class Insight extends React.Component {
       });
   }
 
-  formatHorizontalBarChat(data) {
+  formatHorizontalBarChart(data) {
     let labels = Object.keys(data),
       res = [],
       dropdown_answers = [];
 
     for (let el of labels) {
-      let answers_data = [],
-        colors = [];
+      let answers_data = [];
 
       for (let answer of Object.keys(data[el])) {
         if (data[el][answer].type === "dropdown") {

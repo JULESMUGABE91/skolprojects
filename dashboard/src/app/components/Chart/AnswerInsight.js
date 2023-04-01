@@ -60,6 +60,10 @@ class AnswerInsight extends React.Component {
       request_body.question = this.props?.filters?.question.value;
     }
 
+    if (this.props?.filters && this.props?.filters?.user) {
+      request_body.user = this.props?.filters?.user.value;
+    }
+
     return request_body;
   }
 
@@ -98,6 +102,7 @@ class AnswerInsight extends React.Component {
         });
       })
       .catch((error) => {
+        console.log(error);
         toastMessage("error", error);
         this.setState({ isLoading: false });
       });

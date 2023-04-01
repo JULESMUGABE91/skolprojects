@@ -121,7 +121,7 @@ class Survey extends React.Component {
   }
 
   onResetCheck() {
-    this.props.dispatch(onFilter({ survey: [] }));
+    this.props.dispatch(onFilter({ survey: {} }));
 
     this.setState({
       selected_item: [],
@@ -156,7 +156,7 @@ class Survey extends React.Component {
                 <h1 className="separator-title">Surveys</h1>
                 {this.props.filters &&
                   this.props.filters.survey &&
-                  this.props.filters.survey && (
+                  this.props.filters.survey.value && (
                     <a
                       href="#"
                       className="text-danger"

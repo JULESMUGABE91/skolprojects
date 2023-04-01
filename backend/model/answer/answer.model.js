@@ -115,11 +115,15 @@ const findAnswer = async (params) => {
     filters.status = status;
   }
 
-  if (mode !== "testing") {
-    filters.user = {
-      $nin: testers,
-    };
-  }
+  // if (mode !== "testing") {
+  //   filters.user = {
+  //     $nin: testers,
+  //   };
+  // }
+
+  console.log("====================================");
+  console.log(params);
+  console.log("====================================");
 
   return await answerMongo
     .find(filters)
@@ -129,8 +133,8 @@ const findAnswer = async (params) => {
       path: "user",
       model: userMongo,
       select: { firstname: 1, lastname: 1 },
-    });
-  limit(100).sort(sort);
+    })
+    .sort(sort);
 };
 
 const findMySurvey = async (params) => {
@@ -220,6 +224,7 @@ const findAnswersFromDifferentLocation = async (params) => {
 };
 
 const findInsightAnswers = async (params) => {
+  console.log(params);
   const answers = await findAnswer({
     ...params,
     sort: "asc",

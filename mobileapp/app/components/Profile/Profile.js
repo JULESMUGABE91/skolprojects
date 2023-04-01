@@ -110,8 +110,8 @@ class Profile extends React.Component {
     const {user} = this.state;
 
     const options = {
-      method: 'GET',
-      url: `${ROOT_API}/user/survey?user=${user.user_id}`,
+      method: 'POST',
+      url: `${ROOT_API}/answer/respondent`,
       headers: {
         authorization: `Bearer ${user.token}`,
       },
@@ -119,7 +119,7 @@ class Profile extends React.Component {
     axios(options)
       .then(data => {
         if (data.data.length > 0) {
-          return this.setState({survey: data.data.length});
+          return this.setState({survey: data.data.total});
         }
         this.setState({isLoading: false, survey: 0});
       })
