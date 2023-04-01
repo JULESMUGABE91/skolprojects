@@ -13,7 +13,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {connect} from 'react-redux';
 import LocalStorage from '../../utils/storage';
 import {Button} from '../Button';
-import {APP_ID, ROOT_API} from '../../constants/strings';
+import {APP_ID, GOOGLE_API, ROOT_API} from '../../constants/strings';
 import axios from 'axios';
 import {VirtualizedList} from '../VirtualizedList';
 import {Loading} from '../Loading';
@@ -27,6 +27,8 @@ import Dropdown from './Modal/Dropdown';
 import uuid4 from '../../utils/uuid4';
 import {Introduction} from '../Introduction';
 import {checkboxes, dropdown, inputs} from '../../constants/input_options';
+import Geolocation from 'react-native-geolocation-service';
+import Geocoder from 'react-native-geocoding';
 
 const {height} = Dimensions.get('screen');
 class SurveyPreview extends React.Component {
@@ -44,6 +46,8 @@ class SurveyPreview extends React.Component {
 
   componentDidMount = async () => {
     const user = await new LocalStorage().get();
+
+    this.updateLocation();
 
     this.setState({user, survey: this.props.params.data}, () => {
       this.getData();
@@ -64,6 +68,45 @@ class SurveyPreview extends React.Component {
     if (this.state.current_question_index === 0) {
       this.setState({start_interview: new Date().getTime()});
     }
+  };
+
+  updateLocation = () => {
+    Geocoder.init(GOOGLE_API);
+
+    Geolocation.getCurrentPosition(
+      async position => {
+        let latitude = position.coords.latitude;
+        let longitude = position.coords.longitude;
+
+        const geocode_address = await Geocoder.from({
+          latitude,
+          longitude,
+        });
+
+        let address = '';
+
+        if (
+          geocode_address?.results?.length > 0 &&
+          geocode_address?.results[0]?.formatted_address
+        ) {
+          address = geocode_address?.results[0]?.formatted_address;
+        }
+
+        this.props.dispatch(
+          onSetLocation({
+            name: address,
+            latitude,
+            longitude,
+          }),
+        );
+      },
+      error => {
+        // See error code charts below.
+        this.setState({isSubmitting: false});
+        toastMessage('Check your internet and try again');
+      },
+      {enableHighAccuracy: false, timeout: 25000, maximumAge: 3600000},
+    );
   };
 
   getData = async () => {
@@ -290,7 +333,7 @@ class SurveyPreview extends React.Component {
   }
 
   formattedSurvey(questions) {
-    const {survey} = this.state;
+    const {survey, start_interview} = this.state;
     const {my_location} = this.props;
 
     let formatted = [];
@@ -312,6 +355,8 @@ class SurveyPreview extends React.Component {
             coordinates: [my_location.latitude, my_location.longitude],
             address: my_location.name,
           },
+          start_interview,
+          end_interview: new Date().getTime(),
         });
       }
     }
@@ -407,6 +452,8 @@ class SurveyPreview extends React.Component {
       this.setState({
         isSubmitting: false,
       });
+
+      this.updateLocation();
 
       this.props.navigation.navigate('Success', data.data);
     } catch (error) {
@@ -514,11 +561,13 @@ class SurveyPreview extends React.Component {
         },
       };
 
-      const data = await axios(options);
+      await axios(options);
 
       this.setState({
         isCancelling: false,
       });
+
+      this.updateLocation();
 
       this.props.navigation.goBack();
     } catch (error) {

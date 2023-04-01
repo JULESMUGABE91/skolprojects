@@ -55,9 +55,9 @@ class Profile extends React.Component {
     this.setState(
       {
         user,
-        link: `${URL}/invite?org=${APP_ID}&uid=${user._id}&ref=${generateOTP(
-          4,
-        )}`,
+        link: `${URL}/api/invite?org=${APP_ID}&uid=${
+          user._id
+        }&ref=${generateOTP(4)}`,
       },
       () => {
         this.getRewards(true);
