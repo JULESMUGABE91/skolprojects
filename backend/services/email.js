@@ -77,4 +77,43 @@ const sendEmail = async (params) => {
   }
 };
 
-module.exports = { sendEmail };
+const sendEmailWithAttachment = async (params) => {
+  const { to, subject, message, file } = params;
+
+  const fileName = path.basename(file);
+
+  try {
+    let transporter = send(process.env.EMAIL_FROM, subject, message, to);
+
+    let mailOptions = {
+      from: process.env.EMAIL_FROM,
+      to,
+      subject,
+      html: message,
+      attachments: [
+        {
+          filename: fileName,
+          path: file,
+        },
+      ],
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        return {
+          status: "failed",
+          error,
+        };
+      }
+      return {
+        status: "success",
+        error: null,
+        message: "Email successfully sent!",
+      };
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+module.exports = { sendEmail, sendEmailWithAttachment };

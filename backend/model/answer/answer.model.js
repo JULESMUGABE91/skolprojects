@@ -5,6 +5,7 @@ const { createReward, findReward } = require("../reward/reward.model");
 const surveyMongo = require("../survey/survey.mongo");
 const userMongo = require("../users/user.mongo");
 const answerMongo = require("./answer.mongo");
+const testers = require("../../constant/testers");
 
 const createAnswer = async (params) => {
   delete params._id;
@@ -65,7 +66,9 @@ const findAnswer = async (params) => {
     questions,
     status,
     identifier,
+    mode,
   } = params;
+
   let filters = {};
 
   if (id) {
@@ -113,8 +116,15 @@ const findAnswer = async (params) => {
     filters.status = status;
   }
 
+  if (!mode || mode !== "testing") {
+    filters.user = {
+      $nin: testers,
+    };
+  }
+
   return await answerMongo
     .find(filters)
+    .populate({ path: "survey", model: surveyMongo })
     .populate({ path: "question", model: questionMongo })
     .populate({
       path: "user",
@@ -448,9 +458,7 @@ const fetchRespondentsByAgeGroup = async (params) => {
 };
 
 const fetchByStatus = async (params) => {
-  let { survey, organization, status } = params;
-
-  const answersData = await findAnswer({ survey, organization, status });
+  const answersData = await findAnswer(params);
 
   return { count: answersData.length };
 };

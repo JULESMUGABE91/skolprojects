@@ -1,198 +1,143 @@
 var PdfPrinter = require("pdfmake");
-var PdfFonts = require("pdfmake/build/vfs_fonts");
-
+const path = require("path");
+const { findAnswer } = require("../../model/answer/answer.model");
+const { findSurveyById } = require("../../model/survey/survey.model");
+const moment = require("moment");
 var fonts = {
-  defaultStyle: {
-    font: "Helvetica",
+  Roboto: {
+    normal: path.join(__dirname, "..", "pdf", "/fonts/Roboto-Regular.ttf"),
+    bold: path.join(__dirname, "..", "pdf", "/fonts/Roboto-Medium.ttf"),
+    italics: path.join(__dirname, "..", "pdf", "/fonts/Roboto-Italic.ttf"),
+    bolditalics: path.join(
+      __dirname,
+      "..",
+      "pdf",
+      "/fonts/Roboto-MediumItalic.ttf"
+    ),
   },
 };
 
 var printer = new PdfPrinter(fonts);
 var fs = require("fs");
+const { inputs } = require("../../constant/string");
 
-const generatePDFReport = (params) => {
-  // json with invoice layout
-  var docDefinition = {
-    content: [
-      {
-        fontSize: 11,
-        table: {
-          widths: ["50%", "50%"],
-          body: [
-            [
-              {
-                text: "Status: unpaid",
-                border: [false, false, false, true],
-                margin: [-5, 0, 0, 10],
-              },
-              {
-                text: "Invoice# test 1 ",
-                alignment: "right",
-                border: [false, false, false, true],
-                margin: [0, 0, 0, 10],
-              },
-            ],
-          ],
-        },
+const formatAnswer = (answers) => {
+  let table_body = [["#", "Answer"]];
+
+  for (let [i, answer] of answers.entries()) {
+    if (answer.type === "dropdown" && answer.selection) {
+      for (let [s, item] of answer?.selection?.entries() || []) {
+        table_body.push([s + 1, item.value]);
+      }
+    } else {
+      table_body.push([
+        i + 1,
+        inputs.includes(answer.type)
+          ? answer?.value || ""
+          : answer?.option || "",
+      ]);
+    }
+  }
+
+  return table_body;
+};
+
+const generateAnswerPDFReport = async (params) => {
+  const { identifier, survey } = params;
+  const answers = await findAnswer({ ...params, sort: "asc" });
+  const surveyInfo = await findSurveyById(survey);
+
+  let started_location = "",
+    end_location = "",
+    started_date = "",
+    end_date = "";
+
+  let docDefinition = {
+    content: [{ text: surveyInfo.title, style: "header" }],
+    styles: {
+      header: {
+        fontSize: 14,
+        bold: true,
+        margin: [0, 0, 0, 10],
       },
-      {
-        layout: "noBorders",
-        fontSize: 11,
-        table: {
-          widths: ["50%", "50%"],
-          body: [
-            [
-              { text: "Website.com", margin: [0, 10, 0, 0] },
-              {
-                text: "Invoice date: 3",
-                alignment: "right",
-                margin: [0, 10, 0, 0],
-              },
-            ],
-            ["...", ""],
-            ["...", ""],
-            ["...", ""],
-          ],
-        },
+      subheader: {
+        fontSize: 13,
+        bold: true,
+        margin: [0, 10, 0, 5],
       },
-      {
-        fontSize: 11,
-        table: {
-          widths: ["50%", "50%"],
-          body: [
-            [
-              {
-                text: " ",
-                border: [false, false, false, true],
-                margin: [0, 0, 0, 10],
-              },
-              {
-                text: "Payment amount: $zxzxzxzxzxz",
-                alignment: "right",
-                border: [false, false, false, true],
-                margin: [0, 0, 0, 10],
-              },
-            ],
-          ],
-        },
+      tableExample: {
+        margin: [0, 5, 0, 15],
       },
-      {
-        layout: "noBorders",
-        fontSize: 11,
-        table: {
-          widths: ["100%"],
-          body: [
-            [{ text: "User account for payment:", margin: [0, 10, 0, 0] }],
-            ["testssdsgdsd"],
-            ["test"],
-            ["Payment link:"],
-            [
-              {
-                text:
-                  "https://website.com/shopcart/invoices_view.php?hash=" +
-                  "data.hash",
-                margin: [0, 0, 0, 10],
-                fontSize: 10,
-              },
-            ],
-          ],
-        },
+      tableHeader: {
+        bold: true,
+        fontSize: 10,
+        color: "black",
       },
-      {
-        fontSize: 11,
-        table: {
-          widths: ["5%", "56%", "13%", "13%", "13%"],
-          body: [
-            [
-              { text: "Pos", border: [false, true, false, true] },
-              { text: "Item", border: [false, true, false, true] },
-              { text: "Price", border: [false, true, false, true] },
-              {
-                text: "Quantity",
-                alignment: "center",
-                border: [false, true, false, true],
-              },
-              { text: "Total", border: [false, true, false, true] },
-            ],
-            [
-              { text: "1", border: [false, true, false, true] },
-              { text: "data.item", border: [false, true, false, true] },
-              { text: "$" + "data.price", border: [false, true, false, true] },
-              {
-                text: "1",
-                alignment: "center",
-                border: [false, true, false, true],
-              },
-              { text: "$" + "data.price", border: [false, true, false, true] },
-            ],
-          ],
-        },
+      quote: {
+        italics: true,
       },
-      {
-        layout: "noBorders",
-        fontSize: 11,
-        margin: [0, 0, 5, 0],
-        table: {
-          widths: ["88%", "12%"],
-          body: [
-            [
-              { text: "Subtotal:", alignment: "right", margin: [0, 5, 0, 0] },
-              { text: "$" + " data.price", margin: [0, 5, 0, 0] },
-            ],
-            [{ text: "Tax %:", alignment: "right" }, "$0.00"],
-          ],
-        },
+      small: {
+        fontSize: 8,
       },
-      {
-        fontSize: 11,
-        table: {
-          widths: ["88%", "12%"],
-          body: [
-            [
-              {
-                text: "Total:",
-                alignment: "right",
-                border: [false, false, false, true],
-                margin: [0, 0, 0, 10],
-              },
-              {
-                text: "$" + "data.price",
-                border: [false, false, false, true],
-                margin: [0, 0, 0, 10],
-              },
-            ],
-          ],
-        },
-      },
-      {
-        layout: "noBorders",
-        fontSize: 11,
-        alignment: "center",
-        table: {
-          widths: ["100%"],
-          body: [
-            [{ text: "Wire transfer info:", margin: [0, 10, 0, 0] }],
-            ["SWIFT: ..."],
-            ["Account number: ..."],
-            ["Company name: ..."],
-            [" "],
-            ["Company address:"],
-            ["..."],
-          ],
-        },
-      },
-    ],
+    },
+    defaultStyle: {
+      // alignment: 'justify'
+    },
   };
+
+  for (let answer of answers) {
+    let answer_table = formatAnswer(answer.answers);
+
+    started_location = answer?.start_location?.address || "unknown";
+    end_location = answer?.end_location?.address || "unknown";
+    started_date = answer?.start_interview
+      ? moment(answer?.start_interview).format("lll")
+      : "-";
+    end_date = answer?.end_interview
+      ? moment(answer?.end_interview).format("lll")
+      : "-";
+
+    docDefinition.content.push(
+      {
+        text: answer.question.position + ". " + answer.question.question,
+        style: "subheader",
+      },
+      "",
+      {
+        style: "tableExample",
+        table: {
+          widths: [100, 300],
+          body: answer_table,
+        },
+      }
+    );
+  }
+
+  docDefinition.content.push({
+    text: "Date: " + started_date + "   -   " + end_date + "\n\n",
+    style: ["quote", "small"],
+  });
+
+  docDefinition.content.push({
+    text: "Location: " + started_location + "  -  " + end_location + "\n\n",
+    style: ["quote", "small"],
+  });
+
   var options = {};
 
-  // create invoice and save it to invoices_pdf folder
   var pdfDoc = printer.createPdfKitDocument(docDefinition, options);
-  pdfDoc.pipe(
-    fs.createWriteStream(path.join(__dirname, "../../reports/pdf/pdf1.pdf"))
+
+  let file_path = path.join(
+    __dirname,
+    "../../reports/pdf/New Survey" + identifier + ".pdf"
   );
+
+  pdfDoc.pipe(fs.createWriteStream(file_path));
   pdfDoc.end();
+
+  return file_path;
 };
 
 module.exports = {
-  generatePDFReport,
+  generateAnswerPDFReport,
 };

@@ -12,7 +12,7 @@ app.post("/answer/add/bulk", protect, (req, res) => {
   answer.addBulkInfo(req, res);
 });
 
-app.post("/answer/http", protect, (req, res) => {
+app.post("/answer/fetch", protect, (req, res) => {
   answer.httpFetchInfo(req, res);
 });
 
