@@ -81,7 +81,10 @@ const addBulkInfo = async (req, res) => {
       ...req.body,
     });
 
-    await httpAnswerPDFReport(common);
+    await httpAnswerPDFReport({
+      ...common,
+      channel: ["email"],
+    });
 
     res.status(200).json(answerInfo);
   } catch (error) {
