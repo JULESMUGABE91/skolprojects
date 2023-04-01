@@ -116,9 +116,6 @@ const httpFetchInfo = async (req, res) => {
 
     res.status(200).json(answerInfo);
   } catch (error) {
-    console.log("====================================");
-    console.log(error);
-    console.log("====================================");
     res.status(400).json(error.stack);
   }
 };

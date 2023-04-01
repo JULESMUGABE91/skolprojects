@@ -68,7 +68,6 @@ const findAnswer = async (params) => {
     identifier,
     mode,
   } = params;
-
   let filters = {};
 
   if (id) {
@@ -116,7 +115,7 @@ const findAnswer = async (params) => {
     filters.status = status;
   }
 
-  if (!mode || mode !== "testing") {
+  if (mode !== "testing") {
     filters.user = {
       $nin: testers,
     };
@@ -130,8 +129,8 @@ const findAnswer = async (params) => {
       path: "user",
       model: userMongo,
       select: { firstname: 1, lastname: 1 },
-    })
-    .sort(sort);
+    });
+  limit(100).sort(sort);
 };
 
 const findMySurvey = async (params) => {
