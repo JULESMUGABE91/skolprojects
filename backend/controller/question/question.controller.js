@@ -57,7 +57,6 @@ const updateInfo = async (req, res) => {
 
 const deleteInfo = async (req, res) => {
   const { id } = req.body;
-  console.log({ id });
 
   try {
     const questionInfo = await findAndDeleteQuestion(id);

@@ -113,9 +113,6 @@ const findAnswer = async (params = {}) => {
     filters.status = status;
   }
 
-  console.log("====================================");
-  console.log(filters);
-  console.log("====================================");
 
   return await answerMongo
     .find(filters)
@@ -138,6 +135,13 @@ const findMySurvey = async (params) => {
 
   if (user) {
     filters.user = user;
+  }
+
+  if (start_date && end_date) {
+    filters.createdAt = {
+      $gte: new Date(start_date),
+      $lt: new Date(end_date),
+    };
   }
 
   const answers = await answerMongo
@@ -216,6 +220,9 @@ const findAnswersFromDifferentLocation = async (params) => {
 };
 
 const findInsightAnswers = async (params) => {
+  console.log("====================================");
+  console.log({ params });
+  console.log("====================================");
   console.log(params);
   const answers = await findAnswer({
     ...params,
@@ -339,9 +346,7 @@ const getKey = (common, option) => {
 };
 
 const fetchRespondentsByGender = async (params) => {
-  let { survey, organization } = params;
-
-  const answersData = await findAnswer({ survey, organization });
+  const answersData = await findAnswer(params);
 
   let groupGender = {},
     total_respondent = await fetchRespondents(params);
@@ -374,9 +379,7 @@ const fetchRespondentsByGender = async (params) => {
 };
 
 const fetchRespondentsByRegion = async (params) => {
-  let { survey, organization } = params;
-
-  const answersData = await findAnswer({ survey, organization });
+  const answersData = await findAnswer(params);
 
   let groupRegion = {},
     total_respondent = await fetchRespondents(params);
@@ -415,9 +418,7 @@ const fetchRespondentsByRegion = async (params) => {
 };
 
 const fetchRespondentsByAgeGroup = async (params) => {
-  let { survey, organization } = params;
-
-  const answersData = await findAnswer({ survey, organization });
+  const answersData = await findAnswer(params);
 
   let groupAgeGroup = {},
     total_respondent = await fetchRespondents(params);
@@ -460,7 +461,7 @@ const fetchByStatus = async (params) => {
 };
 
 const fetchAndGroupByUser = async (params) => {
-  let { survey, organization, user } = params;
+  let { survey, organization, user, start_date, end_date } = params;
 
   let match = {};
 
@@ -476,9 +477,21 @@ const fetchAndGroupByUser = async (params) => {
     match.user = mongoose.Types.ObjectId(user);
   }
 
+  if (start_date && end_date) {
+    match.createdAt = {
+      $gte: new Date(start_date),
+      $lt: new Date(end_date),
+    };
+  }
+
   const answersData = await answerMongo.aggregate([
     { $match: { ...match } },
-    { $group: { _id: "$identifier", doc: { $first: "$$ROOT" } } },
+    {
+      $group: {
+        _id: { identifier: "$identifier", user: "$user" },
+        doc: { $first: "$$ROOT" },
+      },
+    },
     { $replaceRoot: { newRoot: "$doc" } },
   ]);
 
