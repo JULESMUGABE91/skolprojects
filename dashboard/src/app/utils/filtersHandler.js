@@ -27,11 +27,7 @@ export default (filters) => {
   if (filters && filters?.end_date) {
     let end_date = filters?.end_date;
 
-
-    request_body.end_date = moment(end_date)
-      .add("d", 1)
-      .startOf("day")
-      .format();
+    request_body.end_date = moment(end_date).add("d", 1).format();
   }
 
   return request_body;
