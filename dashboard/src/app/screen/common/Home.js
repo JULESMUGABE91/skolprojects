@@ -128,7 +128,7 @@ class Home extends React.Component {
 
     const options = {
       method: "POST",
-      url: ENDPOINT + "/answer/fetch",
+      url: ENDPOINT + "/survey/fetch",
       data: filtersHandler(this.props.filters),
       headers: {
         authorization: "Bearer " + user.token,
@@ -298,7 +298,7 @@ class Home extends React.Component {
           <div className="row">
             <div className="col-6 col-md-3">
               <CardCount
-                title="Total Respondent"
+                title="Total Number of People Interviewed"
                 total={
                   this.state.isLoadingRespondent
                     ? "..."
@@ -308,7 +308,7 @@ class Home extends React.Component {
             </div>
             <div className="col-6 col-md-3">
               <CardCount
-                title="Total Survey"
+                title="Total Surveys"
                 total={
                   this.state.isLoadingSurvey ? "..." : this.state.total_surveys
                 }
@@ -326,7 +326,7 @@ class Home extends React.Component {
             </div>
             <div className="col-6 col-md-3">
               <CardCount
-                title="Incomplete Survey"
+                title="Incomplete Questionnaires"
                 total={
                   this.state.isLoadingStatus
                     ? "..."
