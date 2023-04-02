@@ -8,6 +8,7 @@ import { Header } from "../../components/Header";
 import { ENDPOINT } from "../../constants/api";
 import { getStorage } from "../../utils/storage";
 import toastMessage from "../../utils/toastMessage";
+import filtersHandler from "../../utils/filtersHandler";
 
 class Home extends React.Component {
   state = {
@@ -45,24 +46,6 @@ class Home extends React.Component {
     }
   }
 
-  returnFilters() {
-    let request_body = {};
-
-    if (this.props?.filters && this.props?.filters?.organization) {
-      request_body.organization = this.props?.filters?.organization.value;
-    }
-
-    if (this.props?.filters && this.props?.filters?.survey) {
-      request_body.survey = this.props?.filters?.survey.value;
-    }
-
-    if (this.props?.filters && this.props?.filters?.user) {
-      request_body.user = this.props?.filters?.user.value;
-    }
-
-    return request_body;
-  }
-
   getIncomplete(isLoadingStatus) {
     const { user } = this.state;
 
@@ -73,7 +56,7 @@ class Home extends React.Component {
       url: ENDPOINT + "/answer/fetch",
       data: {
         status: "incomplete",
-        ...this.returnFilters(),
+        ...filtersHandler(this.props.filters),
       },
       headers: {
         authorization: "Bearer " + user.token,
@@ -99,7 +82,7 @@ class Home extends React.Component {
     const options = {
       method: "POST",
       url: ENDPOINT + "/answer/respondent",
-      data: this.returnFilters(),
+      data: filtersHandler(this.props.filters),
       headers: {
         authorization: "Bearer " + user.token,
       },
@@ -122,7 +105,7 @@ class Home extends React.Component {
     const options = {
       method: "POST",
       url: ENDPOINT + "/user/fetch",
-      data: this.returnFilters(),
+      data: filtersHandler(this.props.filters),
       headers: {
         authorization: "Bearer " + user.token,
       },
@@ -146,7 +129,7 @@ class Home extends React.Component {
     const options = {
       method: "POST",
       url: ENDPOINT + "/answer/fetch",
-      data: this.returnFilters(),
+      data: filtersHandler(this.props.filters),
       headers: {
         authorization: "Bearer " + user.token,
       },
@@ -170,7 +153,7 @@ class Home extends React.Component {
       isLoadingQuestion,
     });
 
-    let request_body = this.returnFilters();
+    let request_body = filtersHandler(this.props.filters);
 
     delete request_body.user;
 
@@ -205,7 +188,7 @@ class Home extends React.Component {
       method: "GET",
       url: ENDPOINT + "/user/survey",
       params: {
-        ...this.returnFilters(),
+        ...filtersHandler(this.props.filters),
       },
       headers: {
         authorization: "Bearer " + user.token,

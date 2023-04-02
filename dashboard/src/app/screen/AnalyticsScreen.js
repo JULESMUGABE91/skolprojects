@@ -7,7 +7,7 @@ class AnalyticScreen extends React.Component {
   render() {
     return (
       <div>
-        <Home isCountCard organization survey />
+        <Home isCountCard organization survey date user />
         <div style={{ position: "relative", marginTop: "1rem" }}>
           <div className="row">
             <div className="col-md-6">

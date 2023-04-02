@@ -9,7 +9,7 @@ import toastMessage from "../../utils/toastMessage";
 
 class DateRange extends React.Component {
   state = {
-    fromDate: moment().subtract(30, "d").format("YYYY-MM-DD"),
+    fromDate: moment("2023-04-01").format("YYYY-MM-DD"),
     toDate: moment().add(1, "d").format("YYYY-MM-DD"),
     error: {},
   };

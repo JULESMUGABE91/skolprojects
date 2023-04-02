@@ -8,6 +8,7 @@ import toastMessage from "../../utils/toastMessage";
 import { connect } from "react-redux";
 import { LoadingSpinner } from "../LoadingSpinner";
 import { colors } from "../../constants/strings";
+import filtersHandler from "../../utils/filtersHandler";
 
 const options = {
   maintainAspectRatio: false,
@@ -49,20 +50,6 @@ class PerAgeGroup extends React.Component {
     });
   };
 
-  returnFilters() {
-    let request_body = {};
-
-    if (this.props?.filters && this.props?.filters?.organization) {
-      request_body.organization = this.props?.filters?.organization.value;
-    }
-
-    if (this.props?.filters && this.props?.filters?.survey) {
-      request_body.survey = this.props?.filters?.survey.value;
-    }
-
-    return request_body;
-  }
-
   getData(isLoading) {
     const { user } = this.state;
     this.setState({
@@ -72,7 +59,7 @@ class PerAgeGroup extends React.Component {
     const options = {
       method: "POST",
       url: ENDPOINT + "/answer/respondent/age_group",
-      data: this.returnFilters(),
+      data: filtersHandler(this.props.filters),
       headers: {
         authorization: "Bearer " + user.token,
       },

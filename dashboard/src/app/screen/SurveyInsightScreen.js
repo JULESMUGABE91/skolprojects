@@ -141,7 +141,6 @@ class SurveyInsightScreen extends React.Component {
 
     axios(options)
       .then((res) => {
-        console.log(res.data);
         const total_surveyed = res.data.length;
         this.setState({ total_surveyed });
       })
@@ -157,7 +156,7 @@ class SurveyInsightScreen extends React.Component {
   render() {
     return (
       <div>
-        <Home organization survey />
+        <Home organization survey date />
         <div className="row">
           <div
             className="col-6 col-md-4"

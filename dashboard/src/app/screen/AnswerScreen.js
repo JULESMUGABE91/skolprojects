@@ -6,7 +6,7 @@ class AnswerScreen extends React.Component {
   render() {
     return (
       <div>
-        <Home organization survey question user />
+        <Home organization survey question user date />
         <AnswerInsight />
       </div>
     );

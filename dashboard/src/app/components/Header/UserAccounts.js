@@ -160,10 +160,22 @@ class Location extends React.Component {
                     )}
                 </div>
                 {this.state.accounts.map((item, i) => {
+                  let name = "";
+
+                  if (item.firstname) {
+                    name =
+                      item.firstname +
+                      " " +
+                      item.lastname +
+                      " " +
+                      (item.email || item.phone);
+                  } else {
+                    name = item.email || item.phone;
+                  }
                   return (
                     <div className="cdropdown-item" key={i}>
                       <Checkbox
-                        name={item.email}
+                        name={name}
                         handleCheck={() => this.handleCheck(item)}
                         checked={item._id === this.props?.filters?.user?.value}
                       />

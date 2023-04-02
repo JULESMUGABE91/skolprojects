@@ -6,6 +6,7 @@ import socket from "../utils/socketIO";
 import { ENDPOINT } from "../constants/api";
 import axios from "axios";
 import { connect } from "react-redux";
+import filtersHandler from "../utils/filtersHandler";
 
 class LiveMapScreen extends React.Component {
   state = {
@@ -36,31 +37,13 @@ class LiveMapScreen extends React.Component {
     });
   };
 
-  returnFilters() {
-    let request_body = {};
-
-    if (this.props?.filters && this.props?.filters?.organization) {
-      request_body.organization = this.props?.filters?.organization.value;
-    }
-
-    if (this.props?.filters && this.props?.filters?.survey) {
-      request_body.survey = this.props?.filters?.survey.value;
-    }
-
-    if (this.props?.filters && this.props?.filters?.user) {
-      request_body.user = this.props?.filters?.user.value;
-    }
-
-    return request_body;
-  }
-
   getData(isLoading) {
     const { user } = this.state;
     this.setState({
       isLoading,
     });
 
-    let request_body = this.returnFilters();
+    let request_body = filtersHandler(this.props.filters);
 
     const options = {
       method: "POST",
@@ -70,6 +53,8 @@ class LiveMapScreen extends React.Component {
         authorization: "Bearer " + user.token,
       },
     };
+
+    console.log(options);
 
     axios(options)
       .then((res) => {
@@ -108,7 +93,7 @@ class LiveMapScreen extends React.Component {
 
     return (
       <div>
-        <Home isCountCard organization survey user />
+        <Home isCountCard organization survey user date />
         <div style={{ position: "relative", marginTop: "1rem" }}>
           <Map
             isLoading={this.state.isLoading}
