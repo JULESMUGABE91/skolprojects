@@ -45,7 +45,7 @@ class SurveyItem extends React.Component {
       url: `${ROOT_API}/answer/fetch`,
       data: {
         survey: this.props._id,
-        // user: this.state.user.user_id,
+        user: this.state.user.user_id,
       },
       headers: {
         authorization: `Bearer ${user.token}`,

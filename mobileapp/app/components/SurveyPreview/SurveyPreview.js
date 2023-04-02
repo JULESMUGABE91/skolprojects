@@ -29,6 +29,7 @@ import {Introduction} from '../Introduction';
 import {checkboxes, dropdown, inputs} from '../../constants/input_options';
 import Geolocation from 'react-native-geolocation-service';
 import Geocoder from 'react-native-geocoding';
+import {onSetLocation} from '../../actions/MyLocation';
 
 const {height} = Dimensions.get('screen');
 class SurveyPreview extends React.Component {
@@ -49,7 +50,9 @@ class SurveyPreview extends React.Component {
 
     this.updateLocation();
 
-    this.setState({user, survey: this.props.params.data}, () => {
+    const identifier = this.props.params.data._id + '__' + uuid4();
+
+    this.setState({user, survey: this.props.params.data, identifier}, () => {
       this.getData();
 
       //for surveyor
@@ -411,9 +414,7 @@ class SurveyPreview extends React.Component {
 
       this.setState({isSubmitting: true});
 
-      const {user, survey, questions, start_interview} = this.state;
-
-      const identifier = survey._id + '__' + uuid4();
+      const {user, survey, questions, start_interview, identifier} = this.state;
 
       const completed_format = this.formattedSurvey(questions);
 
@@ -546,13 +547,11 @@ class SurveyPreview extends React.Component {
     try {
       this.setState({isCancelling: true});
 
-      let {current_question_index, survey, user} = this.state;
+      let {current_question_index, survey, user, identifier} = this.state;
 
       const q = this.remainingQuestion(current_question_index);
 
       let last_question = q[current_question_index]?._id || undefined;
-
-      const identifier = survey._id + '__' + uuid4();
 
       const completed_format = this.formattedSurvey(q);
 
