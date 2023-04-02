@@ -132,6 +132,10 @@ class NewAdminEmail extends React.Component {
       error.organization = "Organization is required";
     }
 
+    console.log('====================================');
+    console.log(organization);
+    console.log('====================================');
+
     this.setState({
       error,
     });
@@ -151,6 +155,10 @@ class NewAdminEmail extends React.Component {
         email,
         organization: organization.value,
       };
+
+      console.log('====================================');
+      console.log(data);
+      console.log('====================================');
 
       let url = ENDPOINT + "/user/admin_email_info",
         method = "POST";

@@ -5,7 +5,6 @@ const { createReward, findReward } = require("../reward/reward.model");
 const surveyMongo = require("../survey/survey.mongo");
 const userMongo = require("../users/user.mongo");
 const answerMongo = require("./answer.mongo");
-const testers = require("../../constant/testers");
 
 const createAnswer = async (params) => {
   delete params._id;
@@ -53,7 +52,7 @@ const findAndDeleteAnswer = async (_id) => {
   return await answerMongo.findByIdAndDelete({ _id });
 };
 
-const findAnswer = async (params) => {
+const findAnswer = async (params = {}) => {
   let {
     id,
     question,
@@ -66,7 +65,6 @@ const findAnswer = async (params) => {
     questions,
     status,
     identifier,
-    mode,
   } = params;
   let filters = {};
 
@@ -83,7 +81,7 @@ const findAnswer = async (params) => {
   }
 
   if (user) {
-    filters.user = user;
+    filters.user = mongoose.Types.ObjectId(user);
   }
 
   if (identifier) {
@@ -115,14 +113,8 @@ const findAnswer = async (params) => {
     filters.status = status;
   }
 
-  // if (mode !== "testing") {
-  //   filters.user = {
-  //     $nin: testers,
-  //   };
-  // }
-
   console.log("====================================");
-  console.log(params);
+  console.log(filters);
   console.log("====================================");
 
   return await answerMongo

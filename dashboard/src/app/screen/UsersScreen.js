@@ -23,7 +23,7 @@ class UsersScreen extends React.Component {
                 data: this.renderUsers(),
               },
               {
-                title: "Admin Emails",
+                title: "Report Account",
                 data: this.renderAdminEmail(),
               },
             ]}
