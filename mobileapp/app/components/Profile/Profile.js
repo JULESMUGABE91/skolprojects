@@ -112,6 +112,9 @@ class Profile extends React.Component {
     const options = {
       method: 'POST',
       url: `${ROOT_API}/answer/respondent`,
+      data: {
+        user: user._id,
+      },
       headers: {
         authorization: `Bearer ${user.token}`,
       },
