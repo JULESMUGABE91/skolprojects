@@ -521,6 +521,27 @@ class SurveyPreview extends React.Component {
     }
   };
 
+  sendReport = async params => {
+    try {
+      const {user} = this.state;
+
+      const options = {
+        method: 'POST',
+        url: `${ROOT_API}/answer/report/pdf`,
+        data: {
+          ...params,
+        },
+        headers: {
+          authorization: `Bearer ${user.token}`,
+        },
+      };
+
+      return await axios(options);
+    } catch (error) {
+      toastMessage(error);
+    }
+  };
+
   handleCancel = async () => {
     try {
       this.setState({isCancelling: true});

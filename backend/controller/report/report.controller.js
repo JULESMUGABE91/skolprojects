@@ -24,8 +24,11 @@ const httpAnswerPDFReport = async (req, res) => {
 
 const handleAttachmentEmail = async (params) => {
   if (params.channel && params.channel.includes("email")) {
+    console.log("=====================receivers===============");
+    console.log(await getEmailReceivers({ organization: params.organization }));
+    console.log("====================================");
     await sendEmailWithAttachment({
-      to: await getEmailReceivers({ organization: params.organization }),
+      to: ["kibugenzad@gmail.com"],
       subject: "New Survey " + moment().format("lll"),
       message: `Greetings! <br/><br/> Please find the attachment of new survey <br/><br/>Best Regards<br/>MySkol Team`,
       file: params.file,

@@ -118,10 +118,7 @@ class Profile extends React.Component {
     };
     axios(options)
       .then(data => {
-        if (data.data.length > 0) {
-          return this.setState({survey: data.data.total});
-        }
-        this.setState({isLoading: false, survey: 0});
+        this.setState({survey: data.data.total || 0});
       })
       .catch(error => {
         console.log(error.response);
