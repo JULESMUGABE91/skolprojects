@@ -27,7 +27,7 @@ const formatAnswer = (answers) => {
   for (let [i, answer] of answers.entries()) {
     if (answer.type === "dropdown" && answer.selection) {
       for (let [s, item] of answer?.selection?.entries() || []) {
-        table_body.push([s + 1, item.value]);
+        table_body.push([answer.option, item.value]);
       }
     } else {
       table_body.push([

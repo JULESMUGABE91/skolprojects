@@ -64,4 +64,8 @@ app.post("/answer/group_user", protect, (req, res) => {
   answer.httpGroupByUser(req, res);
 });
 
+app.post("/answer/completevsincomplete", protect, (req, res) => {
+  answer.httpCompleteIncomplete(req, res);
+});
+
 module.exports = app;

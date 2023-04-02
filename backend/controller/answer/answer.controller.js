@@ -20,6 +20,7 @@ const {
   fetchRespondentsByAgeGroup,
   fetchByStatus,
   fetchAndGroupByUser,
+  fetchCompletedIncomplete,
 } = require("../../model/answer/answer.model");
 const {
   validateAnswer,
@@ -230,6 +231,16 @@ const httpGroupByUser = async (req, res) => {
   }
 };
 
+const httpCompleteIncomplete = async (req, res) => {
+  try {
+    const answerInfo = await fetchCompletedIncomplete(req.body);
+
+    res.status(200).json(answerInfo);
+  } catch (error) {
+    res.status(400).json(error.stack);
+  }
+};
+
 module.exports = {
   addInfo,
   deleteInfo,
@@ -246,4 +257,5 @@ module.exports = {
   httpAnswerByStatus,
   httpRespondentPerAgeGroup,
   httpGroupByUser,
+  httpCompleteIncomplete,
 };

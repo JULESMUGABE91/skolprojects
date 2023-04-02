@@ -5,6 +5,8 @@ const { createReward, findReward } = require("../reward/reward.model");
 const surveyMongo = require("../survey/survey.mongo");
 const userMongo = require("../users/user.mongo");
 const answerMongo = require("./answer.mongo");
+const { findQuestion } = require("../question/question.model");
+const { findSurvey } = require("../survey/survey.model");
 
 const createAnswer = async (params) => {
   delete params._id;
@@ -112,7 +114,6 @@ const findAnswer = async (params = {}) => {
   if (status) {
     filters.status = status;
   }
-
 
   return await answerMongo
     .find(filters)
@@ -500,6 +501,58 @@ const fetchAndGroupByUser = async (params) => {
   return answersData;
 };
 
+const fetchCompletedIncomplete = async () => {
+  // try {
+  //   const answers = await findAnswer();
+  //   const questions = await findQuestion();
+
+  //   let groupBySurvey = {},
+  //     groupByIdentifier = {};
+
+  //   for (let el of questions) {
+  //     if (!groupBySurvey[el.survey._id]) {
+  //       groupBySurvey[el.survey._id] = { count: 0 };
+  //     }
+  //     groupBySurvey[el.survey._id]["count"] += 1;
+  //   }
+
+  //   for (let el of answers) {
+  //     if (!groupBySurvey[el.survey._id]["data"]) {
+  //       groupBySurvey[el.survey._id]["data"] = {};
+  //     }
+  //     if (!groupBySurvey[el.survey._id]["data"][el.identifier]) {
+  //       groupBySurvey[el.survey._id]["data"][el.identifier] = [];
+  //     }
+  //     groupBySurvey[el.survey._id]["data"][el.identifier].push(el);
+  //   }
+
+  //   let completed = 0,
+  //     incomplete = 0;
+
+  //   for (let el of Object.keys(groupBySurvey)) {
+  //     for (let identifier_item of Object.keys(groupBySurvey[el].data)) {
+  //       if (identifier_item.length === groupBySurvey[el].count) {
+  //         completed += 1;
+  //       } else {
+  //         incomplete += 1;
+  //       }
+  //     }
+
+  //     if (!groupByIdentifier[el.identifier]) {
+  //       groupByIdentifier[el.identifier] = [];
+  //     }
+  //     groupByIdentifier[el.identifier].push(el);
+  //   }
+
+  //   return {
+  //     completed,
+  //     incomplete,
+  //   };
+  // } catch (error) {
+  //   console.log(error);
+  // }
+};
+
 module.exports = {
   createAnswer,
   findAndUpdateAnswer,
@@ -517,4 +570,5 @@ module.exports = {
   fetchByStatus,
   fetchRespondentsByAgeGroup,
   fetchAndGroupByUser,
+  fetchCompletedIncomplete,
 };
