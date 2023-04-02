@@ -14,11 +14,15 @@ const findAndDeleteSurvey = async (_id) => {
 };
 
 const findSurvey = async (params) => {
-  const { id, exclude_surveys, organization } = params;
+  const { id, exclude_surveys, organization, survey } = params;
   let filters = {};
 
   if (id) {
     filters._id = id;
+  }
+
+  if (survey) {
+    filters._id = survey;
   }
 
   if (organization) {
