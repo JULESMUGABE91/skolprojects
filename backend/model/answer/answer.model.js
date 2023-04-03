@@ -213,7 +213,7 @@ const findAnswerById = async (_id) => {
     .findById({ _id })
     .populate({ path: "question", model: questionMongo });
 };
-const findAnswerNormal = async () => {
+const findAnswerNormal = async (params) => {
   return await answerMongo.find(params);
 };
 
