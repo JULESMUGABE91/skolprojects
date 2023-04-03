@@ -157,7 +157,7 @@ const findAnswer = async (params = {}) => {
         },
       },
     },
-    { $sort: { ...sort, "question.position": 1 } },
+    // { $sort: { ...sort, "question.position": 1 } },
     { $unwind: "$doc" },
     { $replaceRoot: { newRoot: "$doc" } },
   ]);
@@ -271,7 +271,6 @@ const findAnswersFromDifferentLocation = async (params) => {
 const findInsightAnswers = async (params) => {
   const answers = await findAnswer({
     ...params,
-    // sort: "asc",
   });
 
   const total_respondent = await fetchRespondents(params, answers);
