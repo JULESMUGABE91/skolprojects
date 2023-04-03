@@ -271,7 +271,7 @@ const findAnswersFromDifferentLocation = async (params) => {
 const findInsightAnswers = async (params) => {
   const answers = await findAnswer({
     ...params,
-    sort: "asc",
+    // sort: "asc",
   });
 
   const total_respondent = await fetchRespondents(params, answers);
