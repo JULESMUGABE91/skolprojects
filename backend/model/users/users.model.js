@@ -20,7 +20,7 @@ const findUseById = async (_id) => {
 };
 
 const findUser = async (params) => {
-  const { id, badge, phone, organization } = params;
+  const { id, badge, phone, organization, account_type } = params;
 
   let filters = {};
 
@@ -38,6 +38,10 @@ const findUser = async (params) => {
 
   if (phone) {
     filters.phone = phone;
+  }
+
+  if (account_type) {
+    filters.account_type = account_type;
   }
 
   return await userMongo
