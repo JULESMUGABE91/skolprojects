@@ -80,7 +80,6 @@ const findAnswer = async (params = {}) => {
     questions,
     status,
     identifier,
-    users,
   } = params;
   let filters = {};
 
@@ -130,7 +129,7 @@ const findAnswer = async (params = {}) => {
   }
 
   const answers = await answerMongo.aggregate([
-    { $sort: { createdAt: -1, position: 1 } },
+    { $sort: { createdAt: -1 } },
     { $match: filters },
     {
       $group: {
@@ -158,7 +157,7 @@ const findAnswer = async (params = {}) => {
         },
       },
     },
-    { $sort: sort },
+    { $sort: { ...sort, "question.position": 1 } },
     { $unwind: "$doc" },
     { $replaceRoot: { newRoot: "$doc" } },
   ]);
@@ -213,6 +212,9 @@ const findAnswerById = async (_id) => {
   return await answerMongo
     .findById({ _id })
     .populate({ path: "question", model: questionMongo });
+};
+const findAnswerNormal = async () => {
+  return await answerMongo.find(params);
 };
 
 const markQuestion = async (organization, question, user) => {
