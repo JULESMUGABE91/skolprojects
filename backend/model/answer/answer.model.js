@@ -129,7 +129,7 @@ const findAnswer = async (params = {}) => {
   }
 
   const answers = await answerMongo.aggregate([
-    { $sort: { createdAt: -1 } },
+    { $sort: { createdAt: -1, "question.position": 1 } },
     { $match: filters },
     {
       $group: {
