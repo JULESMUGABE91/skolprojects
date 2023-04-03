@@ -1,6 +1,6 @@
 var PdfPrinter = require("pdfmake");
 const path = require("path");
-const { findAnswer } = require("../../model/answer/answer.model");
+const { findAnswerNormal } = require("../../model/answer/answer.model");
 const { findSurveyById } = require("../../model/survey/survey.model");
 const moment = require("moment");
 var fonts = {
