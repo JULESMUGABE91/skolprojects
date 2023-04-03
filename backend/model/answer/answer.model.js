@@ -28,13 +28,26 @@ const createBulkAnswer = async (params) => {
   let answers = [];
 
   for (let el of questions) {
-    const answerInfo = await answerMongo.create({
-      ...el,
-      ...organization,
-      survey,
-      identifier,
-      user,
-    });
+    let answerInfo,
+      checkAnswer = await findAnswer({
+        organization,
+        survey,
+        identifier,
+        user,
+        question: el.question,
+      });
+
+    if (checkAnswer.length === 0) {
+      answerInfo = await answerMongo.create({
+        ...el,
+        ...organization,
+        survey,
+        identifier,
+        user,
+      });
+    } else {
+      await findAndUpdateAnswer(checkAnswer[0]._id, { ...el });
+    }
 
     const savedAnswer = await findAnswerById(answerInfo._id);
 
@@ -75,11 +88,11 @@ const findAnswer = async (params = {}) => {
   }
 
   if (question) {
-    filters.question = question;
+    filters.question = mongoose.Types.ObjectId(question);
   }
 
   if (survey) {
-    filters.survey = survey;
+    filters.survey = mongoose.Types.ObjectId(survey);
   }
 
   if (user) {
@@ -108,23 +121,58 @@ const findAnswer = async (params = {}) => {
   }
 
   if (organization) {
-    filters.organization = organization;
+    filters.organization = mongoose.Types.ObjectId(organization);
   }
 
   if (status) {
     filters.status = status;
   }
 
-  return await answerMongo
-    .find(filters)
-    .populate({ path: "survey", model: surveyMongo })
-    .populate({ path: "question", model: questionMongo })
-    .populate({
-      path: "user",
-      model: userMongo,
-      select: { firstname: 1, lastname: 1 },
-    })
-    .sort(sort);
+  const answers = await answerMongo.aggregate(
+    [
+      { $match: filters },
+      { $sort: { createdAt: -1 } },
+      {
+        $group: {
+          _id: {
+            identifier: "$identifier",
+            question: "$question",
+            user: "$user",
+          },
+          dups: {
+            $push: "$_id",
+          },
+          count: {
+            $sum: 1,
+          },
+          doc: { $first: "$$ROOT" },
+        },
+      },
+      {
+        $match: {
+          _id: {
+            $ne: null,
+          },
+          count: {
+            $eq: 1,
+          },
+        },
+      },
+      { $sort: sort },
+      { $unwind: "$doc" },
+      { $replaceRoot: { newRoot: "$doc" } },
+    ],
+    (allowDiskUse = true)
+  );
+
+  await answerMongo.populate(answers, { path: "survey" });
+  await answerMongo.populate(answers, { path: "question" });
+  await answerMongo.populate(answers, {
+    path: "user",
+    model: userMongo,
+    select: { firstname: 1, lastname: 1 },
+  });
+  return answers;
 };
 
 const findMySurvey = async (params) => {
@@ -221,16 +269,12 @@ const findAnswersFromDifferentLocation = async (params) => {
 };
 
 const findInsightAnswers = async (params) => {
-  console.log("====================================");
-  console.log({ params });
-  console.log("====================================");
-  console.log(params);
   const answers = await findAnswer({
     ...params,
     sort: "asc",
   });
 
-  const total_respondent = await fetchRespondents(params);
+  const total_respondent = await fetchRespondents(params, answers);
 
   const question_answers = await getQuestionAnswers(answers, total_respondent);
 
@@ -313,10 +357,12 @@ const percentagePerAnswer = (answers, total_respondent) => {
   return answers;
 };
 
-const fetchRespondents = async (params) => {
+const fetchRespondents = async (params, answers) => {
   let data = [];
 
-  const answers = await findAnswer(params);
+  if (!answers) {
+    answers = await findAnswer(params);
+  }
 
   for (let answer of answers) {
     if (!data.includes(answer.identifier)) {
@@ -350,11 +396,14 @@ const fetchRespondentsByGender = async (params) => {
   const answersData = await findAnswer(params);
 
   let groupGender = {},
-    total_respondent = await fetchRespondents(params);
+    total_respondent = await fetchRespondents(params, answersData);
+  let identifiers = [];
 
   for (let el of answersData) {
     if (el.question && el.question.type === "respondent_gender") {
       const { answers } = el;
+
+      identifiers.push(el.identifier);
 
       for (let option of answers) {
         const key = getKey(gender, option);
@@ -376,6 +425,10 @@ const fetchRespondentsByGender = async (params) => {
     );
   }
 
+  const toFindDuplicates = (identifiers) =>
+    identifiers.filter((item, index) => identifiers.indexOf(item) !== index);
+  console.log(toFindDuplicates(identifiers));
+
   return groupGender;
 };
 
@@ -383,7 +436,7 @@ const fetchRespondentsByRegion = async (params) => {
   const answersData = await findAnswer(params);
 
   let groupRegion = {},
-    total_respondent = await fetchRespondents(params);
+    total_respondent = await fetchRespondents(params, answersData);
 
   for (let el of answersData) {
     if (el.question && el.question.type === "respondent_region") {
@@ -422,7 +475,7 @@ const fetchRespondentsByAgeGroup = async (params) => {
   const answersData = await findAnswer(params);
 
   let groupAgeGroup = {},
-    total_respondent = await fetchRespondents(params);
+    total_respondent = await fetchRespondents(params, answersData);
 
   for (let el of answersData) {
     if (el.question && el.question.type === "respondent_age_group") {

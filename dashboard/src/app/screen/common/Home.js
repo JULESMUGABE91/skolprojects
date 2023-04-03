@@ -298,7 +298,7 @@ class Home extends React.Component {
           <div className="row">
             <div className="col-6 col-md-3">
               <CardCount
-                title="Total Number of People Interviewed"
+                title="Total Respondent"
                 total={
                   this.state.isLoadingRespondent
                     ? "..."
