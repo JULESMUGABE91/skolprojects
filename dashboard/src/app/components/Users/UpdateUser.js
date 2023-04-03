@@ -25,7 +25,7 @@ class UpdateUser extends React.Component {
     if (this.props._id && this.props._id !== "") {
       this.setState({
         ...this.props,
-        access_level: setDefaultLevel(this.state.user.account_type),
+        access_level: setDefaultLevel(this.props.account_type),
       });
     }
   };

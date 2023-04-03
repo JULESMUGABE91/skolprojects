@@ -13,7 +13,7 @@ export const setLevels = (account_type) => {
 };
 
 export const setDefaultLevel = (account_type) => {
-  let access_level = {};
+  let access_level = undefined;
 
   for (let level of ACCESS) {
     if (level?.value === account_type) {
