@@ -67,7 +67,7 @@ const findAndDeleteAnswer = async (_id) => {
   return await answerMongo.findByIdAndDelete({ _id });
 };
 
-const findAnswer = async (params = {}) => {
+const answerCommonFilters = (params) => {
   let {
     id,
     question,
@@ -128,9 +128,13 @@ const findAnswer = async (params = {}) => {
     filters.status = status;
   }
 
+  return filters;
+};
+
+const findAnswer = async (params = {}) => {
   const answers = await answerMongo.aggregate([
     { $sort: { createdAt: -1, "question.position": 1 } },
-    { $match: filters },
+    { $match: answerCommonFilters(params) },
     {
       $group: {
         _id: {
@@ -215,7 +219,7 @@ const findAnswerById = async (_id) => {
 };
 const findAnswerNormal = async (params) => {
   return await answerMongo
-    .find(params)
+    .find(answerCommonFilters(params))
     .populate({ path: "survey", model: surveyMongo })
     .populate({ path: "question", model: questionMongo })
     .populate({
