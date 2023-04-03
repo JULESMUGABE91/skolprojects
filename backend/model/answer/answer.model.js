@@ -214,7 +214,15 @@ const findAnswerById = async (_id) => {
     .populate({ path: "question", model: questionMongo });
 };
 const findAnswerNormal = async (params) => {
-  return await answerMongo.find(params);
+  return await answerMongo
+    .find(params)
+    .populate({ path: "survey", model: surveyMongo })
+    .populate({ path: "question", model: questionMongo })
+    .populate({
+      path: "user",
+      model: userMongo,
+      select: { firstname: 1, lastname: 1 },
+    });
 };
 
 const markQuestion = async (organization, question, user) => {
