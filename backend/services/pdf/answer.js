@@ -44,7 +44,7 @@ const formatAnswer = (answers) => {
 
 const generateAnswerPDFReport = async (params) => {
   const { identifier, survey } = params;
-  const answers = await findAnswer({ ...params, sort: "asc" });
+  const answers = await findAnswerNormal({ ...params });
   const surveyInfo = await findSurveyById(survey);
 
   let started_location = "",

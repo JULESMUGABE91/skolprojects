@@ -623,4 +623,5 @@ module.exports = {
   fetchRespondentsByAgeGroup,
   fetchAndGroupByUser,
   fetchCompletedIncomplete,
+  findAnswerNormal,
 };
