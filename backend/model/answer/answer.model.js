@@ -127,6 +127,7 @@ const answerCommonFilters = (params) => {
   if (status) {
     filters.status = status;
   }
+  console.log(filters);
 
   return filters;
 };
@@ -388,7 +389,7 @@ const fetchRespondents = async (params, answers) => {
 
 const getKey = (common, option) => {
   let key = "";
-
+  let count = 0;
   for (let el of common) {
     let option_key = option.option.replace(" ", "").replace(" ", "");
 
@@ -464,7 +465,7 @@ const fetchRespondentsByRegion = async (params) => {
           }
 
           for (let option of answers) {
-            if (option._id === region._id) {
+            if (option._id === region._id && option.option === region.option) {
               groupRegion[key].count += 1;
             }
           }
