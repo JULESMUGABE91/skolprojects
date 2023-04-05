@@ -159,11 +159,12 @@ class AnswerInsight extends React.Component {
                             );
 
                             let chart_data = [],
-                              counts = [];
+                              counts = [],
+                              object_row = Object.keys(
+                                this.state?.data[q][head]?.data || []
+                              );
 
-                            for (let row of Object.keys(
-                              this.state?.data[q][head]?.data || []
-                            )) {
+                            for (let row of object_row) {
                               chart_data.push(
                                 Math.round(
                                   (this.state?.data[q][head]?.data[row]?.count /
@@ -196,7 +197,7 @@ class AnswerInsight extends React.Component {
                             return (
                               <div
                                 key={h}
-                                className="col-md-6 well gap-1"
+                                className={"col-md-6 well gap-1"}
                                 style={{
                                   marginBottom: 10,
                                   border: "1px solid #f2f2f2",
