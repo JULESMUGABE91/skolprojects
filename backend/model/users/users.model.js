@@ -54,7 +54,6 @@ const findUser = async (params) => {
       { lastname: { $regex: search, $options: "i" } },
     ];
   }
-  console.log(filters);
 
   const users = await userMongo
     .find(filters)
