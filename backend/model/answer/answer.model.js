@@ -282,15 +282,24 @@ const findAnswersFromDifferentLocation = async (params) => {
 };
 
 const findInsightAnswers = async (params) => {
-  const answers = await findAnswer({
-    ...params,
-  });
+  try {
+    let answers = await findAnswerNormal({
+      ...params,
+    });
 
-  const total_respondent = await fetchRespondents(params, answers);
+    const total_respondent = await fetchRespondents(params, answers);
 
-  const question_answers = await getQuestionAnswers(answers, total_respondent);
+    const question_answers = await getQuestionAnswers(
+      answers,
+      total_respondent
+    );
 
-  return question_answers;
+    return question_answers;
+  } catch (error) {
+    console.log("====================================");
+    console.log(error);
+    console.log("====================================");
+  }
 };
 
 const getQuestionAnswers = async (data, total_respondent) => {

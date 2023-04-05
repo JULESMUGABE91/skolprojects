@@ -5,9 +5,7 @@ import toastMessage from "../../utils/toastMessage";
 import Table from "../Table/Table";
 import "./styles.css";
 import { getStorage } from "../../utils/storage";
-import { onFilter } from "../../action/Filters";
 import { connect } from "react-redux";
-import formatSelectData from "../../utils/formatSelectData";
 import UpdateUser from "./UpdateUser";
 import { Modal } from "../Modal";
 
@@ -22,6 +20,7 @@ class Users extends React.Component {
     limit: 10,
     selected_data: {},
     error: {},
+    totalPageCount: 0,
   };
 
   componentDidMount = async () => {
@@ -38,7 +37,11 @@ class Users extends React.Component {
   };
 
   returnFilters() {
-    let request_body = {};
+    const { page, limit } = this.state;
+    let request_body = {
+      page,
+      limit,
+    };
 
     if (this.props?.filters && this.props?.filters?.organization) {
       request_body.organization = this.props?.filters?.organization.value;
@@ -47,8 +50,8 @@ class Users extends React.Component {
     return request_body;
   }
 
-  getData(isLoading) {
-    const { user, page, limit } = this.state;
+  getData(isLoading, search_text) {
+    const { user } = this.state;
 
     this.setState({
       isLoading,
@@ -56,10 +59,16 @@ class Users extends React.Component {
 
     let url = ENDPOINT + "/user/fetch";
 
+    let request_body = this.returnFilters();
+
+    if (search_text && search_text !== "") {
+      request_body.search = search_text;
+    }
+
     const options = {
       method: "POST",
       url,
-      data: this.returnFilters(),
+      data: request_body,
       headers: {
         authorization: "Bearer " + user.token,
       },
@@ -67,15 +76,12 @@ class Users extends React.Component {
 
     axios(options)
       .then((res) => {
-        let data = res.data;
-
-        if (!data) {
-          data = res.data;
-        }
+        let { data, count } = res.data;
 
         this.setState({
           data: data,
           isLoading: false,
+          totalPageCount: count,
         });
 
         if (data.length !== 0) {
@@ -121,15 +127,19 @@ class Users extends React.Component {
       search_text,
     });
 
-    for (let i = 0; i < copyData.length; i++) {
-      if (
-        JSON.stringify(copyData[i])
-          .toLowerCase()
-          .indexOf(search_text.toLowerCase()) !== -1
-      ) {
-        array.push(copyData[i]);
-      }
-    }
+    // for (let i = 0; i < copyData.length; i++) {
+    //   if (
+    //     JSON.stringify(copyData[i])
+    //       .toLowerCase()
+    //       .indexOf(search_text.toLowerCase()) !== -1
+    //   ) {
+    //     array.push(copyData[i]);
+    //   }
+    // }
+
+    // if (array.length === 0 && search_text !== "") {
+    this.getData(true, search_text);
+    // }
 
     this.setState({
       data: array,
@@ -148,6 +158,17 @@ class Users extends React.Component {
     this.setState({
       [modal]: false,
     });
+  }
+
+  handlePagination(page) {
+    this.setState(
+      {
+        page,
+      },
+      () => {
+        this.getData(true);
+      }
+    );
   }
 
   render() {
@@ -201,6 +222,10 @@ class Users extends React.Component {
           isSearch
           search_text={this.state.search_text}
           handleSearch={this.handleSearch.bind(this)}
+          totalPageCount={this.state.totalPageCount}
+          handlePagination={this.handlePagination.bind(this)}
+          page={this.state.page}
+          limit={this.state.limit}
           isLoading={this.state.isLoading}
           headers={headers}
           rowPress={(item) => {

@@ -20,7 +20,8 @@ const findUseById = async (_id) => {
 };
 
 const findUser = async (params) => {
-  const { id, badge, phone, organization, account_type } = params;
+  const { id, badge, phone, organization, account_type, limit, page, search } =
+    params;
 
   let filters = {};
 
@@ -44,9 +45,26 @@ const findUser = async (params) => {
     filters.account_type = account_type;
   }
 
-  return await userMongo
+  let skip = limit * (page - 1);
+
+  //handle search
+  if (search) {
+    filters["$or"] = [
+      { firstname: { $regex: search, $options: "i" } },
+      { lastname: { $regex: search, $options: "i" } },
+    ];
+  }
+  console.log(filters);
+
+  const users = await userMongo
     .find(filters)
-    .populate({ path: "organization", model: organizationMongo });
+    .populate({ path: "organization", model: organizationMongo })
+    .skip(skip)
+    .limit(limit);
+
+  const total = await userMongo.find(filters).count();
+
+  return { data: users, count: total };
 };
 
 module.exports = {

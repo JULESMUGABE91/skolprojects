@@ -13,7 +13,7 @@ const findAndDeleteSurvey = async (_id) => {
   return await surveyMongo.findByIdAndDelete({ _id });
 };
 
-const findSurvey = async (params) => {
+const findSurvey = async (params = {}) => {
   const { id, exclude_surveys, organization, survey } = params;
   let filters = {};
 
