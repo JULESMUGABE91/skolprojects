@@ -41,15 +41,18 @@ class Location extends React.Component {
   };
 
   returnFilters() {
-    let request_body = {};
+    let request_body = {
+      page:1,
+      limit:1000
+    };
 
     if (this.props?.filters && this.props?.filters?.organization) {
       request_body.organization = this.props?.filters?.organization.value;
     }
 
+
     return request_body;
   }
-
   getAccounts(isLoading) {
     const { user } = this.state;
 
@@ -59,12 +62,12 @@ class Location extends React.Component {
 
     let url = ENDPOINT + "/user/fetch";
 
+    let request_body = this.returnFilters();
+
     const options = {
       method: "POST",
       url,
-      data: {
-        ...this.returnFilters(),
-      },
+      data: request_body,
       headers: {
         authorization: "Bearer " + user.token,
       },
@@ -72,12 +75,17 @@ class Location extends React.Component {
 
     axios(options)
       .then((res) => {
+        let { data, count } = res.data;
+
         this.setState({
-          accounts: res.data,
+          accounts: data,
           isLoading: false,
+          totalPageCount: count,
         });
 
-        copyAccounts = res.data.slice(0);
+        if (data.length !== 0) {
+          copyAccounts = data.slice(0);
+        }
       })
       .catch((error) => {
         this.setState({
