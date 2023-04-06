@@ -89,6 +89,7 @@ const addBulkInfo = async (req, res) => {
 
     res.status(200).json(answerInfo);
   } catch (error) {
+    console.log(error.stack);
     res.status(400).json(error.stack);
   }
 };
