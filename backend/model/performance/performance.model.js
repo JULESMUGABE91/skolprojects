@@ -2,9 +2,12 @@ const { default: mongoose } = require("mongoose");
 const { findAnswer } = require("../answer/answer.model");
 const answerMongo = require("../answer/answer.mongo");
 const { findUser } = require("../users/users.model");
+const userMongo = require("../users/user.mongo");
+const questionMongo = require("../question/question.mongo");
 
 const fetchSurveyorPerformance = async (params) => {
-  const { account_type, organization, start_date, end_date } = params;
+  const { account_type, organization, start_date, end_date, page, limit } =
+    params;
 
   let performance = {},
     resultArray = [],
@@ -27,57 +30,104 @@ const fetchSurveyorPerformance = async (params) => {
     };
   }
 
-  const users = await findUser({ account_type, organization });
+  const users = await findUser({ account_type, organization, page, limit });
 
-  for (let user of users) {
+  for (let user of users.data) {
     user_ids.push(user._id);
   }
 
-  const answers = await answerMongo.find({
-    users: { $in: user_ids },
-    ...commonFilters,
-    ...answerFilters,
-  });
+  const answers = await answerMongo
+    .find(
+      { user: { $in: user_ids }, ...answerFilters, ...commonFilters },
+      {
+        identifier: 1,
+        question: 1,
+        user: 1,
+        createdAt: 1,
+        status: 1,
+        user: 1,
+        survey: 1,
+        last_question: 1,
+      }
+    )
+    .populate({
+      path: "user",
+      model: userMongo,
+      select: { firstname: 1, lastname: 1 },
+    })
+    .sort({ createdAt: -1 });
 
-  //get duplicates
-  answers.map((item) => {
-    if (
-      resultArray.find((object) => {
-        if (
-          object.identifier === item.identifier &&
-          object.question === item.question
-        ) {
-          //if the object exists iterate times
-          object.times++;
-          return true;
-          //if it does not return false
-        } else {
-          return false;
-        }
-      })
-    ) {
-    } else {
-      //if the object does not exists push it to the resulting array and set the times count to 1
-      item.times = 1;
-      resultArray.push(item);
-    }
-  });
-
-  performance.incomplete = 0;
-  performance.duplicate = 0;
-  performance.completed = 0;
+  let group_by_user = {};
 
   for (let answer of answers) {
-    if (answer.status === "incomplete") {
-      performance.incomplete += 1;
-    } else if (answer.times > 1) {
-      performance.duplicate += 1;
-    } else {
-      performance.completed += 1;
+    if (!group_by_user[answer.user._id]) {
+      group_by_user[answer.user._id] = {
+        user: {
+          firstname: answer.user.firstname,
+          lastname: answer.user.lastname,
+        },
+        data: {},
+      };
+    }
+
+    if (!group_by_user[answer.user._id]["data"][answer.identifier]) {
+      const totalQuestions = await countQuestionsPerSurvey(answer.survey);
+
+      group_by_user[answer.user._id]["data"][answer.identifier] = {
+        total: 0,
+        totalQuestions: totalQuestions,
+      };
+
+      if (
+        group_by_user[answer.user._id]["data"][answer.identifier].total <
+        group_by_user[answer.user._id]["data"][answer.identifier].totalQuestions
+      ) {
+        group_by_user[answer.user._id]["data"][
+          answer.identifier
+        ].incomplete = 0;
+        group_by_user[answer.user._id]["data"][answer.identifier].lastQuestion =
+          answer.last_question;
+        group_by_user[answer.user._id]["data"][answer.identifier].createdAt =
+          answer.createdAt;
+      }
+    }
+
+    console.log(
+      group_by_user[answer.user._id]["data"][answer.identifier].total
+    );
+
+    //don't count duplicates
+    if (
+      group_by_user[answer.user._id]["data"][answer.identifier].total <
+      group_by_user[answer.user._id]["data"][answer.identifier].totalQuestions
+    ) {
+      group_by_user[answer.user._id]["data"][answer.identifier].total += 1;
+
+      if (answer.status === "incomplete") {
+        group_by_user[answer.user._id]["data"][answer.identifier][
+          "incomplete"
+        ] += 1;
+      }
     }
   }
 
-  return performance;
+  let user_performance = [];
+
+  for (let user of Object.keys(group_by_user)) {
+    const questionnaires = group_by_user[user].data;
+
+    user_performance.push({
+      ...group_by_user[user].user,
+      questionnaires,
+      respondents: Object.keys(questionnaires)?.length || 0,
+    });
+  }
+
+  return user_performance;
+};
+
+const countQuestionsPerSurvey = async (survey) => {
+  return await questionMongo.find({ survey }).count();
 };
 
 module.exports = {

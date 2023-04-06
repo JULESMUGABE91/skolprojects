@@ -55,6 +55,8 @@ const findUser = async (params) => {
     ];
   }
 
+  console.log(filters);
+
   const users = await userMongo
     .find(filters)
     .populate({ path: "organization", model: organizationMongo })
