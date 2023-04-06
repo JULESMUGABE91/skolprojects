@@ -21,42 +21,46 @@ const createAnswer = async (params) => {
 };
 
 const createBulkAnswer = async (params) => {
-  const { questions, organization, survey, identifier, user } = params;
+  try {
+    const { questions, organization, survey, identifier, user } = params;
 
-  delete params._id;
+    delete params._id;
 
-  let answers = [];
+    let answers = [];
 
-  for (let el of questions) {
-    let answerInfo,
-      checkAnswer = await findAnswer({
-        organization,
-        survey,
-        identifier,
-        user,
-        question: el.question,
-      });
+    for (let el of questions) {
+      let answerInfo,
+        checkAnswer = await findAnswer({
+          organization,
+          survey,
+          identifier,
+          user,
+          question: el.question,
+        });
 
-    if (checkAnswer.length === 0) {
-      answerInfo = await answerMongo.create({
-        ...el,
-        ...organization,
-        survey,
-        identifier,
-        user,
-      });
-    } else {
-      await findAndUpdateAnswer(checkAnswer[0]._id, { ...el });
+      if (checkAnswer.length === 0) {
+        answerInfo = await answerMongo.create({
+          ...el,
+          ...organization,
+          survey,
+          identifier,
+          user,
+        });
+      } else {
+        await findAndUpdateAnswer(checkAnswer[0]._id, { ...el });
+      }
+
+      const savedAnswer = await findAnswerById(answerInfo._id);
+
+      // markQuestion(savedAnswer.organization, savedAnswer.question, params.user);
+
+      answers.push(savedAnswer);
     }
 
-    const savedAnswer = await findAnswerById(answerInfo._id);
-
-    // markQuestion(savedAnswer.organization, savedAnswer.question, params.user);
-
-    answers.push(savedAnswer);
+    return answers;
+  } catch (error) {
+    console.log(error);
   }
-
-  return answers;
 };
 
 const findAndUpdateAnswer = async (_id, params) => {
