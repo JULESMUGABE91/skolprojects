@@ -205,7 +205,7 @@ class Surveyor extends React.Component {
           title={this.state.modalTitle}
           showHeaderBottomBorder={false}
         >
-          <Questionnaires {...this.state.selected_data} />
+          <Questionnaires {...this.state.selected_data} handleCloseModal={this.handleCloseModal.bind(this, "showModal")}/>
         </Modal>
       </div>
     );

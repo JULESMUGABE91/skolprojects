@@ -19,7 +19,7 @@ class Questionnaires extends React.Component {
     user: {},
     _id: "",
     data: [],
-    limit: 100,
+    limit: 10000,
     page: 1,
     fromDate: moment("2023-04-01").format("YYYY-MM-DD"),
     toDate: moment().add(1, "d").format("YYYY-MM-DD"),
@@ -46,13 +46,12 @@ class Questionnaires extends React.Component {
 
     let url = ENDPOINT + "/user/single/performance";
 
-    console.log(this.props._id);
 
     let request_body = filtersHandler({
       ...this.props.filters,
       limit,
       page,
-      user: this.props._id,
+      user:{value: this.props._id},
       start_date: fromDate,
       end_date: toDate,
     });
@@ -65,7 +64,6 @@ class Questionnaires extends React.Component {
         authorization: "Bearer " + user.token,
       },
     };
-
     axios(options)
       .then((res) => {
         let { data, count } = res.data;
@@ -181,11 +179,11 @@ class Questionnaires extends React.Component {
   render() {
     return (
       <div className="card">
-        <div className="card-body">
+        <div className="card-body"  style={{maxHeight: "60vh", overflowY:"auto"}}>
           {this.state.isLoading ? (
             <LoadingSpinner />
           ) : (
-            <table className="table table-bordered">
+            <table className="table table-bordered" >
               <thead>
                 <tr>
                   <th>File</th>
