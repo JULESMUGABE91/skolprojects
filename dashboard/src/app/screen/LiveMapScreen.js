@@ -7,6 +7,8 @@ import { ENDPOINT } from "../constants/api";
 import axios from "axios";
 import { connect } from "react-redux";
 import filtersHandler from "../utils/filtersHandler";
+import { saveDownload } from "../utils/download";
+import toastMessage from "../utils/toastMessage";
 
 class LiveMapScreen extends React.Component {
   state = {
@@ -70,6 +72,58 @@ class LiveMapScreen extends React.Component {
       });
   }
 
+  onDownload = async (marker) => {
+    const { identifier, survey, organization } = marker;
+
+    const { user } = this.state;
+
+    this.setState({
+      isDownloading: true,
+    });
+
+    toastMessage("info", "Downloading...");
+
+    let url = ENDPOINT + "/answer/report/pdf";
+
+    const options = {
+      method: "POST",
+      url,
+      data: {
+        identifier,
+        user: marker.user._id,
+        organization,
+        survey,
+      },
+      headers: {
+        authorization: "Bearer " + user.token,
+      },
+    };
+
+    axios(options)
+      .then(async (res) => {
+        let data = res.data;
+
+        await saveDownload({
+          file: data,
+          identifier,
+          user: marker.user.firstname + " " + marker.user.lastname,
+        });
+
+        this.setState({
+          isDownloading: false,
+        });
+
+        toastMessage("success", "Download is completed");
+      })
+      .catch((error) => {
+        this.setState({
+          isDownloading: false,
+        });
+
+        toastMessage("error", error);
+      });
+  };
+
   render() {
     const legend = {
       styles: {
@@ -97,6 +151,8 @@ class LiveMapScreen extends React.Component {
         <div style={{ position: "relative", marginTop: "1rem" }}>
           <Map
             isLoading={this.state.isLoading}
+            isDownloading={this.state.isDownloading}
+            onDownload={(params) => this.onDownload(params)}
             legend={legend}
             data={this.state.data}
             type="bin_level"

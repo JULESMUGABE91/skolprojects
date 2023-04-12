@@ -6,7 +6,7 @@ export default (filters) => {
     request_body.organization = filters?.organization.value;
   }
 
-  if (filters && filters?.survey) {
+  if (filters && filters?.survey && filters?.survey.value) {
     request_body.survey = filters?.survey.value;
   }
 
@@ -15,7 +15,23 @@ export default (filters) => {
   }
 
   if (filters && filters?.user) {
-    request_body.user = filters?.user.value;
+    request_body.user = filters?.user?.value;
+  }
+
+  if (filters && filters?.account_type) {
+    request_body.account_type = filters?.account_type;
+  }
+
+  if (filters && filters?.search) {
+    request_body.search = filters?.search;
+  }
+
+  if (filters && filters?.page) {
+    request_body.page = filters?.page;
+  }
+
+  if (filters && filters?.limit) {
+    request_body.limit = filters?.limit;
   }
 
   if (filters && filters?.start_date) {

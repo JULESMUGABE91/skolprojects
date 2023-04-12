@@ -26,7 +26,11 @@ export default function MapMarker(props) {
         //   },
         // }}
       >
-        <MapPopup data={props.marker} />
+        <MapPopup
+          data={props.marker}
+          isDownloading={props.isDownloading}
+          onDownload={props.onDownload}
+        />
       </Marker>
     </div>
   );

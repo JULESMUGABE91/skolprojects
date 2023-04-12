@@ -61,7 +61,14 @@ const Map = (props) => {
                 }
               >
                 {group_answer_by_surveyor[user].map((marker, m) => {
-                  return <MapMarker marker={marker} key={m} />;
+                  return (
+                    <MapMarker
+                      marker={marker}
+                      key={m}
+                      isDownloading={props.isDownloading}
+                      onDownload={() => props.onDownload(marker)}
+                    />
+                  );
                 })}
               </MarkerClusterGroup>
             );

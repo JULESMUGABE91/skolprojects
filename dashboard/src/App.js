@@ -15,6 +15,7 @@ import AnswerScreen from "./app/screen/AnswerScreen";
 import UsersScreen from "./app/screen/UsersScreen";
 import AccountScreen from "./app/screen/AccountScreen";
 import LiveMapScreen from "./app/screen/LiveMapScreen";
+import PerformanceScreen from "./app/screen/PerformanceScreen";
 
 const createBrowserHistory = require("history").createBrowserHistory;
 
@@ -76,6 +77,11 @@ function App() {
                     exact
                     path={`${url}/home/map`}
                     component={LiveMapScreen}
+                  />
+                  <Route
+                    exact
+                    path={`${url}/home/performance`}
+                    component={PerformanceScreen}
                   />
                 </HomeDashBoardScreen>
               );

@@ -2,10 +2,9 @@ import React from "react";
 import { Popup } from "react-leaflet";
 import "./styles.css";
 import moment from "moment";
-import { Link } from "react-router-dom";
+import { Button } from "../Button";
 
 const MapPopup = (props) => {
-  console.log(props);
   return (
     <Popup>
       <div className="bin-popup">
@@ -46,6 +45,14 @@ const MapPopup = (props) => {
               Submitted:
               <b>{moment(props.data.createdAt).format("lll")}</b>
             </span>
+          </div>
+          <div>
+            <Button
+              className="btn-primary"
+              text="Download Report"
+              isSubmitting={props.isDownloading}
+              onPress={props.onDownload}
+            />
           </div>
         </div>
       </div>

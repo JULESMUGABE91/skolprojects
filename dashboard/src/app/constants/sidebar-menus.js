@@ -40,6 +40,11 @@ export const menus = [
     show: true,
   },
   {
+    group: "Performance",
+    icon: "bx-user-check",
+    route: "/dashboard/home/performance",
+  },
+  {
     group: "Accounts",
     icon: "bx-group",
     route: "/dashboard/accounts",
