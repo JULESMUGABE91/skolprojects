@@ -160,7 +160,7 @@ class Surveyor extends React.Component {
       },
       {
         title: "Contact",
-        key: "contact",
+        key: "phone",
       },
       {
         title: "Total Respondent",
@@ -177,8 +177,6 @@ class Surveyor extends React.Component {
         key: "action",
       });
     }
-
-    console.log(this.state.data);
 
     return (
       <div>
