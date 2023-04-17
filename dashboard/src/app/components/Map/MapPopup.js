@@ -5,6 +5,7 @@ import moment from "moment";
 import { Button } from "../Button";
 
 const MapPopup = (props) => {
+  console.log(props.data?.user);
   return (
     <Popup>
       <div className="bin-popup">
@@ -13,7 +14,9 @@ const MapPopup = (props) => {
             <span>
               Surveyor:{" "}
               <b>
-                {props.data.user.firstname + " " + props.data.user.lastname}
+                {props.data?.user?.firstname +
+                  " " +
+                  props?.data?.user?.lastname}
               </b>
             </span>
           </div>
