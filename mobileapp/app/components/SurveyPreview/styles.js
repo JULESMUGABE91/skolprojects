@@ -195,6 +195,25 @@ const styles = EStyleSheet.create({
     fontSize: 18,
     color: '$textColor',
   },
+
+  // confirm modal styles
+  confirm_header: {
+    minHeight: 55,
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    flexDirection: 'row',
+    backgroundColor: '$bgColor',
+  },
+
+  confirm_content: {
+    padding: 15,
+  },
+
+  confirm_btns: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 25,
+  },
 });
 
 export default styles;

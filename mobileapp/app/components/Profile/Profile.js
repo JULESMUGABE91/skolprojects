@@ -284,8 +284,8 @@ class Profile extends React.Component {
         left_icon: 'gift-open-outline',
       },
       {
-        title: 'Survey History',
-        onPress: () => this.gotoScreen('SurveyHistory'),
+        title: 'Dashboard',
+        onPress: () => this.gotoScreen('Dashboard'),
         right_icon: 'chevron-right',
         left_icon: 'archive-clock-outline',
       },

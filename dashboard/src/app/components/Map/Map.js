@@ -22,7 +22,7 @@ const Map = (props) => {
   let group_answer_by_surveyor = {};
 
   for (let i = 0; i < props.data.length; i++) {
-    const user = props.data[i].user._id;
+    const user = props.data[i]?.user?._id;
 
     if (!group_answer_by_surveyor[user]) {
       group_answer_by_surveyor[user] = [];

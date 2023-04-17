@@ -22,6 +22,8 @@ const DOMAIN_NAME = "http://myskol.rw";
    "respondent_phone_number",
    "respondent_address",
    "respondent_age",
+   "respondent_gender",
+   "respondent_region",
  ];
 
  const gender = [

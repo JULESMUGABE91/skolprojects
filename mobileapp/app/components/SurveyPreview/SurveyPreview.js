@@ -30,6 +30,7 @@ import {checkboxes, dropdown, inputs} from '../../constants/input_options';
 import Geolocation from 'react-native-geolocation-service';
 import Geocoder from 'react-native-geocoding';
 import {onSetLocation} from '../../actions/MyLocation';
+import ConfirmIncomplete from './Modal/ConfirmIncomplete';
 
 const {height} = Dimensions.get('screen');
 class SurveyPreview extends React.Component {
@@ -423,7 +424,7 @@ class SurveyPreview extends React.Component {
       for (let formatted of completed_format) {
         request_body.push({
           ...formatted,
-          survey,
+          survey: survey._id,
           organization: APP_ID,
           status: params?.status || undefined,
           last_question: params?.last_question || undefined,
@@ -522,102 +523,6 @@ class SurveyPreview extends React.Component {
     }
   };
 
-  sendReport = async params => {
-    try {
-      const {user} = this.state;
-
-      const options = {
-        method: 'POST',
-        url: `${ROOT_API}/answer/report/pdf`,
-        data: {
-          ...params,
-        },
-        headers: {
-          authorization: `Bearer ${user.token}`,
-        },
-      };
-
-      return await axios(options);
-    } catch (error) {
-      toastMessage(error);
-    }
-  };
-
-  handleCancel = async () => {
-    try {
-      this.setState({isCancelling: true});
-
-      let {current_question_index, survey, user, identifier} = this.state;
-
-      const q = this.remainingQuestion(current_question_index);
-
-      let last_question = q[current_question_index]?._id || undefined;
-
-      const completed_format = this.formattedSurvey(q);
-
-      let request_body = [];
-
-      for (let formatted of completed_format) {
-        request_body.push({
-          ...formatted,
-          survey,
-          organization: APP_ID,
-          status: 'incomplete',
-          last_question: last_question,
-        });
-      }
-
-      const options = {
-        method: 'POST',
-        url: `${ROOT_API}/answer/add/bulk`,
-        data: {
-          questions: request_body,
-          organization: APP_ID,
-          identifier,
-          survey: survey._id,
-        },
-        headers: {
-          authorization: `Bearer ${user.token}`,
-        },
-      };
-
-      await axios(options);
-
-      this.setState({
-        isCancelling: false,
-      });
-
-      this.updateLocation();
-
-      this.props.navigation.goBack();
-    } catch (error) {
-      this.setState({isCancelling: false});
-      toastMessage(
-        'Cancel this survey has been failed, please your internet and try again',
-      );
-    }
-  };
-
-  remainingQuestion(current_question_index) {
-    let {questions} = this.state;
-
-    let copyQuestions = questions.slice(0);
-
-    if (
-      !questions[current_question_index] ||
-      (questions[current_question_index] &&
-        (!questions[current_question_index]?.responses ||
-          questions[current_question_index]?.responses?.length === 0))
-    ) {
-      copyQuestions.splice(current_question_index, 1);
-
-      current_question_index =
-        current_question_index > 0 ? current_question_index - 1 : 0;
-    }
-
-    return copyQuestions;
-  }
-
   render() {
     const bgColor = EStyleSheet.value('$bgColorLight');
 
@@ -639,10 +544,10 @@ class SurveyPreview extends React.Component {
         backgroundColor: bgColor,
       },
 
-      introductionmodal: {
-        // height: height / 2,
-        // ...modal_radius,
-        // backgroundColor: bgColor,
+      confirm_incomplete_modal: {
+        height: height / 4,
+        ...modal_radius,
+        backgroundColor: bgColor,
       },
     });
 
@@ -679,7 +584,7 @@ class SurveyPreview extends React.Component {
                     <TouchableOpacity
                       onPress={() =>
                         this.state.current_question_index > 0
-                          ? this.handleCancel()
+                          ? this.handleOpenModal('confirm_incomplete_modal')
                           : this.props.navigation.goBack()
                       }>
                       <View>
@@ -1034,6 +939,23 @@ class SurveyPreview extends React.Component {
             selected_option={this.state?.selected_option || {}}
             handleDropdownPressed={params => this.handleDropdownPressed(params)}
             handleCloseModal={() => this.handleCloseModal('dropdownmodal')}
+          />
+        </Modal>
+
+        <Modal
+          style={modal_styles.confirm_incomplete_modal}
+          ref="confirm_incomplete_modal"
+          position={'bottom'}
+          coverScreen
+          onClosingState={() =>
+            this.handleCloseModal('confirm_incomplete_modal')
+          }>
+          <ConfirmIncomplete
+            navigation={this.props.navigation}
+            handleCloseModal={() =>
+              this.handleCloseModal('confirm_incomplete_modal')
+            }
+            {...this.state}
           />
         </Modal>
       </>

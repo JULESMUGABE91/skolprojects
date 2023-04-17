@@ -5,64 +5,44 @@ import {Text} from '../Text';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {connect} from 'react-redux';
 import LocalStorage from '../../utils/storage';
-import AnswersPerDayChart from '../Chart/queries/AnswersPerDayChart';
-import AnswersPie from '../Chart/queries/AnswersPie';
-import {APP_ID} from '../../constants/strings';
+import {WebView} from 'react-native-webview';
+import {URL} from '../../constants/strings';
 
 class Dashboard extends React.Component {
   state = {
-    answers: [],
-    answerFilters: {},
-    isInit: true,
+    user: {},
   };
 
   componentDidMount = async () => {
     let user = await new LocalStorage().get();
 
-    const {survey_id} = this.props.params;
-
-    let answerFilters = {};
-
-    if (survey_id) {
-      answerFilters.survey = survey_id;
-    }
-
-    if (!user.account_type) {
-      answerFilters.user = user.user_id;
-    }
-
-    this.setState({
-      answerFilters: {
-        ...answerFilters,
-        organization: APP_ID,
-      },
-      isInit: false,
-    });
+    this.setState({user});
   };
 
+  INJECTED_JAVASCRIPT = `(function() {
+    window.ReactNativeWebView.postMessage(JSON.stringify({message : {"value"}}));
+  })();`;
   render() {
     return (
-      <View style={styles.container}>
-        {/* <View style={styles.filters_container}>
-          <View style={styles.title_bx}>
-            <MaterialCommunityIcons
-              name="view-dashboard"
-              style={styles.title_b_iconx}
-            />
-          </View>
-          <Text numberOfLines={2} style={{flex: 1}} type="bold" primary>
-            {this.props.params.survey_title}
-          </Text>
-        </View> */}
-        {!this.state.isInit && (
-          <ScrollView contentContainerStyle={{flexGrow: 1, paddingBottom: 150}}>
-            <View style={styles.content}>
-              <AnswersPerDayChart filters={this.state.answerFilters} />
-              {/* <AnswersPie filters={this.state.answerFilters} /> */}
-            </View>
-          </ScrollView>
-        )}
-      </View>
+      // <View style={styles.container}>
+      <WebView
+        ref={ref => {
+          this.webview = ref;
+        }}
+        source={{
+          uri: `https://bfe2-2c0f-fe30-164a-0-50ba-cc61-2184-620c.ngrok-free.app/dashboard/home`,
+          headers: {
+            authorization: `Bearer ${this.state.token}`,
+          },
+        }}
+        style={{flex: 1}}
+        injectedJavaScript={this.INJECTED_JAVASCRIPT}
+        onMessage={event => {
+          const data = JSON.parse(event.nativeEvent.data);
+          alert(data.key);
+        }}
+      />
+      // </View>
     );
   }
 }

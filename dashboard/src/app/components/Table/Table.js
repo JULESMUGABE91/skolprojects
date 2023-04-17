@@ -8,6 +8,7 @@ import { Pagination } from "../Pagination";
 import "./styles.css";
 import { LoadingSpinner } from "../LoadingSpinner";
 import { CSVLink } from "react-csv";
+import pdf from "../../assets/pdf.png";
 
 let copyData = [];
 class Table extends React.Component {
@@ -73,6 +74,7 @@ class Table extends React.Component {
       sortOrder,
       sortColumn,
       tab,
+      handleDownloadFilePdf,
     } = this.props;
 
     const { limit, data } = this.state;
@@ -301,6 +303,11 @@ class Table extends React.Component {
                                   <img src={item[header.key]} />
                                 </td>
                               )}
+                              {header.type === "download_pdf" && (
+                                <td onClick={() => handleDownloadFilePdf(item)}>
+                                  <img src={pdf} />
+                                </td>
+                              )}
                               {header.type === "level" && (
                                 <td>
                                   <div
@@ -365,6 +372,7 @@ class Table extends React.Component {
                                 header.type !== "photo" &&
                                 header.type !== "level" &&
                                 header.type !== "sensor_status" &&
+                                header.type !== "download_pdf" &&
                                 header.type !== "link" && (
                                   <td
                                     className="data"

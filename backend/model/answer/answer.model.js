@@ -7,6 +7,7 @@ const userMongo = require("../users/user.mongo");
 const answerMongo = require("./answer.mongo");
 const { findQuestion } = require("../question/question.model");
 const { findSurvey } = require("../survey/survey.model");
+const { responderInfoFields } = require("../../constant/string");
 
 const createAnswer = async (params) => {
   delete params._id;
@@ -131,8 +132,6 @@ const answerCommonFilters = (params) => {
   if (status) {
     filters.status = status;
   }
-  console.log(filters);
-
   return filters;
 };
 
@@ -176,7 +175,7 @@ const findAnswer = async (params = {}) => {
   await answerMongo.populate(answers, {
     path: "user",
     model: userMongo,
-    select: { firstname: 1, lastname: 1 },
+    select: { firstname: 1, lastname: 1, phone: 1 },
   });
   return answers;
 };
@@ -286,24 +285,15 @@ const findAnswersFromDifferentLocation = async (params) => {
 };
 
 const findInsightAnswers = async (params) => {
-  try {
-    let answers = await findAnswerNormal({
-      ...params,
-    });
+  let answers = await findAnswerNormal({
+    ...params,
+  });
 
-    const total_respondent = await fetchRespondents(params, answers);
+  const total_respondent = await fetchRespondents(params, answers);
 
-    const question_answers = await getQuestionAnswers(
-      answers,
-      total_respondent
-    );
+  const question_answers = await getQuestionAnswers(answers, total_respondent);
 
-    return question_answers;
-  } catch (error) {
-    console.log("====================================");
-    console.log(error);
-    console.log("====================================");
-  }
+  return question_answers;
 };
 
 const getQuestionAnswers = async (data, total_respondent) => {
@@ -383,7 +373,8 @@ const percentagePerAnswer = (answers, total_respondent) => {
 };
 
 const fetchRespondents = async (params, answers) => {
-  let data = [];
+  let data = [],
+    respondents = {};
 
   if (!answers) {
     answers = await findAnswer(params);
@@ -393,16 +384,47 @@ const fetchRespondents = async (params, answers) => {
     if (!data.includes(answer.identifier)) {
       data.push(answer.identifier);
     }
-  }
 
+    if (!respondents[answer.identifier]) {
+      respondents[answer.identifier] = {};
+    }
+
+    if (
+      responderInfoFields.includes(answer.question.type) &&
+      answer.answers[0].type &&
+      (answer.answers[0].value !== "" || answer.answers[0].option !== "")
+    ) {
+      respondents[answer.identifier][answer.question.type] =
+        answer.answers[0].type === "textinput" ||
+        answer.answers[0].type === "input" ||
+        answer.answers[0].type === "number"
+          ? answer.answers[0].value
+          : answer.answers[0].option;
+
+      respondents[answer.identifier]["surveyor"] =
+        answer?.user?.firstname + " " + answer?.user?.lastname;
+      respondents[answer.identifier]["surveyor_id"] = answer?.user?._id;
+      respondents[answer.identifier]["surveyor_phone"] = answer?.user?.phone;
+      respondents[answer.identifier]["status"] = answer?.status;
+      respondents[answer.identifier]["start_location"] =
+        answer?.start_location.address || "-";
+      respondents[answer.identifier]["end_location"] =
+        answer?.end_location?.address || "-";
+      respondents[answer.identifier]["end_interview"] = answer?.end_interview;
+      respondents[answer.identifier]["start_interview"] =
+        answer?.start_interview;
+      respondents[answer.identifier]["identifier"] = answer?.identifier;
+      respondents[answer.identifier]["survey"] = answer?.survey._id;
+    }
+  }
   return {
     total: data.length,
+    respondents,
   };
 };
 
 const getKey = (common, option) => {
   let key = "";
-  let count = 0;
   for (let el of common) {
     let option_key = option.option.replace(" ", "").replace(" ", "");
 
@@ -478,7 +500,7 @@ const fetchRespondentsByRegion = async (params) => {
           }
 
           for (let option of answers) {
-            if (option._id === region._id && option.option === region.option) {
+            if (option.option === region.option) {
               groupRegion[key].count += 1;
             }
           }

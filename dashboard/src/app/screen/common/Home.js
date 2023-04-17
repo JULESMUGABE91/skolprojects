@@ -2,7 +2,7 @@ import axios from "axios";
 import moment from "moment";
 import React from "react";
 import { connect } from "react-redux";
-import { Redirect } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import { CardCount } from "../../components/CardCount";
 import { Header } from "../../components/Header";
 import { ENDPOINT } from "../../constants/api";
@@ -297,34 +297,43 @@ class Home extends React.Component {
         {this.props.isCountCard && (
           <div className="row">
             <div className="col-6 col-md-3">
-              <CardCount
-                title="Total Respondent"
-                total={
-                  this.state.isLoadingRespondent
-                    ? "..."
-                    : this.state.total_respondent
-                }
-              />
+              <Link to="/dashboard/home/report">
+                <CardCount
+                  title="Total Respondent"
+                  total={
+                    this.state.isLoadingRespondent
+                      ? "..."
+                      : this.state.total_respondent
+                  }
+                />
+              </Link>
             </div>
             <div className="col-6 col-md-3">
-              <CardCount
-                title="Total Surveys"
-                total={
-                  this.state.isLoadingSurvey ? "..." : this.state.total_surveys
-                }
-              />
+              <Link to="/dashboard/surveys/all_surveys">
+                <CardCount
+                  title="Total Surveys"
+                  total={
+                    this.state.isLoadingSurvey
+                      ? "..."
+                      : this.state.total_surveys
+                  }
+                />
+              </Link>
             </div>
             <div className="col-6 col-md-3">
-              <CardCount
-                title="Total Questions"
-                total={
-                  this.state.isLoadingQuestion
-                    ? "..."
-                    : this.state.total_question
-                }
-              />
+              <Link to="/dashboard/surveys/questions">
+                <CardCount
+                  title="Total Questions"
+                  total={
+                    this.state.isLoadingQuestion
+                      ? "..."
+                      : this.state.total_question
+                  }
+                />
+              </Link>
             </div>
             <div className="col-6 col-md-3">
+              {/* <Link to="/dashboard/home/report"> */}
               <CardCount
                 title="Incomplete Questionnaires"
                 total={
@@ -333,6 +342,7 @@ class Home extends React.Component {
                     : this.state.total_incomplete
                 }
               />
+              {/* </Link> */}
             </div>
           </div>
         )}

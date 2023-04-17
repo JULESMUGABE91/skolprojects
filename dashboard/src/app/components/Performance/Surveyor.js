@@ -9,6 +9,9 @@ import { connect } from "react-redux";
 import { Modal } from "../Modal";
 import filtersHandler from "../../utils/filtersHandler";
 import Questionnaires from "./Questionnaires";
+import { CSVLink } from "react-csv";
+import reportFileName from "../../utils/reportFileName";
+import exportPDF from "../../utils/exportPDF";
 
 class Surveyor extends React.Component {
   state = {
@@ -16,10 +19,11 @@ class Surveyor extends React.Component {
     isLoading: true,
     user: {},
     page: 1,
-    limit: 10,
+    limit: 20,
     selected_data: {},
     error: {},
     totalPageCount: 0,
+    csvData: [],
   };
 
   componentDidMount = async () => {
@@ -148,7 +152,33 @@ class Surveyor extends React.Component {
     );
   }
 
-  render() {
+  downloadExcel = () => {
+    const { data } = this.state;
+
+    this.setState({
+      isLoading: true,
+    });
+
+    this.setState(
+      {
+        isLoading: false,
+        csvData: data,
+      },
+      () => {
+        this.refs.csvDownload?.link.click();
+      }
+    );
+  };
+
+  downloadPDF = () => {
+    const headers = this.returnTableHeaders();
+
+    const { data } = this.state;
+
+    exportPDF(reportFileName(this.props.filters), headers, data, "landscape");
+  };
+
+  returnTableHeaders() {
     let headers = [
       {
         title: "First Name",
@@ -178,6 +208,10 @@ class Surveyor extends React.Component {
       });
     }
 
+    return headers;
+  }
+
+  render() {
     return (
       <div>
         <Table
@@ -190,7 +224,31 @@ class Surveyor extends React.Component {
           page={this.state.page}
           limit={this.state.limit}
           isLoading={this.state.isLoading}
-          headers={headers}
+          headers={this.returnTableHeaders()}
+          filters={[
+            {
+              type: "refresh",
+              title: "Refresh",
+              icon: "bx bx-refresh",
+              onPress: () => this.getData(true),
+            },
+            {
+              type: "export",
+              title: "Export",
+              button_type: "dropdown",
+              icon: "bx bxs-download",
+              options: [
+                {
+                  name: "PDF",
+                  onPress: this.downloadPDF.bind(this),
+                },
+                {
+                  name: "CSV",
+                  onPress: this.downloadExcel.bind(this),
+                },
+              ],
+            },
+          ]}
           rowPress={(item) => {
             this.handleShowModal(
               "showModal",
@@ -205,8 +263,16 @@ class Surveyor extends React.Component {
           title={this.state.modalTitle}
           showHeaderBottomBorder={false}
         >
-          <Questionnaires {...this.state.selected_data} handleCloseModal={this.handleCloseModal.bind(this, "showModal")}/>
+          <Questionnaires
+            {...this.state.selected_data}
+            handleCloseModal={this.handleCloseModal.bind(this, "showModal")}
+          />
         </Modal>
+        <CSVLink
+          ref="csvDownload"
+          filename={reportFileName(this.props.filters)}
+          data={this.state.csvData}
+        ></CSVLink>
       </div>
     );
   }

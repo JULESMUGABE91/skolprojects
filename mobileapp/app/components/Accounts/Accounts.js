@@ -22,6 +22,9 @@ class Accounts extends React.Component {
     user: {},
     isLoading: true,
     data: [],
+    limit: 100,
+    page: 1,
+    totalCount: 0,
   };
 
   componentDidMount = async () => {
@@ -38,19 +41,25 @@ class Accounts extends React.Component {
     this.focusListener = this.props.navigation.addListener(
       'focus',
       async () => {
-        this.getData(true);
+        this.getData(false);
       },
     );
   };
 
-  getData(isLoading) {
+  getData(isLoading, search) {
     this.setState({isLoading, refreshing: false});
 
-    const {user} = this.state;
+    const {user, page, limit} = this.state;
 
     let body = {
       organization: APP_ID,
+      page,
+      limit,
     };
+
+    if (search) {
+      body.search = search;
+    }
 
     const options = {
       method: 'POST',
@@ -65,11 +74,12 @@ class Accounts extends React.Component {
       .then(data => {
         this.setState({
           isLoading: false,
-          data: data.data,
+          data: data.data.data,
           refreshing: false,
+          totalCount: data.data.count,
         });
 
-        copyData = data.data.slice(0);
+        copyData = data.data.data.slice(0);
       })
       .catch(error => {
         toastMessage(error);
@@ -91,10 +101,13 @@ class Accounts extends React.Component {
     this.setState({search_text: text});
 
     for (let el of copyData) {
-      console.log(el);
       if (JSON.stringify(el).toLowerCase().indexOf(text.toLowerCase()) !== -1) {
         array.push(el);
       }
+    }
+
+    if (array.length === 0 && text !== '') {
+      this.getData(true, text);
     }
 
     this.setState({data: array});

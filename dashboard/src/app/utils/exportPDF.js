@@ -26,7 +26,7 @@ export default (
   const marginLeft = 40;
   const doc = new jsPDF(orientation, unit, size);
 
-  doc.setFontSize(15);
+  doc.setFontSize(13);
 
   let _headers = headers.map((elt) => elt.title !== "Action" && elt.title);
   let keys = headers.map((elt) => elt.key);
@@ -40,7 +40,7 @@ export default (
     head: [_headers],
     body,
     styles: { halign: "left" },
-    headStyles: { fillColor: [11, 147, 71] },
+    headStyles: { fillColor: [0, 0, 0] },
     alternateRowStyles: { fillColor: [236, 247, 241] },
     tableLineColor: [11, 147, 71],
     tableLineWidth: 0.1,

@@ -31,6 +31,11 @@ class DashboardLayout extends React.Component {
     }
 
     window.addEventListener("resize", this.handleResize.bind(this));
+    window.addEventListener("message", (data) => {
+      console.log("====================================");
+      console.log("from webview", data);
+      console.log("====================================");
+    });
   };
 
   componentDidUpdate(nextProps) {
