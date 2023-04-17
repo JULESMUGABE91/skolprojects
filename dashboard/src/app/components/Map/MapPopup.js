@@ -10,27 +10,32 @@ const MapPopup = (props) => {
     <Popup>
       <div className="bin-popup">
         <div className="right">
-          <div className="item">
-            <span>
-              Surveyor:{" "}
-              <b>
-                {props.data?.user?.firstname +
-                  " " +
-                  props?.data?.user?.lastname}
-              </b>
-            </span>
-          </div>
-          <div className="item">
-            <span>
-              Surveyor Contact: <b>{props.data.user.phone}</b>
-            </span>
-          </div>
+          {props.data?.user && (
+            <>
+              <div className="item">
+                <span>
+                  Surveyor:{" "}
+                  <b>
+                    {props.data?.user?.firstname +
+                      " " +
+                      props?.data?.user?.lastname}
+                  </b>
+                </span>
+              </div>
+              <div className="item">
+                <span>
+                  Surveyor Contact: <b>{props.data.user.phone}</b>
+                </span>
+              </div>
+            </>
+          )}
           <div className="item">
             <span>
               Location:{" "}
               <b>{props?.data?.start_location?.address || "Unknown"}</b>
             </span>
           </div>
+
           {/* <div className="item">
             <span>
               End Location:{" "}
