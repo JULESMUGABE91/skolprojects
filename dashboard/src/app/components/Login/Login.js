@@ -208,8 +208,6 @@ class Login extends React.Component {
         ...data,
       });
 
-      console.log(data);
-
       if (Object.keys(data?.organization || {}).length !== 0) {
         let org_obj = {
           label: data.organization.name,

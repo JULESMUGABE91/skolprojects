@@ -64,8 +64,8 @@ class Report extends React.Component {
       page,
     });
 
-    if (this.props.filters.user?.value) {
-      request_body.user = this.props.filters.user?.value;
+    if (this.props.filters.user && this.props.filters?.user?.value) {
+      request_body.user = this.props.filters?.user?.value;
     }
 
     if (search_text && search_text !== "") {
@@ -235,14 +235,14 @@ class Report extends React.Component {
         title: "Address",
         key: "respondent_address",
       },
-      // {
-      //   title: "Surveyor Name",
-      //   key: "surveyor",
-      // },
-      // {
-      //   title: "Surveyor Contact",
-      //   key: "surveyor_phone",
-      // },
+      {
+        title: "Surveyor Name",
+        key: "surveyor",
+      },
+      {
+        title: "Surveyor Contact",
+        key: "surveyor_phone",
+      },
       {
         title: "Survey Location",
         key: "start_location",
