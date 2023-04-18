@@ -136,39 +136,42 @@ const answerCommonFilters = (params) => {
 };
 
 const findAnswer = async (params = {}) => {
-  const answers = await answerMongo.aggregate([
-    { $sort: { createdAt: -1, "question.position": 1 } },
-    { $match: answerCommonFilters(params) },
-    {
-      $group: {
-        _id: {
-          identifier: "$identifier",
-          question: "$question",
-          user: "$user",
-        },
-        dups: {
-          $push: "$_id",
-        },
-        count: {
-          $sum: 1,
-        },
-        doc: { $first: "$$ROOT" },
-      },
-    },
-    {
-      $match: {
-        _id: {
-          $ne: null,
-        },
-        count: {
-          $eq: 1,
+  const answers = await answerMongo.aggregate(
+    [
+      { $sort: { createdAt: -1, "question.position": 1 } },
+      { $match: answerCommonFilters(params) },
+      {
+        $group: {
+          _id: {
+            identifier: "$identifier",
+            question: "$question",
+            user: "$user",
+          },
+          dups: {
+            $push: "$_id",
+          },
+          count: {
+            $sum: 1,
+          },
+          doc: { $first: "$$ROOT" },
         },
       },
-    },
-    // { $sort: { ...sort, "question.position": 1 } },
-    { $unwind: "$doc" },
-    { $replaceRoot: { newRoot: "$doc" } },
-  ]);
+      {
+        $match: {
+          _id: {
+            $ne: null,
+          },
+          count: {
+            $eq: 1,
+          },
+        },
+      },
+      // { $sort: { ...sort, "question.position": 1 } },
+      { $unwind: "$doc" },
+      { $replaceRoot: { newRoot: "$doc" } },
+    ],
+    { allowDiskUse: true }
+  );
 
   await answerMongo.populate(answers, { path: "survey" });
   await answerMongo.populate(answers, { path: "question" });
