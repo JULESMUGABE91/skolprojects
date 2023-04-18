@@ -53,7 +53,7 @@ class Home extends React.Component {
 
     const options = {
       method: "POST",
-      url: ENDPOINT + "/answer/fetch",
+      url: ENDPOINT + "/answer/incomplete",
       data: {
         status: "incomplete",
         ...filtersHandler(this.props.filters),
@@ -65,7 +65,7 @@ class Home extends React.Component {
 
     axios(options)
       .then((res) => {
-        const total_incomplete = res.data.length;
+        const total_incomplete = res.data;
         this.setState({ total_incomplete, isLoadingStatus: false });
       })
       .catch((error) => {

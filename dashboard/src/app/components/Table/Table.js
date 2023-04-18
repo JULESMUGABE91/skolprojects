@@ -305,7 +305,10 @@ class Table extends React.Component {
                               )}
                               {header.type === "download_pdf" && (
                                 <td onClick={() => handleDownloadFilePdf(item)}>
-                                  <img src={pdf} />
+                                  <img
+                                    src={pdf}
+                                    style={{ width: 30, height: 30 }}
+                                  />
                                 </td>
                               )}
                               {header.type === "level" && (

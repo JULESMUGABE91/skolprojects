@@ -235,14 +235,14 @@ class Report extends React.Component {
         title: "Address",
         key: "respondent_address",
       },
-      {
-        title: "Surveyor Name",
-        key: "surveyor",
-      },
-      {
-        title: "Surveyor Contact",
-        key: "surveyor_phone",
-      },
+      // {
+      //   title: "Surveyor Name",
+      //   key: "surveyor",
+      // },
+      // {
+      //   title: "Surveyor Contact",
+      //   key: "surveyor_phone",
+      // },
       {
         title: "Survey Location",
         key: "start_location",
