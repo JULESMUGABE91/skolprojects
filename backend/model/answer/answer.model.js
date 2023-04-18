@@ -601,56 +601,30 @@ const fetchAndGroupByUser = async (params) => {
   return answersData;
 };
 
-const fetchCompletedIncomplete = async () => {
-  // try {
-  //   const answers = await findAnswer();
-  //   const questions = await findQuestion();
+const fetchIncomplete = async (params) => {
+  try {
+    // const answers = await answerMongo.find({
+    //   user: "643a6e60196354dd18fdcf10",
+    // }); //findAnswer(params);
 
-  //   let groupBySurvey = {},
-  //     groupByIdentifier = {};
+    const answers = await findAnswer(params);
+    let incomplete = [];
 
-  //   for (let el of questions) {
-  //     if (!groupBySurvey[el.survey._id]) {
-  //       groupBySurvey[el.survey._id] = { count: 0 };
-  //     }
-  //     groupBySurvey[el.survey._id]["count"] += 1;
-  //   }
-
-  //   for (let el of answers) {
-  //     if (!groupBySurvey[el.survey._id]["data"]) {
-  //       groupBySurvey[el.survey._id]["data"] = {};
-  //     }
-  //     if (!groupBySurvey[el.survey._id]["data"][el.identifier]) {
-  //       groupBySurvey[el.survey._id]["data"][el.identifier] = [];
-  //     }
-  //     groupBySurvey[el.survey._id]["data"][el.identifier].push(el);
-  //   }
-
-  //   let completed = 0,
-  //     incomplete = 0;
-
-  //   for (let el of Object.keys(groupBySurvey)) {
-  //     for (let identifier_item of Object.keys(groupBySurvey[el].data)) {
-  //       if (identifier_item.length === groupBySurvey[el].count) {
-  //         completed += 1;
-  //       } else {
-  //         incomplete += 1;
-  //       }
-  //     }
-
-  //     if (!groupByIdentifier[el.identifier]) {
-  //       groupByIdentifier[el.identifier] = [];
-  //     }
-  //     groupByIdentifier[el.identifier].push(el);
-  //   }
-
-  //   return {
-  //     completed,
-  //     incomplete,
-  //   };
-  // } catch (error) {
-  //   console.log(error);
-  // }
+    for (let answer of answers) {
+      if (!incomplete.includes(answer.identifier)) {
+        incomplete.push(answer.identifier);
+        // incomplete.push(answer.identifier);
+        // const arr = await answerMongo.findByIdAndUpdate(
+        //   { _id: answer._id },
+        //   { user: "643e687b95edcc7df79e22e6" }
+        // );
+        // console.log(answer._id);
+      }
+    }
+    return incomplete.length;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 module.exports = {
@@ -670,6 +644,6 @@ module.exports = {
   fetchByStatus,
   fetchRespondentsByAgeGroup,
   fetchAndGroupByUser,
-  fetchCompletedIncomplete,
+  fetchIncomplete,
   findAnswerNormal,
 };
