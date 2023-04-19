@@ -173,8 +173,16 @@ const findAnswer = async (params = {}) => {
     { allowDiskUse: true }
   );
 
-  await answerMongo.populate(answers, { path: "survey" });
-  await answerMongo.populate(answers, { path: "question" });
+  await answerMongo.populate(answers, {
+    path: "survey",
+    model: surveyMongo,
+    select: { _id: 1, title: 1 },
+  });
+  await answerMongo.populate(answers, {
+    path: "question",
+    model: questionMongo,
+    select: { question: 1, options: 1, _id: 1, type: 1 },
+  });
   await answerMongo.populate(answers, {
     path: "user",
     model: userMongo,
@@ -344,6 +352,7 @@ const getQuestionAnswers = async (data, total_respondent) => {
                     count: 0,
                   };
                 }
+
                 answers[question][key_option]["data"][selection.value][
                   "count"
                 ] += 1;
@@ -477,7 +486,6 @@ const fetchRespondentsByGender = async (params) => {
 
   const toFindDuplicates = (identifiers) =>
     identifiers.filter((item, index) => identifiers.indexOf(item) !== index);
-  console.log(toFindDuplicates(identifiers));
 
   return groupGender;
 };
@@ -629,6 +637,7 @@ const fetchIncomplete = async (params) => {
     console.log(error);
   }
 };
+
 
 module.exports = {
   createAnswer,
