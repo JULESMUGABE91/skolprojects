@@ -19,10 +19,10 @@ class ReportScreen extends React.Component {
         <div>
           <Tabs
             options={[
-              // {
-              //   title: "Summary",
-              //   data: this.renderSummary(),
-              // },
+              {
+                title: "Summary",
+                data: this.renderSummary(),
+              },
               // {
               //   title: "Respondents",
               //   data: this.renderReport(),

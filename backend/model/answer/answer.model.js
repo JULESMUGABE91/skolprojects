@@ -466,8 +466,7 @@ const fetchRespondentsByGender = async (params) => {
 
 const fetchRespondentsByRegion = async (params) => {
   try {
-    let groupRegion = {},
-      total_respondent = await fetchRespondents(answerCommonFilters(params));
+    let groupRegion = {};
 
     for (let el of regions) {
       const regionData = await answerMongo.aggregate([
@@ -514,6 +513,8 @@ const fetchRespondentsByRegion = async (params) => {
         ),
       };
     }
+
+    console.log(groupRegion);
 
     return groupRegion;
   } catch (error) {
