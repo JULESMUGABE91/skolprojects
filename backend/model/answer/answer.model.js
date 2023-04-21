@@ -451,7 +451,7 @@ const fetchRespondentsByGender = async (params) => {
       },
     ]);
 
-    let total_respondent = await fetchRespondents(answerCommonFilters(params));
+    let total_respondent = await fetchRespondents(params);
 
     groupGender[el.value] = {
       count: genderData.length,
@@ -505,9 +505,7 @@ const fetchRespondentsByRegion = async (params) => {
         },
       ]);
 
-      let total_respondent = await fetchRespondents(
-        answerCommonFilters(params)
-      );
+      let total_respondent = await fetchRespondents(params);
 
       groupRegion[el.value] = {
         count: regionData.length,
@@ -535,7 +533,7 @@ const fetchRespondentsByAgeGroup = async (params) => {
     const questionAgeGroup = await findQuestion(questionFilters);
 
     let groupAgeGroup = {},
-      total_respondent = await fetchRespondents(answerCommonFilters(params));
+      total_respondent = await fetchRespondents(params);
 
     let groupOptions = [];
 
@@ -573,7 +571,9 @@ const fetchRespondentsByAgeGroup = async (params) => {
 
         groupAgeGroup[el] = {
           count: groupData.length,
-          percentage: Math.round((groupData.length / total_respondent.total) * 100),
+          percentage: Math.round(
+            (groupData.length / total_respondent.total) * 100
+          ),
         };
       }
     }
