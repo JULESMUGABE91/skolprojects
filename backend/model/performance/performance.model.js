@@ -1,20 +1,10 @@
 const { default: mongoose } = require("mongoose");
-const { findAnswer } = require("../answer/answer.model");
 const answerMongo = require("../answer/answer.mongo");
-const { findUser } = require("../users/users.model");
 const userMongo = require("../users/user.mongo");
 const questionMongo = require("../question/question.mongo");
 
 const fetchSurveyorPerformance = async (params) => {
-  const {
-    account_type,
-    organization,
-    start_date,
-    end_date,
-    page,
-    limit,
-    user,
-  } = params;
+  const { account_type, organization, start_date, end_date, user } = params;
   let user_ids = [],
     answerFilters = {},
     commonFilters = {};
@@ -35,97 +25,104 @@ const fetchSurveyorPerformance = async (params) => {
   }
 
   if (user) {
-    commonFilters.user = user;
+    commonFilters.user = mongoose.Types.ObjectId(user);
   }
 
-  const userFilters = {
-    account_type,
-    organization,
-    page,
-    limit,
-  };
+  const answers = await answerMongo.aggregate([
+    { $match: commonFilters },
+    { $group: { _id: "$identifier", doc: { $first: "$$ROOT" } } },
+    { $replaceRoot: { newRoot: "$doc" } },
+    { $group: { _id: "$user", count: { $sum: 1 } } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "_id",
+        foreignField: "_id",
+        as: "user_info",
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        count: 1,
+        user_info: { $arrayElemAt: ["$user_info", 0] },
+      },
+    },
+    { $sort: { count: -1 } },
+  ]);
 
-  if (user) {
-    userFilters.user = user;
-  }
+  return answers;
 
-  const users = await findUser(userFilters);
+  //   .find(
+  //     { user: { $in: user_ids }, ...answerFilters, ...commonFilters },
+  //     {
+  //       identifier: 1,
+  //       question: 1,
+  //       user: 1,
+  //       createdAt: 1,
+  //       status: 1,
+  //       user: 1,
+  //       survey: 1,
+  //       last_question: 1,
+  //     }
+  //   )
+  //   .populate({
+  //     path: "user",
+  //     model: userMongo,
+  //     select: { firstname: 1, lastname: 1, _id: 1, phone: 1 },
+  //   })
+  //   .sort({ createdAt: -1 });
 
-  for (let user of users.data) {
-    user_ids.push(user._id);
-  }
+  // let group_by_user = {};
 
-  const answers = await answerMongo
-    .find(
-      { user: { $in: user_ids }, ...answerFilters, ...commonFilters },
-      {
-        identifier: 1,
-        question: 1,
-        user: 1,
-        createdAt: 1,
-        status: 1,
-        user: 1,
-        survey: 1,
-        last_question: 1,
-      }
-    )
-    .populate({
-      path: "user",
-      model: userMongo,
-      select: { firstname: 1, lastname: 1, _id: 1, phone: 1 },
-    })
-    .sort({ createdAt: -1 });
+  // for (let answer of answers) {
+  //   if (!group_by_user[answer.user._id]) {
+  //     group_by_user[answer.user._id] = {
+  //       user: {
+  //         firstname: answer.user.firstname,
+  //         lastname: answer.user.lastname,
+  //         phone: answer.user.phone,
+  //         _id: answer.user._id,
+  //       },
+  //       data: {},
+  //     };
+  //   }
 
-  let group_by_user = {};
+  //   if (!group_by_user[answer.user._id]["data"][answer.identifier]) {
+  //     group_by_user[answer.user._id]["data"][answer.identifier] = {
+  //       total: 0,
+  //       incomplete: 0,
+  //       last_question: answer.last_question,
+  //       createdAt: answer.createdAt,
+  //       survey: answer.survey,
+  //     };
+  //   }
 
-  for (let answer of answers) {
-    if (!group_by_user[answer.user._id]) {
-      group_by_user[answer.user._id] = {
-        user: {
-          firstname: answer.user.firstname,
-          lastname: answer.user.lastname,
-          phone: answer.user.phone,
-          _id: answer.user._id,
-        },
-        data: {},
-      };
-    }
+  //   group_by_user[answer.user._id]["data"][answer.identifier].total += 1;
 
-    if (!group_by_user[answer.user._id]["data"][answer.identifier]) {
-      group_by_user[answer.user._id]["data"][answer.identifier] = {
-        total: 0,
-        incomplete: 0,
-        last_question: answer.last_question,
-        createdAt: answer.createdAt,
-        survey: answer.survey,
-      };
-    }
+  //   if (answer.status === "incomplete") {
+  //     group_by_user[answer.user._id]["data"][answer.identifier][
+  //       "incomplete"
+  //     ] += 1;
+  //   }
+  // }
 
-    group_by_user[answer.user._id]["data"][answer.identifier].total += 1;
+  // let user_performance = [];
 
-    if (answer.status === "incomplete") {
-      group_by_user[answer.user._id]["data"][answer.identifier][
-        "incomplete"
-      ] += 1;
-    }
-  }
+  // for (let user of Object.keys(group_by_user)) {
+  //   const questionnaires = group_by_user[user].data;
 
-  let user_performance = [];
+  //   user_performance.push({
+  //     ...group_by_user[user].user,
+  //     questionnaires,
+  //     respondents: Object.keys(questionnaires)?.length || 0,
+  //   });
+  // }
 
-  for (let user of Object.keys(group_by_user)) {
-    const questionnaires = group_by_user[user].data;
-
-    user_performance.push({
-      ...group_by_user[user].user,
-      questionnaires,
-      respondents: Object.keys(questionnaires)?.length || 0,
-    });
-  }
-
-  return {
-    data: user_performance,
-    count: users.count,
-  };
+  // return {
+  //   data: user_performance,
+  //   count: users.count,
+  // };
 };
 
 const fetchSingleSurveyorPerformance = async (params) => {

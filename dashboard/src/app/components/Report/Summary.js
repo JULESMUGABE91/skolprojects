@@ -8,19 +8,25 @@ import { getStorage } from "../../utils/storage";
 import { connect } from "react-redux";
 import { Modal } from "../Modal";
 import filtersHandler from "../../utils/filtersHandler";
-import Questionnaires from "./Questionnaires";
 import { CSVLink } from "react-csv";
-import reportFileName from "../../utils/reportFileName";
 import exportPDF from "../../utils/exportPDF";
+import moment from "moment";
+import reportFileName from "../../utils/reportFileName";
+import ReportDownload from "./ReportDownload";
+import { saveDownload } from "../../utils/download";
+import SummaryModal from "./modal/SummaryModal";
 import { Home } from "../../screen/common";
+import Gender from "./chart/Gender";
 
-class Surveyor extends React.Component {
+let copyData = [];
+
+class Summary extends React.Component {
   state = {
     data: [],
     isLoading: true,
     user: {},
     page: 1,
-    limit: 20,
+    limit: 50,
     selected_data: {},
     error: {},
     totalPageCount: 0,
@@ -33,11 +39,11 @@ class Surveyor extends React.Component {
     this.getData(true);
   };
 
-  componentDidUpdate(prevProps){
-    if(prevProps.filters  !== this.props.filters){
-      this.getData(true)
+  componentDidUpdate = async (prevProps) => {
+    if (prevProps.filters !== this.props.filters) {
+      this.getData(true);
     }
-  }
+  };
 
   getUserLoggedInInfo = async () => {
     const user = await getStorage();
@@ -46,28 +52,20 @@ class Surveyor extends React.Component {
     });
   };
 
-  getData(isLoading, search_text) {
+  getData(isLoading) {
     const { user, limit, page } = this.state;
 
     this.setState({
       isLoading,
     });
 
-    let url = ENDPOINT + "/user/performance";
+    let url = ENDPOINT + "/answer/close_question/summary";
 
     let request_body = filtersHandler({
       ...this.props.filters,
       limit,
       page,
     });
-
-    if (this.props.filters.user?.value) {
-      request_body.user = this.props.filters.user?.value;
-    }
-
-    if (search_text && search_text !== "") {
-      request_body.search = search_text;
-    }
 
     const options = {
       method: "POST",
@@ -80,11 +78,15 @@ class Surveyor extends React.Component {
 
     axios(options)
       .then((res) => {
-        let data = res.data;
+        let { data, totalCount } = res.data;
+
         this.setState({
           data: data,
           isLoading: false,
+          totalPageCount: totalCount,
         });
+
+        copyData = data.slice(0);
       })
       .catch((error) => {
         this.setState({
@@ -125,7 +127,14 @@ class Surveyor extends React.Component {
       search_text,
     });
 
-    this.getData(true, search_text);
+    for (let el of copyData) {
+      if (
+        JSON.stringify(el).toLowerCase().indexOf(search_text.toLowerCase()) !==
+        -1
+      ) {
+        array.push(el);
+      }
+    }
 
     this.setState({
       data: array,
@@ -157,60 +166,63 @@ class Surveyor extends React.Component {
     );
   }
 
-  downloadExcel = () => {
-    const { data } = this.state;
-
-    this.setState({
-      isLoading: true,
-    });
-
-    this.setState(
-      {
-        isLoading: false,
-        csvData: data,
-      },
-      () => {
-        this.refs.csvDownload?.link.click();
-      }
-    );
-  };
-
-  downloadPDF = () => {
-    const headers = this.returnTableHeaders();
-
-    const { data } = this.state;
-
-    exportPDF(reportFileName(this.props.filters), headers, data, "landscape");
-  };
-
   returnTableHeaders() {
-    let headers = [
+    return [
+      // {
+      //   title: "Survey",
+      //   key: "survey.title",
+      // },
       {
-        title: "First Name",
-        key: "user_info.firstname",
+        title: "Question",
+        key: "question.question",
       },
       {
-        title: "Last Name",
-        key: "user_info.lastname",
+        title: "Answer",
+        key: "answer",
       },
       {
-        title: "Contact",
-        key: "user_info.phone",
-      },
-      {
-        title: "Total Respondent",
+        title: "Respondent",
         key: "count",
       },
+      // {
+      //   title: "Created At",
+      //   key: "createdAt",
+      //   isMoment: true,
+      //   formatTime: "lll",
+      // },
     ];
-
-    return headers;
   }
+
+  downloadExcel() {}
+
+  downloadPDF() {}
 
   render() {
     return (
       <div>
-        <Home organization user survey date />
-        <Table
+        <Home organization />
+        <Gender />
+        {/* <div className="row">
+          <div className="col-md-6">
+            <div className="card">
+              <div className="card-header">
+                <h3>Total Number of Gender Per Region</h3>
+              </div>
+              <div className="card-body">
+
+              </div>
+            </div>
+          </div>
+          <div className="col-md-6">
+            <div className="card">
+              <div className="card-header">
+                <h3>Total Number of Gender Per Region</h3>
+              </div>
+              <div className="card-body"></div>
+            </div>
+          </div>
+        </div> */}
+        {/* <Table
           data={this.state.data}
           isSearch
           search_text={this.state.search_text}
@@ -221,6 +233,9 @@ class Surveyor extends React.Component {
           limit={this.state.limit}
           isLoading={this.state.isLoading}
           headers={this.returnTableHeaders()}
+          rowPress={(item) => {
+            this.handleShowModal("showModal", item.answer, item);
+          }}
           filters={[
             {
               type: "refresh",
@@ -245,21 +260,15 @@ class Surveyor extends React.Component {
               ],
             },
           ]}
-          rowPress={(item) => {
-            this.handleShowModal(
-              "showModal",
-              item.user_info.firstname + " " + item.user_info.lastname,
-              item
-            );
-          }}
-        />
+        /> */}
         <Modal
           handleClose={this.handleCloseModal.bind(this, "showModal")}
           show={this.state.showModal}
           title={this.state.modalTitle}
           showHeaderBottomBorder={false}
+          size="lg"
         >
-          <Questionnaires
+          <SummaryModal
             {...this.state.selected_data}
             handleCloseModal={this.handleCloseModal.bind(this, "showModal")}
           />
@@ -281,4 +290,4 @@ const mapPropsToState = (state) => {
   };
 };
 
-export default connect(mapPropsToState)(Surveyor);
+export default connect(mapPropsToState)(Summary);

@@ -9,6 +9,9 @@ import { connect } from "react-redux";
 import { LoadingSpinner } from "../LoadingSpinner";
 import { colors } from "../../constants/strings";
 import filtersHandler from "../../utils/filtersHandler";
+import { Button } from "../Button";
+import { Modal } from "../Modal";
+import { ChartTableModal } from "./modal";
 
 const options = {
   legend: {
@@ -25,6 +28,8 @@ class PerGender extends React.Component {
     user: {},
     selected_alert: {},
     user: {},
+    responses: [],
+    title: "Respondents Per Gender",
   };
 
   componentDidMount = async () => {
@@ -45,6 +50,14 @@ class PerGender extends React.Component {
       user,
     });
   };
+
+  handleOpenModal(modal) {
+    this.setState({ [modal]: true });
+  }
+
+  handleCloseModal(modal) {
+    this.setState({ [modal]: false });
+  }
 
   getData(isLoading) {
     const { user } = this.state;
@@ -67,11 +80,18 @@ class PerGender extends React.Component {
 
         let chart_data = [],
           counts = [],
+          responses = [],
           labels = Object.keys(data);
 
         for (let el of labels) {
           chart_data.push(data[el].percentage);
           counts.push(data[el].count);
+
+          responses.push({
+            name: el,
+            count: data[el].count,
+            percentage: data[el].percentage + "%",
+          });
         }
 
         let customLabels = labels.map(
@@ -80,6 +100,7 @@ class PerGender extends React.Component {
 
         this.setState({
           isLoading: false,
+          responses,
           data: {
             labels: customLabels,
             datasets: [
@@ -102,8 +123,13 @@ class PerGender extends React.Component {
     return (
       <div className="chart-container">
         <div className="card">
-          <div className="card-header">
-            <h3>Respondents Per Gender</h3>
+          <div className="card-header chart-header">
+            <h3>{this.state.title}</h3>
+            <Button
+              className="btn-transparent btn-sm"
+              icon="bx bx-link-external"
+              onPress={() => this.handleOpenModal("showModal")}
+            />
           </div>
           <div className="card-body" style={{ height: 280 }}>
             {this.state.isLoading ? (
@@ -113,6 +139,18 @@ class PerGender extends React.Component {
             )}
           </div>
         </div>
+        <Modal
+          handleClose={this.handleCloseModal.bind(this, "showModal")}
+          show={this.state.showModal}
+          title={this.state.title}
+          showHeaderBottomBorder={false}
+        >
+          <ChartTableModal
+            handleCloseModal={this.handleCloseModal.bind(this, "showModal")}
+            data={this.state.responses}
+            title={this.state.title}
+          />
+        </Modal>
       </div>
     );
   }

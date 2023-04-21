@@ -14,6 +14,7 @@ import moment from "moment";
 import reportFileName from "../../utils/reportFileName";
 import ReportDownload from "./ReportDownload";
 import { saveDownload } from "../../utils/download";
+import { Home } from "../../screen/common";
 
 let copyData = [];
 
@@ -315,6 +316,7 @@ class Report extends React.Component {
   render() {
     return (
       <div>
+        <Home organization user survey date />
         <Table
           data={this.state.data}
           isSearch

@@ -26,7 +26,7 @@ const findAndDeleteQuestion = async (_id) => {
 };
 
 const findQuestion = async (params) => {
-  const { id, survey, user, organization } = params;
+  const { id, survey, user, organization, type } = params;
   let filters = {};
 
   if (id) {
@@ -39,6 +39,10 @@ const findQuestion = async (params) => {
 
   if (user) {
     filters.user = user;
+  }
+
+  if (type) {
+    filters.type = type;
   }
 
   if (organization) {

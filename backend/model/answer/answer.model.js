@@ -5,9 +5,8 @@ const { createReward, findReward } = require("../reward/reward.model");
 const surveyMongo = require("../survey/survey.mongo");
 const userMongo = require("../users/user.mongo");
 const answerMongo = require("./answer.mongo");
-const { findQuestion } = require("../question/question.model");
-const { findSurvey } = require("../survey/survey.model");
 const { responderInfoFields } = require("../../constant/string");
+const { findQuestion } = require("../question/question.model");
 
 const createAnswer = async (params) => {
   delete params._id;
@@ -188,6 +187,7 @@ const findAnswer = async (params = {}) => {
     model: userMongo,
     select: { firstname: 1, lastname: 1, phone: 1 },
   });
+
   return answers;
 };
 
@@ -242,6 +242,12 @@ const findAnswerNormal = async (params) => {
       model: userMongo,
       select: { firstname: 1, lastname: 1 },
     });
+};
+
+const findAnswerByField = async (params) => {
+  return await answerMongo
+    .find(params)
+    .populate({ path: "question", model: questionMongo, select: { type: 1 } });
 };
 
 const markQuestion = async (organization, question, user) => {
@@ -384,220 +390,210 @@ const percentagePerAnswer = (answers, total_respondent) => {
   return answers;
 };
 
-const fetchRespondents = async (params, answers) => {
-  let data = [],
-    respondents = {};
-
-  if (!answers) {
-    answers = await findAnswer(params);
-  }
-
-  for (let answer of answers) {
-    if (!data.includes(answer.identifier)) {
-      data.push(answer.identifier);
-    }
-
-    if (!respondents[answer.identifier]) {
-      respondents[answer.identifier] = {};
-    }
-
-    if (
-      responderInfoFields.includes(answer.question.type) &&
-      answer.answers[0].type &&
-      (answer.answers[0].value !== "" || answer.answers[0].option !== "")
-    ) {
-      respondents[answer.identifier][answer.question.type] =
-        answer.answers[0].type === "textinput" ||
-        answer.answers[0].type === "input" ||
-        answer.answers[0].type === "number"
-          ? answer.answers[0].value
-          : answer.answers[0].option;
-
-      respondents[answer.identifier]["surveyor"] =
-        answer?.user?.firstname + " " + answer?.user?.lastname;
-      respondents[answer.identifier]["surveyor_id"] = answer?.user?._id;
-      respondents[answer.identifier]["surveyor_phone"] = answer?.user?.phone;
-      respondents[answer.identifier]["status"] = answer?.status;
-      respondents[answer.identifier]["start_location"] =
-        answer?.start_location.address || "-";
-      respondents[answer.identifier]["end_location"] =
-        answer?.end_location?.address || "-";
-      respondents[answer.identifier]["end_interview"] = answer?.end_interview;
-      respondents[answer.identifier]["start_interview"] =
-        answer?.start_interview;
-      respondents[answer.identifier]["identifier"] = answer?.identifier;
-      respondents[answer.identifier]["survey"] = answer?.survey._id;
-    }
-  }
+const fetchRespondents = async (params) => {
+  const respondent_ = await answerMongo.aggregate([
+    { $match: { ...answerCommonFilters(params) } },
+    {
+      $group: {
+        _id: "$identifier",
+        uniqueValues: { $addToSet: "$identifier" },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        fieldToGroupBy: "$_id",
+        uniqueValues: 1,
+      },
+    },
+  ]);
   return {
-    total: data.length,
-    respondents,
+    total: respondent_.length,
   };
 };
 
-const getKey = (common, option) => {
-  let key = "";
-  for (let el of common) {
-    let option_key = option.option.replace(" ", "").replace(" ", "");
-
-    if (
-      option_key?.toLowerCase() ===
-      el?.label?.replace(" ", "").replace(" ", "").toLowerCase()
-    ) {
-      key = el.value;
-    }
-  }
-
-  return key;
-};
-
 const fetchRespondentsByGender = async (params) => {
-  const answersData = await findAnswer(params);
+  let groupGender = {};
 
-  let groupGender = {},
-    total_respondent = await fetchRespondents(params, answersData);
-  let identifiers = [];
+  for (let el of gender) {
+    const genderData = await answerMongo.aggregate([
+      {
+        $match: {
+          ...answerCommonFilters(params),
+          $or: [
+            {
+              "answers.option": el.label + " ",
+            },
+            {
+              "answers.option": el.label,
+            },
+            {
+              "answers.option": el.value + " ",
+            },
+            {
+              "answers.option": el.value,
+            },
+          ],
+        },
+      },
+      {
+        $group: {
+          _id: "$identifier",
+          uniqueValues: { $addToSet: "$identifier" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          fieldToGroupBy: "$_id",
+          uniqueValues: 1,
+        },
+      },
+    ]);
 
-  for (let el of answersData) {
-    if (el.question && el.question.type === "respondent_gender") {
-      const { answers } = el;
+    let total_respondent = await fetchRespondents(answerCommonFilters(params));
 
-      identifiers.push(el.identifier);
-
-      for (let option of answers) {
-        const key = getKey(gender, option);
-
-        if (!groupGender[key]) {
-          groupGender[key] = {
-            count: 0,
-          };
-        }
-
-        groupGender[key].count += 1;
-      }
-    }
+    groupGender[el.value] = {
+      count: genderData.length,
+      percentage: Math.round(
+        (genderData.length / total_respondent.total) * 100
+      ),
+    };
   }
-
-  for (let key of Object.keys(groupGender)) {
-    groupGender[key]["percentage"] = Math.round(
-      (groupGender[key].count / total_respondent.total) * 100
-    );
-  }
-
-  const toFindDuplicates = (identifiers) =>
-    identifiers.filter((item, index) => identifiers.indexOf(item) !== index);
 
   return groupGender;
 };
 
 const fetchRespondentsByRegion = async (params) => {
-  const answersData = await findAnswer(params);
+  try {
+    let groupRegion = {},
+      total_respondent = await fetchRespondents(answerCommonFilters(params));
 
-  let groupRegion = {},
-    total_respondent = await fetchRespondents(params, answersData);
+    for (let el of regions) {
+      const regionData = await answerMongo.aggregate([
+        {
+          $match: {
+            ...answerCommonFilters(params),
+            $or: [
+              {
+                "answers.option": el.label + " ",
+              },
+              {
+                "answers.option": el.label,
+              },
+              {
+                "answers.option": el.value + " ",
+              },
+              {
+                "answers.option": el.value,
+              },
+            ],
+          },
+        },
+        {
+          $group: {
+            _id: "$identifier",
+            uniqueValues: { $addToSet: "$identifier" },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            fieldToGroupBy: "$_id",
+            uniqueValues: 1,
+          },
+        },
+      ]);
 
-  for (let el of answersData) {
-    if (el.question && el.question.type === "respondent_region") {
-      const { answers } = el;
+      let total_respondent = await fetchRespondents(
+        answerCommonFilters(params)
+      );
 
-      for (let region of el.question.options) {
-        const key = getKey(regions, region);
-
-        if (key && key !== "") {
-          if (!groupRegion[key]) {
-            groupRegion[key] = {
-              count: 0,
-            };
-          }
-
-          for (let option of answers) {
-            if (option.option === region.option) {
-              groupRegion[key].count += 1;
-            }
-          }
-        }
-      }
+      groupRegion[el.value] = {
+        count: regionData.length,
+        percentage: Math.round(
+          (regionData.length / total_respondent.total) * 100
+        ),
+      };
     }
-  }
 
-  for (let key of Object.keys(groupRegion)) {
-    groupRegion[key]["percentage"] = Math.round(
-      (groupRegion[key].count / total_respondent.total) * 100
-    );
+    return groupRegion;
+  } catch (error) {
+    return error;
   }
-
-  return groupRegion;
 };
 
 const fetchRespondentsByAgeGroup = async (params) => {
-  const answersData = await findAnswer(params);
+  try {
+    let questionFilters = {
+      type: "respondent_age_group",
+    };
 
-  let groupAgeGroup = {},
-    total_respondent = await fetchRespondents(params, answersData);
+    if (params.survey) {
+      questionFilters.survey = params.survey;
+    }
+    const questionAgeGroup = await findQuestion(questionFilters);
 
-  for (let el of answersData) {
-    if (el.question && el.question.type === "respondent_age_group") {
-      const { answers } = el;
+    let groupAgeGroup = {},
+      total_respondent = await fetchRespondents(answerCommonFilters(params));
 
-      for (let age of el.question.options) {
-        const key = age.option || age.value;
+    let groupOptions = [];
 
-        if (!groupAgeGroup[key]) {
-          groupAgeGroup[key] = {
-            count: 0,
-          };
-        }
-
-        for (let option of answers) {
-          if (option._id === age._id) {
-            groupAgeGroup[key].count += 1;
-          }
+    for (let el of questionAgeGroup) {
+      for (let option of el.options) {
+        if (!groupOptions.includes(option.option)) {
+          groupOptions.push(option.option);
         }
       }
     }
-  }
 
-  for (let key of Object.keys(groupAgeGroup)) {
-    groupAgeGroup[key]["percentage"] = Math.round(
-      (groupAgeGroup[key].count / total_respondent.total) * 100
-    );
-  }
+    for (let el of groupOptions) {
+      if (el !== "Enter your answer") {
+        const groupData = await answerMongo.aggregate([
+          {
+            $match: {
+              ...answerCommonFilters(params),
+              "answers.option": el,
+            },
+          },
+          {
+            $group: {
+              _id: "$identifier",
+              uniqueValues: { $addToSet: "$identifier" },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              fieldToGroupBy: "$_id",
+              uniqueValues: 1,
+            },
+          },
+        ]);
 
-  return groupAgeGroup;
+        groupAgeGroup[el] = {
+          count: groupData.length,
+          percentage: Math.round((groupData.length / total_respondent.total) * 100),
+        };
+      }
+    }
+
+    return groupAgeGroup;
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
 };
 
 const fetchByStatus = async (params) => {
-  const answersData = await findAnswer(params);
+  const answersData = await answerMongo.find(answerCommonFilters(params)).count;
 
-  return { count: answersData.length };
+  return { count: answersData };
 };
 
 const fetchAndGroupByUser = async (params) => {
-  let { survey, organization, user, start_date, end_date } = params;
-
-  let match = {};
-
-  if (organization) {
-    match.organization = mongoose.Types.ObjectId(organization);
-  }
-
-  if (survey) {
-    match.survey = mongoose.Types.ObjectId(survey);
-  }
-
-  if (user) {
-    match.user = mongoose.Types.ObjectId(user);
-  }
-
-  if (start_date && end_date) {
-    match.createdAt = {
-      $gte: new Date(start_date),
-      $lt: new Date(end_date),
-    };
-  }
-
   const answersData = await answerMongo.aggregate([
-    { $match: { ...match } },
+    { $match: answerCommonFilters(params) },
     {
       $group: {
         _id: { identifier: "$identifier", user: "$user" },
@@ -614,10 +610,6 @@ const fetchAndGroupByUser = async (params) => {
 
 const fetchIncomplete = async (params) => {
   try {
-    // const answers = await answerMongo.find({
-    //   user: "643a6e60196354dd18fdcf10",
-    // }); //findAnswer(params);
-
     const answers = await findAnswer(params);
     let incomplete = [];
 
@@ -638,7 +630,6 @@ const fetchIncomplete = async (params) => {
   }
 };
 
-
 module.exports = {
   createAnswer,
   findAndUpdateAnswer,
@@ -658,4 +649,5 @@ module.exports = {
   fetchAndGroupByUser,
   fetchIncomplete,
   findAnswerNormal,
+  findAnswerByField,
 };

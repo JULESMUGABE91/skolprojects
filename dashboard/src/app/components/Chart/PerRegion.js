@@ -9,6 +9,9 @@ import { connect } from "react-redux";
 import { LoadingSpinner } from "../LoadingSpinner";
 import { colors } from "../../constants/strings";
 import filtersHandler from "../../utils/filtersHandler";
+import { Modal } from "../Modal";
+import { ChartTableModal } from "./modal";
+import { Button } from "../Button";
 
 const options = {
   legend: {
@@ -23,6 +26,8 @@ class PerRegion extends React.Component {
   state = {
     data: [],
     user: {},
+    title: "Respondent Per Region",
+    responses: [],
   };
 
   componentDidMount = async () => {
@@ -35,6 +40,14 @@ class PerRegion extends React.Component {
     if (this.state.user.token && prevProps.filters !== this.props.filters) {
       this.getData(true);
     }
+  }
+
+  handleOpenModal(modal) {
+    this.setState({ [modal]: true });
+  }
+
+  handleCloseModal(modal) {
+    this.setState({ [modal]: false });
   }
 
   getUserLoggedInInfo = async () => {
@@ -64,12 +77,19 @@ class PerRegion extends React.Component {
         const data = res.data;
 
         let chart_data = [],
+          responses = [],
           counts = [],
           labels = Object.keys(data);
 
         for (let key of labels) {
           chart_data.push(data[key].percentage);
           counts.push(data[key].count);
+
+          responses.push({
+            name: key,
+            count: data[key].count,
+            percentage: data[key].percentage + "%",
+          });
         }
 
         let customLabels = labels.map(
@@ -78,6 +98,7 @@ class PerRegion extends React.Component {
 
         this.setState({
           isLoading: false,
+          responses,
           data: {
             labels: customLabels,
             datasets: [
@@ -100,8 +121,13 @@ class PerRegion extends React.Component {
     return (
       <div className="chart-container">
         <div className="card">
-          <div className="card-header">
-            <h3>Respondent Per Region</h3>
+          <div className="card-header chart-header">
+            <h3>{this.state.title}</h3>
+            <Button
+              className="btn-transparent btn-sm"
+              icon="bx bx-link-external"
+              onPress={() => this.handleOpenModal("showModal")}
+            />
           </div>
           <div className="card-body" style={{ height: 280 }}>
             {this.state.isLoading ? (
@@ -111,6 +137,18 @@ class PerRegion extends React.Component {
             )}
           </div>
         </div>
+        <Modal
+          handleClose={this.handleCloseModal.bind(this, "showModal")}
+          show={this.state.showModal}
+          title={this.state.title}
+          showHeaderBottomBorder={false}
+        >
+          <ChartTableModal
+            handleCloseModal={this.handleCloseModal.bind(this, "showModal")}
+            data={this.state.responses}
+            title={this.state.title}
+          />
+        </Modal>
       </div>
     );
   }

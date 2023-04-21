@@ -30,3 +30,12 @@
   align-items: center;
   min-height: 50px;
 }
+
+.chart-header{
+  display: flex;
+  align-items: center;
+}
+
+.chart-header h3{
+  flex:1
+}

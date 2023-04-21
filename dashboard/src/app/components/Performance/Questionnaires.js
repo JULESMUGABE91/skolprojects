@@ -164,7 +164,10 @@ class Questionnaires extends React.Component {
         saveDownload({
           file: data,
           identifier: request_body.identifier,
-          user: this.props.firstname + " " + this.props.lastname,
+          user:
+            this.props.user_info.firstname +
+            " " +
+            this.props.user_info.lastname,
         });
       })
       .catch((error) => {

@@ -54,6 +54,22 @@ export const questionOptions = [
     value: "respondent_age_group",
   },
   {
+    label: "Respondent Last Time Consumer",
+    value: "respondent_last_time_consumer",
+  },
+  {
+    label: "Respondent Size Consumer",
+    value: "respondent_size_consumer",
+  },
+  {
+    label: "Respondent Number Consumer",
+    value: "respondent_number_consumer",
+  },
+  {
+    label: "Respondent Often Consumer",
+    value: "respondent_often_consumer",
+  },
+  {
     label: "Interviewer Name",
     value: "interviewer_name",
   },

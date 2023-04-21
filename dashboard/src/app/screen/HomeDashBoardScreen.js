@@ -29,13 +29,6 @@ class DashboardLayout extends React.Component {
     if (innerWidth < 750) {
       this.props.dispatch(onToggle(false));
     }
-
-    window.addEventListener("resize", this.handleResize.bind(this));
-    window.addEventListener("message", (data) => {
-      console.log("====================================");
-      console.log("from webview", data);
-      console.log("====================================");
-    });
   };
 
   componentDidUpdate(nextProps) {

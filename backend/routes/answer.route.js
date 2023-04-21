@@ -68,4 +68,8 @@ app.post("/answer/incomplete", protect, (req, res) => {
   answer.httpIncomplete(req, res);
 });
 
+app.post("/answer/updateall", protect, (req, res) => {
+  answer.httpUpdateAll(req, res);
+});
+
 module.exports = app;

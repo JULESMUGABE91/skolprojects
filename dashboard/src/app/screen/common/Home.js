@@ -156,6 +156,8 @@ class Home extends React.Component {
     let request_body = filtersHandler(this.props.filters);
 
     delete request_body.user;
+    delete request_body.start_date;
+    delete request_body.end_date;
 
     const options = {
       method: "POST",

@@ -73,6 +73,15 @@ const surveySchema = new Schema(
     end_interview: {
       type: Number,
     },
+    gender: {
+      type: String,
+    },
+    ageGroup: {
+      type: String,
+    },
+    region: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
