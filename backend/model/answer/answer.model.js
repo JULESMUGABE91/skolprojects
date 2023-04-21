@@ -514,8 +514,6 @@ const fetchRespondentsByRegion = async (params) => {
       };
     }
 
-    console.log(groupRegion);
-
     return groupRegion;
   } catch (error) {
     return error;
