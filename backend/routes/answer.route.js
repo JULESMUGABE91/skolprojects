@@ -72,4 +72,8 @@ app.post("/answer/updateall", protect, (req, res) => {
   answer.httpUpdateAll(req, res);
 });
 
+app.post("/answer/responses", protect, (req, res) => {
+  answer.httpFetchResponses(req, res);
+});
+
 module.exports = app;

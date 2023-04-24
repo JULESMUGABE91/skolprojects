@@ -17,6 +17,7 @@ import { saveDownload } from "../../utils/download";
 import SummaryModal from "./modal/SummaryModal";
 import { Home } from "../../screen/common";
 import Gender from "./chart/Gender";
+import GenderAgeGroup from "./chart/GenderAgeGroup";
 
 let copyData = [];
 
@@ -59,7 +60,7 @@ class Summary extends React.Component {
       isLoading,
     });
 
-    let url = ENDPOINT + "/answer/close_question/summary";
+    let url = ENDPOINT + "/answer/responses";
 
     let request_body = filtersHandler({
       ...this.props.filters,
@@ -168,22 +169,18 @@ class Summary extends React.Component {
 
   returnTableHeaders() {
     return [
-      // {
-      //   title: "Survey",
-      //   key: "survey.title",
-      // },
       {
         title: "Question",
-        key: "question.question",
+        key: "question",
       },
       {
         title: "Answer",
         key: "answer",
       },
-      {
-        title: "Respondent",
-        key: "count",
-      },
+      // {
+      //   title: "Respondent",
+      //   key: "count",
+      // },
       // {
       //   title: "Created At",
       //   key: "createdAt",
@@ -193,15 +190,163 @@ class Summary extends React.Component {
     ];
   }
 
-  downloadExcel() {}
+  downloadExcel() {
+    const { user } = this.state;
 
-  downloadPDF() {}
+    this.setState({
+      isLoading: true,
+    });
+
+    let request_body = filtersHandler({
+      ...this.props.filters,
+      limit: 10000000,
+      page: 1,
+    });
+
+    const options = {
+      method: "POST",
+      url: ENDPOINT + "/answer/responses",
+      data: request_body,
+      headers: {
+        authorization: "Bearer " + user.token,
+      },
+    };
+
+    axios(options)
+      .then((res) => {
+        const data = res.data.data;
+
+        this.setState(
+          {
+            csvData: data,
+            isLoading: false,
+          },
+          () => {
+            this.refs.csvDownload?.link.click();
+          }
+        );
+      })
+      .catch((error) => {
+        toastMessage("error", error);
+        this.setState({ isLoading: false });
+      });
+  }
+
+  downloadPDF() {
+    const headers = this.returnTableHeaders();
+
+    delete headers[headers.length - 1];
+
+    const { user } = this.state;
+
+    let request_body = filtersHandler({
+      ...this.props.filters,
+      // limit,
+      // page,
+    });
+
+    this.setState({
+      isLoading: true,
+    });
+
+    const options = {
+      method: "POST",
+      url: ENDPOINT + "/answer/responses",
+      data: {
+        ...request_body,
+      },
+      headers: {
+        authorization: "Bearer " + user.token,
+      },
+    };
+
+    axios(options)
+      .then((res) => {
+        const data = res.data.data;
+
+        this.setState({ isLoading: false });
+
+        exportPDF("Survey Responses", headers, data);
+      })
+      .catch((error) => {
+        toastMessage("error", error);
+        this.setState({ isLoading: false });
+      });
+  }
 
   render() {
     return (
       <div>
         <Home organization />
-        <Gender />
+        <div className="card" style={{ marginBottom: 15 }}>
+          <div className="card-header">
+            <h3>Total Number of Population Per Region</h3>
+          </div>
+          <div className="card-body">
+            <Gender />
+          </div>
+        </div>
+        <div className="row" style={{ marginBottom: 15 }}>
+          <div className="col-md-12">
+            <Table
+              data={this.state.data}
+              isSearch
+              search_text={this.state.search_text}
+              handleSearch={this.handleSearch.bind(this)}
+              totalPageCount={this.state.totalPageCount}
+              handlePagination={this.handlePagination.bind(this)}
+              page={this.state.page}
+              limit={this.state.limit}
+              isLoading={this.state.isLoading}
+              headers={this.returnTableHeaders()}
+              rowPress={(item) => {
+                this.handleShowModal("showModal", item.answer, item);
+              }}
+              filters={[
+                {
+                  type: "refresh",
+                  title: "Refresh",
+                  icon: "bx bx-refresh",
+                  onPress: () => this.getData(true),
+                },
+                {
+                  type: "export",
+                  title: "Export",
+                  button_type: "dropdown",
+                  icon: "bx bxs-download",
+                  options: [
+                    {
+                      name: "PDF",
+                      onPress: this.downloadPDF.bind(this),
+                    },
+                    {
+                      name: "CSV",
+                      onPress: this.downloadExcel.bind(this),
+                    },
+                  ],
+                },
+              ]}
+            />
+          </div>
+        </div>
+        {/* <div className="row" style={{ marginBottom: 15 }}>
+          <div className="col-md-6">
+            <did className="card">
+              <div className="card-header">
+                <h3>Frequency of Consumption Gender</h3>
+              </div>
+              <div className="card-body"></div>
+            </did>
+          </div>
+          <div className="col-md-6">
+            <did className="card">
+              <div className="card-header">
+                <h3>Frequency of Consumption Age Group</h3>
+              </div>
+              <div className="card-body"></div>
+            </did>
+          </div>
+        </div> */}
         {/* <div className="row">
           <div className="col-md-6">
             <div className="card">
@@ -222,45 +367,7 @@ class Summary extends React.Component {
             </div>
           </div>
         </div> */}
-        {/* <Table
-          data={this.state.data}
-          isSearch
-          search_text={this.state.search_text}
-          handleSearch={this.handleSearch.bind(this)}
-          totalPageCount={this.state.totalPageCount}
-          handlePagination={this.handlePagination.bind(this)}
-          page={this.state.page}
-          limit={this.state.limit}
-          isLoading={this.state.isLoading}
-          headers={this.returnTableHeaders()}
-          rowPress={(item) => {
-            this.handleShowModal("showModal", item.answer, item);
-          }}
-          filters={[
-            {
-              type: "refresh",
-              title: "Refresh",
-              icon: "bx bx-refresh",
-              onPress: () => this.getData(true),
-            },
-            {
-              type: "export",
-              title: "Export",
-              button_type: "dropdown",
-              icon: "bx bxs-download",
-              options: [
-                {
-                  name: "PDF",
-                  onPress: this.downloadPDF.bind(this),
-                },
-                {
-                  name: "CSV",
-                  onPress: this.downloadExcel.bind(this),
-                },
-              ],
-            },
-          ]}
-        /> */}
+        {/*
         <Modal
           handleClose={this.handleCloseModal.bind(this, "showModal")}
           show={this.state.showModal}
@@ -272,10 +379,10 @@ class Summary extends React.Component {
             {...this.state.selected_data}
             handleCloseModal={this.handleCloseModal.bind(this, "showModal")}
           />
-        </Modal>
+        </Modal> */}
         <CSVLink
           ref="csvDownload"
-          filename={reportFileName(this.props.filters)}
+          filename={"Survey Responses"}
           data={this.state.csvData}
         ></CSVLink>
       </div>

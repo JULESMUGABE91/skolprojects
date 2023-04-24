@@ -1,5 +1,6 @@
 import axios from "axios";
 import { ENDPOINT } from "../constants/api";
+import exportPDF from "./exportPDF";
 
 export const saveDownload = async ({ file, user, identifier }) => {
   return await axios({
@@ -21,4 +22,24 @@ export const saveDownload = async ({ file, user, identifier }) => {
     document.body.removeChild(link);
     URL.revokeObjectURL(href);
   });
+};
+
+export const downloadExcel = (that, { data }) => {
+  that.setState({
+    isLoading: true,
+  });
+
+  that.setState(
+    {
+      isLoading: false,
+      csvData: data,
+    },
+    () => {
+      that.refs.csvDownload?.link.click();
+    }
+  );
+};
+
+export const downloadPDF = ({ filename, headers, data, orientation }) => {
+  exportPDF(filename, headers, data, orientation);
 };

@@ -629,6 +629,72 @@ const fetchIncomplete = async (params) => {
   }
 };
 
+const fetchResponses = async (params) => {
+  const { page, limit } = params;
+
+  let skip = limit * (page - 1);
+
+  try {
+    const answers = await answerMongo.aggregate([
+      {
+        $lookup: {
+          from: "questions",
+          localField: "question",
+          foreignField: "_id",
+          as: "question",
+        },
+      },
+      {
+        $match: {
+          ...answerCommonFilters(params),
+          status: { $ne: "incomplete" },
+          $and: [
+            {
+              $or: [
+                {
+                  ["question.type"]: "respondent_gender",
+                },
+                { ["question.type"]: "respondent_region" },
+                {
+                  ["question.type"]: "respondent_age_group",
+                },
+                {
+                  ["question.type"]: "respondent_last_time_consumer",
+                },
+                {
+                  ["question.type"]: "respondent_favorite",
+                },
+                {
+                  ["question.type"]: "respondent_first_brand",
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          question: { $arrayElemAt: ["$question.question", 0] },
+          answer: { $arrayElemAt: ["$answers.option", 0] },
+        },
+      },
+      {
+        $limit: limit,
+      },
+      {
+        $skip: skip,
+      },
+    ]);
+    return {
+      data: answers,
+      totalCount: "many",
+    };
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports = {
   createAnswer,
   findAndUpdateAnswer,
@@ -649,4 +715,5 @@ module.exports = {
   fetchIncomplete,
   findAnswerNormal,
   findAnswerByField,
+  fetchResponses,
 };

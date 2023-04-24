@@ -12,4 +12,7 @@ app.post("/summary/regionGender", protect, (req, res) => {
   summary.httpRegionGender(req, res);
 });
 
+app.post("/summary/genderAgeGroup", protect, (req, res) => {
+  summary.httpGenderAgeGroup(req, res);
+});
 module.exports = app;

@@ -21,6 +21,7 @@ const {
   fetchByStatus,
   fetchAndGroupByUser,
   fetchIncomplete,
+  fetchResponses,
 } = require("../../model/answer/answer.model");
 const {
   validateAnswer,
@@ -253,6 +254,16 @@ const httpUpdateAll = async (req, res) => {
   }
 };
 
+const httpFetchResponses = async (req, res) => {
+  try {
+    const answerInfo = await fetchResponses(req.body);
+
+    res.status(200).json(answerInfo);
+  } catch (error) {
+    res.status(400).json(error.stack);
+  }
+};
+
 module.exports = {
   addInfo,
   deleteInfo,
@@ -271,4 +282,5 @@ module.exports = {
   httpGroupByUser,
   httpIncomplete,
   httpUpdateAll,
+  httpFetchResponses,
 };

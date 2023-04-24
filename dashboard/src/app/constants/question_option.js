@@ -70,6 +70,14 @@ export const questionOptions = [
     value: "respondent_often_consumer",
   },
   {
+    label: "Respondent Favorite",
+    value: "respondent_favorite",
+  },
+  {
+    label: "Respondent First Brand",
+    value: "respondent_first_brand",
+  },
+  {
     label: "Interviewer Name",
     value: "interviewer_name",
   },
