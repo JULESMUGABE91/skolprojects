@@ -75,6 +75,10 @@ const DOMAIN_NAME = "http://myskol.rw";
      value: "Kigali Rural",
    },
    {
+     label: "Kigali munyengero",
+     value: "Kigali Rural",
+   },
+   {
      label: "Icyaro cyakarere",
      value: "Regional Rural",
    },
