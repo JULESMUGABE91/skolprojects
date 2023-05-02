@@ -177,16 +177,6 @@ class Summary extends React.Component {
         title: "Answer",
         key: "answer",
       },
-      // {
-      //   title: "Respondent",
-      //   key: "count",
-      // },
-      // {
-      //   title: "Created At",
-      //   key: "createdAt",
-      //   isMoment: true,
-      //   formatTime: "lll",
-      // },
     ];
   }
 
@@ -216,6 +206,10 @@ class Summary extends React.Component {
       .then((res) => {
         const data = res.data.data;
 
+        for(let el of data){
+
+        }
+
         this.setState(
           {
             csvData: data,
@@ -241,9 +235,10 @@ class Summary extends React.Component {
 
     let request_body = filtersHandler({
       ...this.props.filters,
-      // limit,
-      // page,
+      limit: 10000000,
+      page: 1,
     });
+
 
     this.setState({
       isLoading: true,
