@@ -78,6 +78,10 @@ export const questionOptions = [
     value: "respondent_first_brand",
   },
   {
+    label: "Respondent Social Economic Group",
+    value: "respondent_seg",
+  },
+  {
     label: "Interviewer Name",
     value: "interviewer_name",
   },
