@@ -392,7 +392,20 @@ const percentagePerAnswer = (answers, total_respondent) => {
 
 const fetchRespondents = async (params) => {
   const respondent_ = await answerMongo.aggregate([
-    { $match: { ...answerCommonFilters(params) } },
+    {
+      $lookup: {
+        from: "questions",
+        localField: "question",
+        foreignField: "_id",
+        as: "questions",
+      },
+    },
+    {
+      $match: {
+        ...answerCommonFilters(params),
+        ["questions.type"]: "respondent_gender",
+      },
+    },
     {
       $group: {
         _id: "$identifier",
@@ -413,78 +426,30 @@ const fetchRespondents = async (params) => {
 };
 
 const fetchRespondentsByGender = async (params) => {
-  let groupGender = {};
-
-  for (let el of gender) {
-    const genderData = await answerMongo.aggregate([
-      {
-        $match: {
-          ...answerCommonFilters(params),
-          $or: [
-            {
-              "answers.option": el.label + " ",
-            },
-            {
-              "answers.option": el.label,
-            },
-            {
-              "answers.option": el.value + " ",
-            },
-            {
-              "answers.option": el.value,
-            },
-          ],
-        },
-      },
-      {
-        $group: {
-          _id: "$identifier",
-          uniqueValues: { $addToSet: "$identifier" },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          fieldToGroupBy: "$_id",
-          uniqueValues: 1,
-        },
-      },
-    ]);
-
-    let total_respondent = await fetchRespondents(params);
-
-    groupGender[el.value] = {
-      count: genderData.length,
-      percentage: Math.round(
-        (genderData.length / total_respondent.total) * 100
-      ),
-    };
-  }
-
-  return groupGender;
-};
-
-const fetchRespondentsByRegion = async (params) => {
   try {
-    let groupRegion = {};
+    let groupGender = {},
+      total_respondent = await fetchRespondents(params);
 
-    for (let el of regions) {
-      const regionData = await answerMongo.aggregate([
+    for (let el of gender) {
+      const genderData = await answerMongo.aggregate([
+        {
+          $lookup: {
+            from: "questions",
+            localField: "question",
+            foreignField: "_id",
+            as: "questions",
+          },
+        },
         {
           $match: {
             ...answerCommonFilters(params),
+            ["questions.type"]: "respondent_gender",
             $or: [
               {
                 "answers.option": el.label + " ",
               },
               {
                 "answers.option": el.label,
-              },
-              {
-                "answers.option": el.value + " ",
-              },
-              {
-                "answers.option": el.value,
               },
             ],
           },
@@ -504,14 +469,75 @@ const fetchRespondentsByRegion = async (params) => {
         },
       ]);
 
-      let total_respondent = await fetchRespondents(params);
+      if (!groupGender[el.value]) {
+        groupGender[el.value] = {
+          count: genderData.length,
+        };
+      } else {
+        groupGender[el.value]["count"] += genderData.length;
+      }
+    }
 
-      groupRegion[el.value] = {
-        count: regionData.length,
-        percentage: Math.round(
-          (regionData.length / total_respondent.total) * 100
-        ),
-      };
+    for (let el of Object.keys(groupGender)) {
+      groupGender[el]["percentage"] = Math.round(
+        (groupGender[el].count / total_respondent.total) * 100
+      );
+    }
+
+    return groupGender;
+  } catch (error) {
+    return error;
+  }
+};
+
+const fetchRespondentsByRegion = async (params) => {
+  try {
+    let groupRegion = {},
+      total_respondent = await fetchRespondents(params);
+
+    for (let el of regions) {
+      const regionData = await answerMongo.aggregate([
+        {
+          $match: {
+            ...answerCommonFilters(params),
+            $or: [
+              {
+                "answers.option": el.label + " ",
+              },
+              {
+                "answers.option": el.label,
+              },
+            ],
+          },
+        },
+        {
+          $group: {
+            _id: "$identifier",
+            uniqueValues: { $addToSet: "$identifier" },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            fieldToGroupBy: "$_id",
+            uniqueValues: 1,
+          },
+        },
+      ]);
+
+      if (!groupRegion[el.value]) {
+        groupRegion[el.value] = {
+          count: regionData.length,
+        };
+      } else {
+        groupRegion[el.value]["count"] += regionData.length;
+      }
+    }
+
+    for (let el of Object.keys(groupRegion)) {
+      groupRegion[el]["percentage"] = Math.round(
+        (groupRegion[el].count / total_respondent.total) * 100
+      );
     }
 
     return groupRegion;
@@ -568,13 +594,22 @@ const fetchRespondentsByAgeGroup = async (params) => {
           },
         ]);
 
-        groupAgeGroup[el] = {
-          count: groupData.length,
-          percentage: Math.round(
-            (groupData.length / total_respondent.total) * 100
-          ),
-        };
+        if (groupData.length !== 0) {
+          if (!groupAgeGroup[el]) {
+            groupAgeGroup[el] = {
+              count: groupData.length,
+            };
+          } else {
+            groupAgeGroup[el]["count"] += groupData.length;
+          }
+        }
       }
+    }
+
+    for (let el of Object.keys(groupAgeGroup)) {
+      groupAgeGroup[el]["percentage"] = Math.round(
+        (groupAgeGroup[el].count / total_respondent.total) * 100
+      );
     }
 
     return groupAgeGroup;
@@ -648,6 +683,9 @@ const fetchResponses = async (params) => {
         $match: {
           ...answerCommonFilters(params),
           status: { $ne: "incomplete" },
+          ["answers.option"]: {
+            $ne: "Hashize ukwezi kurenga",
+          },
           $and: [
             {
               $or: [
@@ -665,6 +703,9 @@ const fetchResponses = async (params) => {
                   ["question.type"]: "respondent_favorite",
                 },
                 {
+                  ["question.type"]: "respondent_seg",
+                },
+                {
                   ["question.type"]: "respondent_first_brand",
                 },
               ],
@@ -677,6 +718,7 @@ const fetchResponses = async (params) => {
           _id: 0,
           question: { $arrayElemAt: ["$question.question", 0] },
           answer: { $arrayElemAt: ["$answers.option", 0] },
+          identifier: 1,
         },
       },
       {
@@ -686,8 +728,27 @@ const fetchResponses = async (params) => {
         $skip: skip,
       },
     ]);
+
+    let data = {};
+
+    for (let el of answers) {
+      if (!data[el.identifier]) {
+        data[el.identifier] = [];
+      }
+      data[el.identifier].push(el);
+    }
+
+    const result = Object.entries(data).reduce((acc, [identifier, answers]) => {
+      const obj = { identifier };
+      for (let answer of answers) {
+        obj[answer.question] = answer.answer.trim();
+      }
+      acc.push(obj);
+      return acc;
+    }, []);
+
     return {
-      data: answers,
+      data: result,
       totalCount: "many",
     };
   } catch (error) {
