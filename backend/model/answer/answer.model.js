@@ -247,6 +247,7 @@ const findAnswerNormal = async (params) => {
         model: userMongo,
         select: { firstname: 1, lastname: 1 },
       })
+      .lean()
       .select({ survey: 1, question: 1, user: 1, answers: 1 });
   } catch (error) {
     return error;
@@ -391,8 +392,13 @@ const getQuestionAnswers = async (data, total_respondent) => {
 
 const percentagePerAnswer = (answers, total_respondent) => {
   for (let el of Object.keys(answers)) {
+    let count = answers[el].count;
+
+    if (answers[el].count > total_respondent.total) {
+      count = total_respondent.total;
+    }
     answers[el]["percentage"] = parseFloat(
-      ((answers[el].count / total_respondent.total) * 100).toFixed(2)
+      ((count / total_respondent.total) * 100).toFixed(2)
     );
   }
 
