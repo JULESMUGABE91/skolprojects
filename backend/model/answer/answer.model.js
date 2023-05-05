@@ -240,16 +240,15 @@ const findAnswerNormal = async (params) => {
       .populate({
         path: "question",
         model: questionMongo,
-        select: { question: 1, type: 1 },
+        select: { question: 1, type: 1, options: 1 },
       })
       .populate({
         path: "user",
         model: userMongo,
         select: { firstname: 1, lastname: 1 },
-      });
-    // .select({ survey: 1, question: 1, user: 1, answers: 1 });
+      })
+      .select({ survey: 1, question: 1, user: 1, answers: 1 });
   } catch (error) {
-    console.log(error);
     return error;
   }
 };
