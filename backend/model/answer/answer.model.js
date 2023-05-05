@@ -429,7 +429,7 @@ const fetchRespondents = async (params) => {
     {
       $match: {
         ...answerCommonFilters(params),
-        // ["questions.type"]: "respondent_gender",
+        ["questions.type"]: "respondent_start",
       },
     },
     {
