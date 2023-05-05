@@ -233,21 +233,25 @@ const findAnswerById = async (_id) => {
     .populate({ path: "question", model: questionMongo });
 };
 const findAnswerNormal = async (params) => {
-  return await answerMongo
-    .find(answerCommonFilters(params))
-    .populate({ path: "survey", model: surveyMongo, select: { title: 1 } })
-    .populate({
-      path: "question",
-      model: questionMongo,
-      select: { question: 1, type: 1 },
-    })
-    .populate({
-      path: "user",
-      model: userMongo,
-      select: { firstname: 1, lastname: 1 },
-    })
-    .lean()
-    .select({ survey: 1, question: 1, user: 1, answers: 1 });
+  try {
+    return await answerMongo
+      .find(answerCommonFilters(params))
+      .populate({ path: "survey", model: surveyMongo, select: { title: 1 } })
+      .populate({
+        path: "question",
+        model: questionMongo,
+        select: { question: 1, type: 1 },
+      })
+      .populate({
+        path: "user",
+        model: userMongo,
+        select: { firstname: 1, lastname: 1 },
+      });
+    // .select({ survey: 1, question: 1, user: 1, answers: 1 });
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
 };
 
 const findAnswerByField = async (params) => {
