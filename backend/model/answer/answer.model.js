@@ -313,7 +313,7 @@ const findAnswersFromDifferentLocation = async (params) => {
 const findInsightAnswers = async (params) => {
   try {
     delete params.survey;
-    let answers = await findAnswer({
+    let answers = await findAnswerNormal({
       ...params,
     });
 
