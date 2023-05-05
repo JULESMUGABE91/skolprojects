@@ -358,7 +358,7 @@ const getQuestionAnswers = async (data, total_respondent) => {
       }
 
       for (let option of item?.question?.options || []) {
-        const key_option = option.option_english || option.option;
+        const key_option = (option.option_english || option.option).trim();
 
         if (!answers[question][key_option]) {
           answers[question][key_option] = {
