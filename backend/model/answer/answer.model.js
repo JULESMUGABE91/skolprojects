@@ -235,13 +235,19 @@ const findAnswerById = async (_id) => {
 const findAnswerNormal = async (params) => {
   return await answerMongo
     .find(answerCommonFilters(params))
-    .populate({ path: "survey", model: surveyMongo })
-    .populate({ path: "question", model: questionMongo })
+    .populate({ path: "survey", model: surveyMongo, select: { title: 1 } })
+    .populate({
+      path: "question",
+      model: questionMongo,
+      select: { question: 1, type: 1 },
+    })
     .populate({
       path: "user",
       model: userMongo,
       select: { firstname: 1, lastname: 1 },
-    });
+    })
+    .lean()
+    .select({ survey: 1, question: 1, user: 1, answers: 1 });
 };
 
 const findAnswerByField = async (params) => {
@@ -382,8 +388,8 @@ const getQuestionAnswers = async (data, total_respondent) => {
 
 const percentagePerAnswer = (answers, total_respondent) => {
   for (let el of Object.keys(answers)) {
-    answers[el]["percentage"] = Math.round(
-      (answers[el].count / total_respondent.total) * 100
+    answers[el]["percentage"] = parseFloat(
+      ((answers[el].count / total_respondent.total) * 100).toFixed(2)
     );
   }
 
@@ -650,15 +656,41 @@ const fetchIncomplete = async (params) => {
     for (let answer of answers) {
       if (!incomplete.includes(answer.identifier)) {
         incomplete.push(answer.identifier);
-        // incomplete.push(answer.identifier);
-        // const arr = await answerMongo.findByIdAndUpdate(
-        //   { _id: answer._id },
-        //   { user: "643e687b95edcc7df79e22e6" }
-        // );
-        // console.log(answer._id);
       }
     }
-    return incomplete.length;
+    return incomplete;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const fetchIncompleteResponses = async (params) => {
+  const { page, limit } = params;
+  try {
+    let skip = limit * (page - 1);
+
+    const incomplete = await answerMongo.aggregate([
+      {
+        $match: {
+          ...answerCommonFilters(params),
+          status: "incomplete",
+        },
+      },
+      {
+        $group: {
+          _id: { identifier: "$identifier" },
+          doc: { $first: "$$ROOT" },
+        },
+      },
+      { $replaceRoot: { newRoot: "$doc" } },
+      {$skip:skip},
+      {$limit:limit}
+    ]);
+
+    return {
+      data:incomplete,
+      totalCount:"many"
+    };
   } catch (error) {
     console.log(error);
   }
@@ -777,4 +809,5 @@ module.exports = {
   findAnswerNormal,
   findAnswerByField,
   fetchResponses,
+  fetchIncompleteResponses,
 };

@@ -52,6 +52,8 @@ const onPhoneAuth = async (req, res) => {
 const updateInfo = async (req, res) => {
   const { id } = req.body;
 
+  console.log(req.body);
+
   try {
     await findUserAndUpdate(id, req.body);
     const userInfo = await findUseById(id);
