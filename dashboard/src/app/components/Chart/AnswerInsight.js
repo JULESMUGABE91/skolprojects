@@ -52,10 +52,14 @@ class AnswerInsight extends React.Component {
       isLoading,
     });
 
+    let requestBody = filtersHandler(this.props.filters);
+
+    delete requestBody.survey;
+
     const options = {
       method: "POST",
       url: ENDPOINT + "/answer/insight",
-      data: filtersHandler(this.props.filters),
+      data: requestBody,
       headers: {
         authorization: "Bearer " + user.token,
       },

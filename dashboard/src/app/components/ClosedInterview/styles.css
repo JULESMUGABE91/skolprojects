@@ -1,0 +1,35 @@
+.card-primary {
+  border: 2px solid var(--border);
+}
+
+.option_form {
+  display: flex;
+  /* align-items: center; */
+}
+
+.question_menus {
+  display: flex;
+  align-items: center;
+}
+
+.remote_btn {
+  display: flex;
+  align-items: center;
+}
+
+.remove_question {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  background-color: red;
+  display: flex;
+  cursor: pointer;
+}
+
+.remove_question i {
+  color: white;
+}

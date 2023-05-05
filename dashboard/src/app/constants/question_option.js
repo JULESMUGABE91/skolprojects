@@ -6,6 +6,10 @@ export const questionOptions = [
     value: "textinput",
   },
   {
+    label: "Survey Start",
+    value: "respondent_start",
+  },
+  {
     label: "Respondent Name",
     value: "respondent_name",
   },

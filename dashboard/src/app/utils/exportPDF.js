@@ -20,8 +20,6 @@ export default (
   size = "A4"
 ) => {
   const unit = "pt";
-  //   const size = "A4"; // Use A1, A2, A3 or A4
-  //   const orientation = "portrait"; // portrait or landscape
 
   const marginLeft = 40;
   const doc = new jsPDF(orientation, unit, size);
