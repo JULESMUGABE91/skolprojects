@@ -87,6 +87,7 @@ class QuestionForm extends React.Component {
       type: questionOptions[0].value,
       options: [],
       question: "",
+      english_question: "",
       setting: {
         isRequired: true,
       },
@@ -317,6 +318,16 @@ class QuestionForm extends React.Component {
                 }
                 error={question.error}
               />
+              <Input
+                label="English Question:"
+                required
+                className="form-control-lg"
+                value={question.english_question}
+                onChange={(value) =>
+                  this.onChangeQuestion({ index, field: "english_question", value })
+                }
+                error={question.error}
+              />
             </div>
             <div className="col-md-4">
               <Select
@@ -408,6 +419,20 @@ class QuestionForm extends React.Component {
                       question_index,
                       option_index,
                       field: "option",
+                      value,
+                    })
+                  }
+                  error={option.error}
+                />
+                <Input
+                  label={"English Option " + option_index}
+                  className="form-control-lg"
+                  value={option.option_english}
+                  onChange={(value) =>
+                    this.onChangeOption({
+                      question_index,
+                      option_index,
+                      field: "option_english",
                       value,
                     })
                   }
@@ -544,12 +569,6 @@ class QuestionForm extends React.Component {
 
     questions[index] = question;
 
-    console.log("====================================");
-    console.log({ questions, index });
-    console.log("====================================");
-
-    // this.setState({ questions });
-
     return errors_count;
   }
 
@@ -593,6 +612,7 @@ class QuestionForm extends React.Component {
         position: question.position,
         survey: filters.survey.value,
         question: question.question,
+        english_question: question.english_question,
         options: question.options,
         type: question.type,
         setting: question.setting,

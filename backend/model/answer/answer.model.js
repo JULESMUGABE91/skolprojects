@@ -5,7 +5,6 @@ const { createReward, findReward } = require("../reward/reward.model");
 const surveyMongo = require("../survey/survey.mongo");
 const userMongo = require("../users/user.mongo");
 const answerMongo = require("./answer.mongo");
-const { responderInfoFields } = require("../../constant/string");
 const { findQuestion } = require("../question/question.model");
 
 const createAnswer = async (params) => {
@@ -240,7 +239,7 @@ const findAnswerNormal = async (params) => {
       .populate({
         path: "question",
         model: questionMongo,
-        select: { question: 1, type: 1, options: 1 },
+        select: { question: 1, type: 1, options: 1, english_question: 1 },
       })
       .populate({
         path: "user",
@@ -312,22 +311,37 @@ const findAnswersFromDifferentLocation = async (params) => {
 };
 
 const findInsightAnswers = async (params) => {
-  let answers = await findAnswerNormal({
-    ...params,
-  });
+  try {
+    delete params.survey;
+    let answers = await findAnswer({
+      ...params,
+    });
 
-  const total_respondent = await fetchRespondents(params, answers);
+    const total_respondent = await fetchRespondents(params, answers);
 
-  const question_answers = await getQuestionAnswers(answers, total_respondent);
+    const question_answers = await getQuestionAnswers(
+      answers,
+      total_respondent
+    );
 
-  return question_answers;
+    return question_answers;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const getQuestionAnswers = async (data, total_respondent) => {
   let answers = {};
 
   for (let item of data) {
-    const question = item?.question?.question;
+    const question = (
+      item.question.english_question
+        ? item.question.english_question
+        : item?.question?.question
+    )
+      .trim()
+      .replace(/ /g, "_");
+
     const exclude = [
       "respondent_name",
       "respondent_address",
@@ -344,7 +358,7 @@ const getQuestionAnswers = async (data, total_respondent) => {
       }
 
       for (let option of item?.question?.options || []) {
-        const key_option = option.option;
+        const key_option = option.option_english || option.option;
 
         if (!answers[question][key_option]) {
           answers[question][key_option] = {
@@ -355,14 +369,16 @@ const getQuestionAnswers = async (data, total_respondent) => {
         for (let answer of item.answers) {
           const answer_option = answer.option;
 
-          if (key_option === answer_option) {
+          if (key_option === answer_option || answer_option === option.option) {
             if (answer.selection) {
               answers[question]["question_type"] = "dropdown";
               answers[question]["total_respondent"] = total_respondent.total;
+
               for (let selection of answer.selection || []) {
                 if (!answers[question][key_option]["data"]) {
                   answers[question][key_option]["data"] = {};
                 }
+
                 if (!answers[question][key_option]["data"][selection.value]) {
                   answers[question][key_option]["data"][selection.value] = {
                     count: 0,
@@ -392,13 +408,8 @@ const getQuestionAnswers = async (data, total_respondent) => {
 
 const percentagePerAnswer = (answers, total_respondent) => {
   for (let el of Object.keys(answers)) {
-    let count = answers[el].count;
-
-    if (answers[el].count > total_respondent.total) {
-      count = total_respondent.total;
-    }
     answers[el]["percentage"] = parseFloat(
-      ((count / total_respondent.total) * 100).toFixed(2)
+      ((answers[el].count / total_respondent.total) * 100).toFixed(2)
     );
   }
 
@@ -418,7 +429,7 @@ const fetchRespondents = async (params) => {
     {
       $match: {
         ...answerCommonFilters(params),
-        ["questions.type"]: "respondent_gender",
+        // ["questions.type"]: "respondent_gender",
       },
     },
     {

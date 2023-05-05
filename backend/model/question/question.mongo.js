@@ -28,6 +28,9 @@ const questionSchema = new Schema(
     options: {
       type: "Object",
     },
+    english_question: {
+      type: "String",
+    },
     setting: {
       type: "Object",
     },
