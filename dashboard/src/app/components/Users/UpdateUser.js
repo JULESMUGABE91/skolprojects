@@ -17,6 +17,8 @@ class UpdateUser extends React.Component {
     user: {},
     _id: "",
     access_levels: [],
+    lastname: "",
+    firstname: "",
   };
 
   componentDidMount = async () => {
@@ -66,7 +68,7 @@ class UpdateUser extends React.Component {
   onSubmit = async () => {
     await this.validateForm();
 
-    const { user, error, access_level } = this.state;
+    const { user, error, access_level, firstname, lastname } = this.state;
 
     if (Object.keys(error).length === 0) {
       this.setState({
@@ -79,6 +81,8 @@ class UpdateUser extends React.Component {
       let data = {
         id: this.props._id,
         account_type: access_level.value,
+        firstname,
+        lastname,
       };
 
       const options = {
@@ -113,6 +117,7 @@ class UpdateUser extends React.Component {
   };
 
   render() {
+    console.log(this.state);
     return (
       <div className="card">
         <div className="card-body">
@@ -125,7 +130,7 @@ class UpdateUser extends React.Component {
                 value={this.state.firstname}
                 onChange={(e) => this.onChangeText("firstname", e)}
                 error={this.state.error.firstname}
-                disabled
+                // disabled
               />
             </div>
             <div className="col-md-12">
@@ -136,7 +141,7 @@ class UpdateUser extends React.Component {
                 value={this.state.lastname}
                 onChange={(e) => this.onChangeText("lastname", e)}
                 error={this.state.error.lastname}
-                disabled
+                // disabled
               />
             </div>
             <div className="col-md-12">
@@ -147,7 +152,7 @@ class UpdateUser extends React.Component {
                 value={this.state.phone}
                 onChange={(e) => this.onChangeText("phone", e)}
                 error={this.state.error.phone}
-                disabled
+                // disabled
               />
             </div>
             <div className="col-md-12">

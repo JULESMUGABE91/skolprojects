@@ -65,7 +65,7 @@ class Home extends React.Component {
 
     axios(options)
       .then((res) => {
-        const total_incomplete = res.data;
+        const total_incomplete = res.data.length;
         this.setState({ total_incomplete, isLoadingStatus: false });
       })
       .catch((error) => {
@@ -335,16 +335,16 @@ class Home extends React.Component {
               </Link>
             </div>
             <div className="col-6 col-md-3">
-              {/* <Link to="/dashboard/home/report"> */}
-              <CardCount
-                title="Incomplete Questionnaires"
-                total={
-                  this.state.isLoadingStatus
-                    ? "..."
-                    : this.state.total_incomplete
-                }
-              />
-              {/* </Link> */}
+              <Link to="/dashboard/home/incomplete">
+                <CardCount
+                  title="Incomplete Questionnaires"
+                  total={
+                    this.state.isLoadingStatus
+                      ? "..."
+                      : this.state.total_incomplete
+                  }
+                />
+              </Link>
             </div>
           </div>
         )}

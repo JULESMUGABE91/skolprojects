@@ -166,10 +166,13 @@ class AnswerInsight extends React.Component {
 
                             for (let row of object_row) {
                               chart_data.push(
-                                Math.round(
-                                  (this.state?.data[q][head]?.data[row]?.count /
-                                    this.state.data[q].total_respondent) *
+                                parseFloat(
+                                  (
+                                    (this.state?.data[q][head]?.data[row]
+                                      ?.count /
+                                      this.state.data[q].total_respondent) *
                                     100
+                                  ).toFixed(2)
                                 )
                               );
 

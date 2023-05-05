@@ -6,7 +6,9 @@ class AnswerScreen extends React.Component {
   render() {
     return (
       <div>
-        <Home organization survey question user date isCountCard />
+        <div style={{ marginBottom: 15 }}>
+          <Home organization survey question user date isCountCard />
+        </div>
         <AnswerInsight />
       </div>
     );

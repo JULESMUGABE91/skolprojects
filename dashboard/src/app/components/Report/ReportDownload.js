@@ -179,11 +179,14 @@ class Questionnaires extends React.Component {
   render() {
     return (
       <div className="card">
-        <div className="card-body"  style={{maxHeight: "60vh", overflowY:"auto"}}>
+        <div
+          className="card-body"
+          style={{ maxHeight: "60vh", overflowY: "auto" }}
+        >
           {this.state.isLoading ? (
             <LoadingSpinner />
           ) : (
-            <table className="table table-bordered" >
+            <table className="table table-bordered">
               <thead>
                 <tr>
                   <th>File</th>
@@ -194,7 +197,6 @@ class Questionnaires extends React.Component {
               </thead>
               <tbody>
                 {Object.keys(this.state.data).map((identifier, i) => {
-                  console.log(this.state.data[identifier]);
                   return (
                     <tr className="list-questionnaire-download" key={i}>
                       <td>
