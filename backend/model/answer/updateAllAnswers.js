@@ -1,7 +1,58 @@
 const answerMongo = require("./answer.mongo");
 const questionMongo = require("../question/question.mongo");
+const { default: mongoose } = require("mongoose");
 
-module.exports = async () => {
+module.exports = async (params) => {
+  const data = [
+    "63ffb22a731970d4c34689d2__2bme81680499552244",
+    "63ffb22a731970d4c34689d2__jaln01680535226827",
+    "63ffb22a731970d4c34689d2__5jl311680517525975",
+    "63ffb22a731970d4c34689d2__dgsrf1680526063143",
+    "63ffb22a731970d4c34689d2__dqe1f1680529862344",
+    "63ffb22a731970d4c34689d2__elqqm1680510747647",
+    "63ffb22a731970d4c34689d2__esrcl1680341864238",
+    "63ffb22a731970d4c34689d2__f5bld1680512106270",
+    "63ffb22a731970d4c34689d2__gopm01680526053459",
+    "63ffb22a731970d4c34689d2__jaln01680535226827",
+    "63ffb22a731970d4c34689d2__men121680516348418",
+    "63ffb22a731970d4c34689d2__n9gq21680528050924",
+    "63ffb22a731970d4c34689d2__ntdfh1680523654669",
+    "63ffb22a731970d4c34689d2__p6pd51680533410464",
+    "63ffb22a731970d4c34689d2__pbbmq1680535082706",
+    "63ffb22a731970d4c34689d2__qld0e1680520655406",
+    "63ffb22a731970d4c34689d2__qtg0y1680527862448",
+    "63ffb22a731970d4c34689d2__tu6n21680507527194",
+    "63ffdb94b551bc8aec516701__05cka1680532876109",
+    "63ffdb94b551bc8aec516701__6v1nq1680533256470",
+    "63ffdb94b551bc8aec516701__7ud3a1680531393472",
+    "63ffdb94b551bc8aec516701__7zcq01680508103808",
+    "63ffdb94b551bc8aec516701__8jckx1680527850382",
+    "63ffdb94b551bc8aec516701__8pyfv1680520487401",
+    "63ffdb94b551bc8aec516701__chuys1680525723895",
+    "63ffdb94b551bc8aec516701__h26xq1680511077626",
+    "63ffdb94b551bc8aec516701__i58fh1680529127613",
+    "63ffdb94b551bc8aec516701__ijyll1680531444373",
+    "63ffdb94b551bc8aec516701__lqw201680518760008",
+  ];
+
+  try {
+    for (let el of data) {
+      const answers = await answerMongo.find({ identifier: el });
+
+      let last = answers.slice(33, answers.length);
+
+      console.log(last.length);
+
+      for (let dAns of last) {
+        await answerMongo.findByIdAndDelete({ _id: dAns._id });
+      }
+    }
+
+    return "All documents deleted successfully";
+  } catch (error) {
+    return error.stack;
+  }
+
   // try {
   //   let data = [
   //     {

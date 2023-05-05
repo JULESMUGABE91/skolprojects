@@ -80,4 +80,8 @@ app.post("/answer/incomplete/responses", (req, res) => {
   answer.httpFetchIncompleteResponses(req, res);
 });
 
+app.post("/answer/closedInterviews", (req, res) => {
+  answer.httpFetchClosedInterview(req, res);
+});
+
 module.exports = app;

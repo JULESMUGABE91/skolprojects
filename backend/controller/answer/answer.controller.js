@@ -23,6 +23,7 @@ const {
   fetchIncomplete,
   fetchResponses,
   fetchIncompleteResponses,
+  fetchClosedInterviews,
 } = require("../../model/answer/answer.model");
 const {
   validateAnswer,
@@ -275,6 +276,16 @@ const httpFetchIncompleteResponses = async (req, res) => {
   }
 };
 
+const httpFetchClosedInterview = async (req, res) => {
+  try {
+    const answerInfo = await fetchClosedInterviews(req.body);
+
+    res.status(200).json(answerInfo);
+  } catch (error) {
+    res.status(400).json(error.stack);
+  }
+};
+
 module.exports = {
   addInfo,
   deleteInfo,
@@ -295,4 +306,5 @@ module.exports = {
   httpUpdateAll,
   httpFetchResponses,
   httpFetchIncompleteResponses,
+  httpFetchClosedInterview,
 };

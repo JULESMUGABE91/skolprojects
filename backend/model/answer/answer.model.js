@@ -326,7 +326,7 @@ const findInsightAnswers = async (params) => {
 
     return question_answers;
   } catch (error) {
-    console.log(error);
+    return error;
   }
 };
 
@@ -703,13 +703,13 @@ const fetchIncompleteResponses = async (params) => {
         },
       },
       { $replaceRoot: { newRoot: "$doc" } },
-      {$skip:skip},
-      {$limit:limit}
+      { $skip: skip },
+      { $limit: limit },
     ]);
 
     return {
-      data:incomplete,
-      totalCount:"many"
+      data: incomplete,
+      totalCount: "many",
     };
   } catch (error) {
     console.log(error);
@@ -808,6 +808,41 @@ const fetchResponses = async (params) => {
   }
 };
 
+const fetchClosedInterviews = async (params) => {
+  const { page, limit } = params;
+
+  let skip = limit * (page - 1);
+
+  try {
+    const answers = await answerMongo
+      .find({
+        $or: [
+          { "answers.option": "Hashize ukwezi kurenga" },
+          { "answers.option": "More than a month ago" },
+        ],
+      })
+      .skip(skip)
+      .limit(limit);
+    const counts = await answerMongo
+      .find({
+        $or: [
+          { "answers.option": "Hashize ukwezi kurenga" },
+          { "answers.option": "More than a month ago" },
+        ],
+      })
+      .count();
+
+    let data = {};
+
+    return {
+      data: answers,
+      totalCount: counts,
+    };
+  } catch (error) {
+    return error.stack;
+  }
+};
+
 module.exports = {
   createAnswer,
   findAndUpdateAnswer,
@@ -830,4 +865,5 @@ module.exports = {
   findAnswerByField,
   fetchResponses,
   fetchIncompleteResponses,
+  fetchClosedInterviews,
 };
