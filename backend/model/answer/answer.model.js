@@ -389,82 +389,68 @@ const getQuestionAnswers = async (params, total_respondent) => {
         answers[question] = {};
       }
 
-      let question_options = [];
-
       for (let option of item?.question?.options || []) {
-        question_options.push({
-          option: option.option,
-          option_english: option.option_english,
-        });
-      }
+        const key_option = (option.option_english || option.option).trim();
+        for (let answer of item.answers) {
+          const answer_option = answer.option;
 
-      for (let answer of item.answers) {
-        const answer_option = answer.option;
-        let key_option;
-
-        for (let qo of question_options) {
-          if (
-            qo.option === answer_option ||
-            qo.option_english === answer_option
-          ) {
-            key_option = (qo.option_english || qo.option).trim();
+          if (!answers[question][key_option]) {
+            answers[question][key_option] = {
+              count: 0,
+            };
           }
-        }
 
-        if (!answers[question][key_option]) {
-          answers[question][key_option] = {
-            count: 0,
-          };
-        }
+          if (answer_option === option.option || key_option === answer_option) {
+            if (answer.selection) {
+              answers[question]["question_type"] = "dropdown";
+              answers[question]["total_respondent"] = total_respondent.total;
 
-        if (key_option && key_option !== "") {
-          if (answer.selection) {
-            answers[question]["question_type"] = "dropdown";
-            answers[question]["total_respondent"] = total_respondent.total;
+              for (let selection of answer.selection || []) {
+                if (!answers[question][key_option]["data"]) {
+                  answers[question][key_option]["data"] = {};
+                }
 
-            for (let selection of answer.selection || []) {
-              if (!answers[question][key_option]["data"]) {
-                answers[question][key_option]["data"] = {};
+                if (!answers[question][key_option]["data"][selection.value]) {
+                  answers[question][key_option]["data"][selection.value] = {
+                    count: 0,
+                  };
+                }
+
+                if (
+                  answers[question][key_option]["data"][selection.value][
+                    "count"
+                  ] <= total_respondent.total
+                ) {
+                  answers[question][key_option]["data"][selection.value][
+                    "count"
+                  ] += 1;
+
+                  // createResponse({
+                  //   question,
+                  //   answer: key_option + "___" + selection.value,
+                  //   count:
+                  //     answers[question][key_option]["data"][selection.value][
+                  //       "count"
+                  //     ],
+                  // });
+                }
               }
+            } else if (
+              answers[question][key_option]["count"] < total_respondent.total
+            ) {
+              answers[question][key_option]["count"] += 1;
 
-              if (!answers[question][key_option]["data"][selection.value]) {
-                answers[question][key_option]["data"][selection.value] = {
-                  count: 0,
-                };
-              }
-
-              if (
-                answers[question][key_option]["data"][selection.value][
-                  "count"
-                ] <= total_respondent.total
-              ) {
-                answers[question][key_option]["data"][selection.value][
-                  "count"
-                ] += 1;
-
-                // createResponse({
-                //   question,
-                //   answer: key_option + "___" + selection.value,
-                //   count:
-                //     answers[question][key_option]["data"][selection.value][
-                //       "count"
-                //     ],
-                // });
-              }
+              // createResponse({
+              //   question,
+              //   answer: key_option,
+              //   count: answers[question][key_option]["count"],
+              // });
             }
-          } else if (
-            answers[question][key_option]["count"] < total_respondent.total
-          ) {
-            answers[question][key_option]["count"] += 1;
-
-            // createResponse({
-            //   question,
-            //   answer: key_option,
-            //   count: answers[question][key_option]["count"],
-            // });
           }
         }
       }
+
+
     }
 
     answers[question] = percentagePerAnswer(
