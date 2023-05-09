@@ -240,7 +240,9 @@ const findAnswerById = async (_id) => {
 const findAnswerNormal = async (params) => {
   try {
     return await answerMongo
-      .find(answerCommonFilters(params))
+      .find({
+        ...answerCommonFilters(params),
+      })
       .populate({ path: "survey", model: surveyMongo, select: { title: 1 } })
       .populate({
         path: "question",
@@ -332,11 +334,41 @@ const findInsightAnswers = async (params) => {
 };
 
 const getQuestionAnswers = async (params, total_respondent) => {
-  let answers = {};
+  let answers = {},
+    question_ids = [];
+
+  let questions = await questionMongo.find(
+    {
+      $or: [
+        {
+          question: params.questionName,
+        },
+        {
+          english_question: params.questionName,
+        },
+        {
+          question: params.questionName + " ",
+        },
+        {
+          english_question: params.questionName + " ",
+        },
+      ],
+    },
+    { _id: 1 }
+  );
+
+  if (questions.length > 0) {
+    for (let el of questions) {
+      question_ids.push(el._id);
+    }
+  } else {
+    return "Not found";
+  }
 
   const data = await findAnswerNormal({
     ...params,
     identifiers: total_respondent.data,
+    questions: question_ids,
   });
 
   console.log("====================================");
@@ -352,23 +384,32 @@ const getQuestionAnswers = async (params, total_respondent) => {
       .trim()
       .replace(/ /g, "_");
 
-    const exclude = [
-      "respondent_name",
-      "respondent_address",
-      "respondent_email",
-      "respondent_phone_number",
-      "respondent_id",
-      "interviewer_name",
-      "interviewer_id",
-    ];
-
-    if (question && !exclude.includes(item.question.type)) {
+    if (question) {
       if (!answers[question]) {
         answers[question] = {};
       }
 
+      let question_options = [];
+
       for (let option of item?.question?.options || []) {
-        const key_option = (option.option_english || option.option).trim();
+        question_options.push({
+          option: option.option,
+          option_english: option.option_english,
+        });
+      }
+
+      for (let answer of item.answers) {
+        const answer_option = answer.option;
+        let key_option;
+
+        for (let qo of question_options) {
+          if (
+            qo.option === answer_option ||
+            qo.option_english === answer_option
+          ) {
+            key_option = (qo.option_english || qo.option).trim();
+          }
+        }
 
         if (!answers[question][key_option]) {
           answers[question][key_option] = {
@@ -376,42 +417,61 @@ const getQuestionAnswers = async (params, total_respondent) => {
           };
         }
 
-        for (let answer of item.answers) {
-          const answer_option = answer.option;
+        if (key_option && key_option !== "") {
+          if (answer.selection) {
+            answers[question]["question_type"] = "dropdown";
+            answers[question]["total_respondent"] = total_respondent.total;
 
-          if (key_option === answer_option || answer_option === option.option) {
-            if (answer.selection) {
-              answers[question]["question_type"] = "dropdown";
-              answers[question]["total_respondent"] = total_respondent.total;
+            for (let selection of answer.selection || []) {
+              if (!answers[question][key_option]["data"]) {
+                answers[question][key_option]["data"] = {};
+              }
 
-              for (let selection of answer.selection || []) {
-                if (!answers[question][key_option]["data"]) {
-                  answers[question][key_option]["data"] = {};
-                }
+              if (!answers[question][key_option]["data"][selection.value]) {
+                answers[question][key_option]["data"][selection.value] = {
+                  count: 0,
+                };
+              }
 
-                if (!answers[question][key_option]["data"][selection.value]) {
-                  answers[question][key_option]["data"][selection.value] = {
-                    count: 0,
-                  };
-                }
-
+              if (
+                answers[question][key_option]["data"][selection.value][
+                  "count"
+                ] <= total_respondent.total
+              ) {
                 answers[question][key_option]["data"][selection.value][
                   "count"
                 ] += 1;
+
+                // createResponse({
+                //   question,
+                //   answer: key_option + "___" + selection.value,
+                //   count:
+                //     answers[question][key_option]["data"][selection.value][
+                //       "count"
+                //     ],
+                // });
               }
-            } else {
-              answers[question][key_option]["count"] += 1;
             }
+          } else if (
+            answers[question][key_option]["count"] < total_respondent.total
+          ) {
+            answers[question][key_option]["count"] += 1;
+
+            // createResponse({
+            //   question,
+            //   answer: key_option,
+            //   count: answers[question][key_option]["count"],
+            // });
           }
         }
       }
-
-      answers[question] = percentagePerAnswer(
-        question,
-        answers[question],
-        total_respondent
-      );
     }
+
+    answers[question] = percentagePerAnswer(
+      question,
+      answers[question],
+      total_respondent
+    );
   }
 
   console.log("====================================");
@@ -422,14 +482,8 @@ const getQuestionAnswers = async (params, total_respondent) => {
 };
 
 const percentagePerAnswer = (question, answers, total_respondent) => {
-
   for (let el of Object.keys(answers)) {
-    let count = answers[el].count - 2;
-    createResponse({
-      question,
-      answer: el,
-      count,
-    });
+    let count = answers[el].count;
 
     answers[el]["percentage"] = parseFloat(
       ((count / total_respondent.total) * 100).toFixed(2)

@@ -3,6 +3,10 @@ const Schema = mongoose.Schema;
 
 const surveySchema = new Schema(
   {
+    survey: {
+      type: Schema.Types.ObjectId,
+      ref: "Surveys",
+    },
     question: {
       type: Schema.Types.ObjectId,
       ref: "Questions",
@@ -13,11 +17,10 @@ const surveySchema = new Schema(
     },
     answer: {
       type: "String",
-      // required: true,
+      required: true,
     },
     answerOption: {
       type: "String",
-      required: true,
     },
     count: {
       type: Number,

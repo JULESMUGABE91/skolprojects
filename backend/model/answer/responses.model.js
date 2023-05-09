@@ -1,4 +1,3 @@
-const answerMongo = require("./answer.mongo");
 const responseMongo = require("./responses.mongo");
 
 const createResponse = async (params) => {
@@ -10,8 +9,7 @@ const createResponse = async (params) => {
     return await responseMongo.create(params);
   }
 
-  let _count =
-    count > 0 ? checkExist[0].count + count : checkExist[0].count + 1;
+  let _count = count > 0 ? count : checkExist[0].count + 1;
 
   await responseMongo.findByIdAndUpdate(
     { _id: checkExist[0]._id },
@@ -19,6 +17,33 @@ const createResponse = async (params) => {
   );
 };
 
+const fetchResponses = async (params) => {
+  try {
+    const answers = await responseMongo.aggregate([
+      {
+        $match: {},
+      },
+      {
+        $group: {
+          _id: "$question",
+          answers: { $push: "$$ROOT" },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          answers: 1,
+        },
+      },
+    ]);
+
+    return answers;
+  } catch (error) {
+    return error;
+  }
+};
+
 module.exports = {
   createResponse,
+  fetchResponses,
 };
