@@ -320,7 +320,7 @@ const findInsightAnswers = async (params) => {
   try {
     const total_respondent = await fetchRespondents(params);
 
-    const question_answers = await getQuestionAnswers(total_respondent);
+    const question_answers = await getQuestionAnswers(params, total_respondent);
 
     return question_answers;
   } catch (error) {
@@ -331,10 +331,11 @@ const findInsightAnswers = async (params) => {
   }
 };
 
-const getQuestionAnswers = async (total_respondent) => {
+const getQuestionAnswers = async (params, total_respondent) => {
   let answers = {};
 
   const data = await findAnswerNormal({
+    ...params,
     identifiers: total_respondent.data,
   });
 
