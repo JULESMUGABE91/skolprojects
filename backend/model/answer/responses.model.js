@@ -2,7 +2,7 @@ const answerMongo = require("./answer.mongo");
 const responseMongo = require("./responses.mongo");
 
 const createResponse = async (params) => {
-  const { question, answer } = params;
+  const { question, answer, count = 0 } = params;
 
   const checkExist = await responseMongo.find({ question, answer });
 
@@ -10,9 +10,12 @@ const createResponse = async (params) => {
     return await responseMongo.create(params);
   }
 
-  let count = checkExist[0].count + 1;
+  let _count = count > 0 ? count : checkExist[0].count + 1;
 
-  await responseMongo.findByIdAndUpdate({ _id: checkExist[0]._id }, { count });
+  await responseMongo.findByIdAndUpdate(
+    { _id: checkExist[0]._id },
+    { count: _count }
+  );
 };
 
 module.exports = {

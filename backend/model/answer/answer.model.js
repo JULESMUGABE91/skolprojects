@@ -398,26 +398,16 @@ const getQuestionAnswers = async (params, total_respondent) => {
                 answers[question][key_option]["data"][selection.value][
                   "count"
                 ] += 1;
-
-                createResponse({
-                  question,
-                  answer: selection.value,
-                  answerOption: key_option,
-                });
               }
             } else {
               answers[question][key_option]["count"] += 1;
-
-              createResponse({
-                question,
-                answer: key_option,
-              });
             }
           }
         }
       }
 
       answers[question] = percentagePerAnswer(
+        question,
         answers[question],
         total_respondent
       );
@@ -431,11 +421,17 @@ const getQuestionAnswers = async (params, total_respondent) => {
   return answers;
 };
 
-const percentagePerAnswer = (answers, total_respondent) => {
+const percentagePerAnswer = (question, answers, total_respondent) => {
+  let count = answers[el].count - 2;
   for (let el of Object.keys(answers)) {
+    createResponse({
+      question,
+      answer: el,
+      count,
+    });
 
     answers[el]["percentage"] = parseFloat(
-      ((answers[el].count / total_respondent.total) * 100).toFixed(2)
+      ((count / total_respondent.total) * 100).toFixed(2)
     );
   }
 
