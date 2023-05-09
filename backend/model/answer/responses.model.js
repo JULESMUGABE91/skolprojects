@@ -10,7 +10,8 @@ const createResponse = async (params) => {
     return await responseMongo.create(params);
   }
 
-  let _count = count > 0 ? count : checkExist[0].count + 1;
+  let _count =
+    count > 0 ? checkExist[0].count + count : checkExist[0].count + 1;
 
   await responseMongo.findByIdAndUpdate(
     { _id: checkExist[0]._id },

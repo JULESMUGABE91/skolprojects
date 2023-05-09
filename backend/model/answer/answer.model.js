@@ -422,8 +422,9 @@ const getQuestionAnswers = async (params, total_respondent) => {
 };
 
 const percentagePerAnswer = (question, answers, total_respondent) => {
-  let count = answers[el].count - 2;
+
   for (let el of Object.keys(answers)) {
+    let count = answers[el].count - 2;
     createResponse({
       question,
       answer: el,
