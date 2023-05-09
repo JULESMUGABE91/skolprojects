@@ -6,9 +6,8 @@ const surveySchema = new Schema(
     question: {
       type: Schema.Types.ObjectId,
       ref: "Questions",
-      required: true,
     },
-    questionName: {
+    question: {
       type: "String",
       required: true,
     },

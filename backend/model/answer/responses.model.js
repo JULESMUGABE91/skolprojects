@@ -4,10 +4,6 @@ const responseMongo = require("./responses.mongo");
 const createResponse = async (params) => {
   const { question, answer } = params;
 
-  console.log("====================================");
-  console.log(params);
-  console.log("====================================");
-
   const checkExist = await responseMongo.find({ question, answer });
 
   if (checkExist.length === 0) {
