@@ -338,6 +338,10 @@ const getQuestionAnswers = async (total_respondent) => {
     identifiers: total_respondent.data,
   });
 
+  console.log("====================================");
+  console.log(data.length);
+  console.log("====================================");
+
   for (let item of data) {
     const question = (
       item.question.english_question
@@ -396,17 +400,17 @@ const getQuestionAnswers = async (total_respondent) => {
 
                 createResponse({
                   question,
-                  answer:selection.value,
-                  answerOption:key_option,
-                })
+                  answer: selection.value,
+                  answerOption: key_option,
+                });
               }
             } else {
               answers[question][key_option]["count"] += 1;
 
               createResponse({
                 question,
-                answer:key_option
-              })
+                answer: key_option,
+              });
             }
           }
         }
@@ -418,6 +422,10 @@ const getQuestionAnswers = async (total_respondent) => {
       );
     }
   }
+
+  console.log("====================================");
+  console.log("Done!");
+  console.log("====================================");
 
   return answers;
 };
