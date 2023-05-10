@@ -16,6 +16,9 @@ class AnswerScreen extends React.Component {
   render() {
     return (
       <div>
+        <div style={{ marginBottom: 15 }}>
+          <Home isCountCard survey date />
+        </div>
         <Tabs
           options={[
             {

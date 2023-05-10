@@ -67,6 +67,11 @@ function App() {
                   />
                   <Route
                     exact
+                    path={`${url}/surveys/answers/:question`}
+                    component={AnswerScreen}
+                  />
+                  <Route
+                    exact
                     path={`${url}/accounts`}
                     component={UsersScreen}
                   />

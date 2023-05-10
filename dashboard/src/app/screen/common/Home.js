@@ -294,7 +294,7 @@ class Home extends React.Component {
     }
     return (
       <div>
-        <Header filters={list_filters} />
+        {!this.props.none && <Header filters={list_filters} />}
         <hr />
         {this.props.isCountCard && (
           <div className="row">

@@ -10,6 +10,7 @@ import { LoadingSpinner } from "../LoadingSpinner";
 import { colors } from "../../constants/strings";
 import filtersHandler from "../../utils/filtersHandler";
 import { Select } from "../Input";
+import { onFilter } from "../../action/Filters";
 
 const questions = [
   { label: "Do you have 15 min to answer some questions" },
@@ -210,12 +211,14 @@ class AnswerInsight extends React.Component {
 
   onChangeQuestion(e) {
     this.setState({ question: e });
+
+    window.location.href = "/dashboard/surveys/answers/" + e.label;
   }
 
   render() {
     return (
       <div>
-        <div className="card">
+        {/* <div className="card">
           <div className="card-body">
             <div className="col-md-6">
               <Select
@@ -226,7 +229,7 @@ class AnswerInsight extends React.Component {
               />
             </div>
           </div>
-        </div>
+        </div> */}
         <div className="chart-container row" style={{ marginTop: 20 }}>
           {Object.keys(this.state.data).length > 0
             ? Object.keys(this.state.data).map((q, i) => {
