@@ -371,10 +371,6 @@ const getQuestionAnswers = async (params, total_respondent) => {
     questions: question_ids,
   });
 
-  console.log("====================================");
-  console.log(data.length);
-  console.log("====================================");
-
   for (let item of data) {
     const question = (
       item.question.english_question
@@ -391,6 +387,7 @@ const getQuestionAnswers = async (params, total_respondent) => {
 
       for (let option of item?.question?.options || []) {
         const key_option = (option.option_english || option.option).trim();
+
         for (let answer of item.answers) {
           const answer_option = answer.option;
 
@@ -424,33 +421,18 @@ const getQuestionAnswers = async (params, total_respondent) => {
                   answers[question][key_option]["data"][selection.value][
                     "count"
                   ] += 1;
-
-                  // createResponse({
-                  //   question,
-                  //   answer: key_option + "___" + selection.value,
-                  //   count:
-                  //     answers[question][key_option]["data"][selection.value][
-                  //       "count"
-                  //     ],
-                  // });
                 }
-              }
-            } else if (
-              answers[question][key_option]["count"] < total_respondent.total
-            ) {
-              answers[question][key_option]["count"] += 1;
 
-              // createResponse({
-              //   question,
-              //   answer: key_option,
-              //   count: answers[question][key_option]["count"],
-              // });
+                break;
+              }
+            } else {
+              answers[question][key_option]["count"] += 1;
             }
           }
+
+          if (!answer.selection) break;
         }
       }
-
-
     }
 
     answers[question] = percentagePerAnswer(
@@ -729,17 +711,45 @@ const fetchAndGroupByUser = async (params) => {
 
 const fetchIncomplete = async (params) => {
   try {
-    const answers = await findAnswer(params);
-    let incomplete = [];
+    const data = await answerMongo.aggregate(
+      [
+        {
+          $match: {
+            ...answerCommonFilters(params),
+          },
+        },
+        {
+          $group: {
+            _id: "$identifier",
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $match: {
+            count: { $lt: 33 },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            ids: { $push: "$_id" },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            ids: {
+              $map: { input: "$ids", as: "id", in: { $toString: "$$id" } },
+            },
+          },
+        },
+      ],
+      { allowDiskUse: true }
+    );
 
-    for (let answer of answers) {
-      if (!incomplete.includes(answer.identifier)) {
-        incomplete.push(answer.identifier);
-      }
-    }
-    return incomplete;
+    return data.length > 0 ? data[0].ids.length : 0;
   } catch (error) {
-    console.log(error);
+    return error.stack;
   }
 };
 
@@ -748,17 +758,23 @@ const fetchIncompleteResponses = async (params) => {
   try {
     let skip = limit * (page - 1);
 
+    delete params.status;
     const incomplete = await answerMongo.aggregate([
       {
         $match: {
           ...answerCommonFilters(params),
-          status: "incomplete",
         },
       },
       {
         $group: {
-          _id: { identifier: "$identifier" },
+          _id: "$identifier",
+          count: { $sum: 1 },
           doc: { $first: "$$ROOT" },
+        },
+      },
+      {
+        $match: {
+          count: { $lt: 33 },
         },
       },
       { $replaceRoot: { newRoot: "$doc" } },
