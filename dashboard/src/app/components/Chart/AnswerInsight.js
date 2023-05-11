@@ -45,35 +45,35 @@ const questions = [
   { label: "Show card 3 (Traditional/ Modern)" },
   { label: "Show Card 6 (Light/ Strong)" },
   { label: "Social Economic Group (SEG)" },
-  {
-    label:
-      "How often do you drink beer? (READ OUT ALL POSSIBLE ANSWERS, SINGLE RESPONSE)",
-  },
-  { label: "When you drink, how many bottles do you drink?" },
-  {
-    label:
-      'All other brands you know PROBE "any other?" THREE TIMESNOTE: IF THE NAME MENTIONED BY THE RESPONDENT IS NOT EXACTLY THE NAME / WORD AS IN THE PRECODED LIST (EG: "Knowless", THEN THE MENTIONED NAME COULD BE WRITTEN UNDER OTHERS',
-  },
-  {
-    label:
-      "For each of the brands I am going to read to you please tell me if you know this brand of beer even if you know it only by nameSHOW CARD 1: BRAND LIST ",
-  },
-  {
-    label:
-      "Which size of beer bottle do you usually order? (READ OUT, SINGLE RESPONSE)",
-  },
-  {
-    label:
-      "If you don't find your preferred beer, what other beer do you take?",
-  },
-  { label: "What is your preferred beer?" },
-  { label: "Show card 4 (Low Quality/ High Quality)" },
-  { label: "Show card 7 (Affordable/ Expensive" },
-  { label: "Show Card 8 (Serious/ Fun)" },
-  {
-    label:
-      "I declare that this interview has been carried out strictly in accordance with your specification and has been conducted within the ESOMAR Code of conduct with a person unknown to me.",
-  },
+  // {
+  //   label:
+  //     "How often do you drink beer? (READ OUT ALL POSSIBLE ANSWERS, SINGLE RESPONSE)",
+  // },
+  // { label: "When you drink, how many bottles do you drink?" },
+  // {
+  //   label:
+  //     'All other brands you know PROBE "any other?" THREE TIMESNOTE: IF THE NAME MENTIONED BY THE RESPONDENT IS NOT EXACTLY THE NAME / WORD AS IN THE PRECODED LIST (EG: "Knowless", THEN THE MENTIONED NAME COULD BE WRITTEN UNDER OTHERS',
+  // },
+  // {
+  //   label:
+  //     "For each of the brands I am going to read to you please tell me if you know this brand of beer even if you know it only by nameSHOW CARD 1: BRAND LIST ",
+  // },
+  // {
+  //   label:
+  //     "Which size of beer bottle do you usually order? (READ OUT, SINGLE RESPONSE)",
+  // },
+  // {
+  //   label:
+  //     "If you don't find your preferred beer, what other beer do you take?",
+  // },
+  // { label: "What is your preferred beer?" },
+  // { label: "Show card 4 (Low Quality/ High Quality)" },
+  // { label: "Show card 7 (Affordable/ Expensive" },
+  // { label: "Show Card 8 (Serious/ Fun)" },
+  // {
+  //   label:
+  //     "I declare that this interview has been carried out strictly in accordance with your specification and has been conducted within the ESOMAR Code of conduct with a person unknown to me.",
+  // },
 ];
 
 let results = {};

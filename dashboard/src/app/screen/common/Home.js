@@ -55,7 +55,6 @@ class Home extends React.Component {
       method: "POST",
       url: ENDPOINT + "/answer/incomplete",
       data: {
-        status: "incomplete",
         ...filtersHandler(this.props.filters),
       },
       headers: {
@@ -65,7 +64,7 @@ class Home extends React.Component {
 
     axios(options)
       .then((res) => {
-        const total_incomplete = res.data.length;
+        const total_incomplete = res.data;
         this.setState({ total_incomplete, isLoadingStatus: false });
       })
       .catch((error) => {
