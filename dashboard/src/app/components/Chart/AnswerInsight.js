@@ -339,7 +339,13 @@ class AnswerInsight extends React.Component {
                   );
                 }
                 return (
-                  <div className="col-md-6">
+                  <div
+                    className={
+                      this.state.data[q].labels.length > 15
+                        ? "col-md-12"
+                        : "col-md-6"
+                    }
+                  >
                     <div className="card" key={i} style={{ marginBottom: 15 }}>
                       <div className="card-header">
                         <h3>{q}</h3>
