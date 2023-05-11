@@ -99,7 +99,7 @@ const generateAnswerPDFReport = async (params) => {
 
     docDefinition.content.push(
       {
-        text: answer.question.position + ". " + answer.question.question,
+        text:  answer.question.question,
         style: "subheader",
       },
       "",
