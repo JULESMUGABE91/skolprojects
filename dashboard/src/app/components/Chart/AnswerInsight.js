@@ -13,24 +13,24 @@ import { Select } from "../Input";
 import { onFilter } from "../../action/Filters";
 
 const questions = [
-  { label: "Do you have 15 min to answer some questions" },
-  { label: "Gender" },
-  { label: "Where? Specify" },
-  { label: "Age group" },
-  { label: "What else you certainly never drink?" },
-  {
-    label:
-      "When was the last time you drunk bottled beer? NOTE: Close interview if the answer is more than one month",
-  },
-  { label: "What is your third choice?" },
-  {
-    label:
-      "Think about beer brands, could you please tell me the brand that comes to your mind FIRST? INTERVIEW: RECORD FIRST MENTIONED ON THE TOM COLUMN (a) SINGLE RESPONSE",
-  },
-  {
-    label:
-      "You have understood now we can start to describe different beers:SHOW CARD 1: BRAND...... SPECIFY ",
-  },
+  // { label: "Do you have 15 min to answer some questions" },
+  // { label: "Gender" },
+  // { label: "Where? Specify" },
+  // { label: "Age group" },
+  // { label: "What else you certainly never drink?" },
+  // {
+  //   label:
+  //     "When was the last time you drunk bottled beer? NOTE: Close interview if the answer is more than one month",
+  // },
+  // { label: "What is your third choice?" },
+  // {
+  //   label:
+  //     "Think about beer brands, could you please tell me the brand that comes to your mind FIRST? INTERVIEW: RECORD FIRST MENTIONED ON THE TOM COLUMN (a) SINGLE RESPONSE",
+  // },
+  // {
+  //   label:
+  //     "You have understood now we can start to describe different beers:SHOW CARD 1: BRAND...... SPECIFY ",
+  // },
   { label: "Show card 5 (Old/ Young)" },
   { label: "Which beer you certainly never drink?" },
   {
@@ -121,6 +121,8 @@ class AnswerInsight extends React.Component {
 
     delete requestBody.survey;
 
+    let results = [];
+
     for (let qName of this.state.question || questions) {
       this.setState({
         isLoading: true,
@@ -140,17 +142,23 @@ class AnswerInsight extends React.Component {
         .then((res) => {
           const data = res.data;
 
-          for (let key of Object.keys(data)) {
-            if (data[key].question_type === "dropdown") {
-              results[key] = data[key];
-            } else {
-              results[key] = this.formatChart(data[key], key);
-            }
-          }
+          results.push(data);
+
+          // for (let key of Object.keys(data)) {
+          //   // if (data[key].question_type === "dropdown") {
+          //   //   results[key] = data[key];
+          //   // } else {
+          //   //   results[key] = this.formatChart(data[key], key);
+          //   // }
+          //   results.push({
+          //     identifier: key,
+          //     ...data[key],
+          //   });
+          // }
 
           this.setState({
             isLoading: false,
-            data: results,
+            // data: results,
           });
         })
         .catch((error) => {
@@ -159,6 +167,10 @@ class AnswerInsight extends React.Component {
           this.setState({ isLoading: false });
         });
     }
+
+    console.log("====================================");
+    console.log({ results: JSON.stringify(results) });
+    console.log("====================================");
   };
 
   formatChart(data, key) {

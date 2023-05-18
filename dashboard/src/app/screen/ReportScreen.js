@@ -1,15 +1,12 @@
 import React from "react";
 import { Surveyor } from "../components/Performance";
 import { Tabs } from "../components/Tabs";
-import { Report, Summary } from "../components/Report";
+import { Report } from "../components/Report";
 
 class ReportScreen extends React.Component {
-  renderSummary = () => {
-    return <Summary />;
+  renderReport = () => {
+    return <Report />;
   };
-  // renderReport = () => {
-  //   return <Report />;
-  // };
   renderUsers = () => {
     return <Surveyor />;
   };
@@ -19,14 +16,10 @@ class ReportScreen extends React.Component {
         <div>
           <Tabs
             options={[
-              // {
-              //   title: "Summary",
-              //   data: this.renderSummary(),
-              // },
-              // {
-              //   title: "Respondents",
-              //   data: this.renderReport(),
-              // },
+              {
+                title: "Report Data",
+                data: this.renderReport(),
+              },
               {
                 title: "Performance",
                 data: this.renderUsers(),

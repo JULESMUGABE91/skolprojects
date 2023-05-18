@@ -242,7 +242,7 @@ class Table extends React.Component {
                 {headers &&
                   headers.map((item, i) => {
                     return (
-                      <th key={i}>
+                      <th key={i} title={item.title}>
                         {item.title}
                         {item.sort && (
                           <button

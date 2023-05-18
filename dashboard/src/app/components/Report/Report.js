@@ -29,6 +29,7 @@ class Report extends React.Component {
     error: {},
     totalPageCount: 0,
     csvData: [],
+    headers: [],
   };
 
   componentDidMount = async () => {
@@ -55,9 +56,11 @@ class Report extends React.Component {
 
     this.setState({
       isLoading,
+      headers: [],
+      data: [],
     });
 
-    let url = ENDPOINT + "/answer/respondent";
+    let url = ENDPOINT + "/answer/responses";
 
     let request_body = filtersHandler({
       ...this.props.filters,
@@ -67,10 +70,6 @@ class Report extends React.Component {
 
     if (this.props.filters.user && this.props.filters?.user?.value) {
       request_body.user = this.props.filters?.user?.value;
-    }
-
-    if (search_text && search_text !== "") {
-      request_body.search = search_text;
     }
 
     const options = {
@@ -84,31 +83,16 @@ class Report extends React.Component {
 
     axios(options)
       .then((res) => {
-        // let { data, count } = res.data;
-        let data = res.data;
-
-        let results = [];
-
-        for (let el of Object.keys(data.respondents)) {
-          results.push({
-            ...data.respondents[el],
-            identifier: el,
-            start_interview: moment(
-              data.respondents[el].start_interview
-            ).format("lll"),
-            end_interview: moment(data.respondents[el].end_interview).format(
-              "lll"
-            ),
-          });
-        }
+        let { data, totalCount, headers } = res.data;
 
         this.setState({
-          data: results,
+          data: data,
+          headers: headers,
           isLoading: false,
-          // totalPageCount: count,
+          totalPageCount: totalCount,
         });
 
-        copyData = results.slice(0);
+        copyData = data.slice(0);
       })
       .catch((error) => {
         this.setState({
@@ -163,20 +147,6 @@ class Report extends React.Component {
     });
   }
 
-  handleShowModal(modal, modalTitle, selected_data = {}) {
-    this.setState({
-      [modal]: true,
-      modalTitle: modalTitle,
-      selected_data,
-    });
-  }
-
-  handleCloseModal(modal) {
-    this.setState({
-      [modal]: false,
-    });
-  }
-
   handlePagination(page) {
     this.setState(
       {
@@ -188,102 +158,18 @@ class Report extends React.Component {
     );
   }
 
-  downloadExcel = () => {
-    const { data } = this.state;
-
-    this.setState({
-      isLoading: true,
-    });
-
-    this.setState(
-      {
-        isLoading: false,
-        csvData: data,
-      },
-      () => {
-        this.refs.csvDownload?.link.click();
-      }
-    );
-  };
-
-  downloadPDF = () => {
-    const headers = this.returnTableHeaders();
-
-    const { data } = this.state;
-
-    exportPDF(reportFileName(this.props.filters), headers, data, "landscape");
-  };
-
-  returnTableHeaders() {
-    return [
-      {
-        title: "File",
-        type: "download_pdf",
-      },
-      {
-        title: "Name",
-        key: "respondent_name",
-      },
-      {
-        title: "Phone Number",
-        key: "respondent_phone_number",
-      },
-      {
-        title: "Gender",
-        key: "respondent_gender",
-      },
-      {
-        title: "Address",
-        key: "respondent_address",
-      },
-      {
-        title: "Surveyor Name",
-        key: "surveyor",
-      },
-      {
-        title: "Surveyor Contact",
-        key: "surveyor_phone",
-      },
-      {
-        title: "Survey Location",
-        key: "start_location",
-      },
-      {
-        title: "Started Time",
-        key: "start_interview",
-        isMoment: true,
-        formatTime: "lll",
-      },
-      {
-        title: "End Time",
-        key: "end_interview",
-        isMoment: true,
-        formatTime: "lll",
-      },
-    ];
-  }
-
-  onDownloadQuestionnaire(item) {
-    const { user } = this.state;
+  getReport = async (type) => {
+    const { user, limit, page } = this.state;
 
     toastMessage("info", "Downloading...");
 
-    let url = ENDPOINT + "/answer/report/pdf";
-
-    delete this.props.filters.start_date;
-    delete this.props.filters.end_date;
+    let url = ENDPOINT + "/responses/export";
 
     let request_body = filtersHandler({
       ...this.props.filters,
-      user: item.surveyor_id,
+      limit,
+      page,
     });
-
-    request_body.survey = item.survey;
-    request_body.identifier = item.identifier;
-
-    if (this.props.filters.user?.value) {
-      request_body.user = this.props.filters.user?.value;
-    }
 
     const options = {
       method: "POST",
@@ -294,19 +180,80 @@ class Report extends React.Component {
       },
     };
 
+    return await axios(options)
+      .then((res) => {
+        const { message, filePath } = res.data;
+
+        this.readFileAndDownload({ type, filePath, message });
+      })
+      .catch((error) => {
+        this.setState({
+          isLoading: false,
+        });
+
+        toastMessage("error", error);
+      });
+  };
+
+  downloadExcel = async () => {
+    try {
+      await this.getReport("csv");
+    } catch (error) {
+      toastMessage("error", error);
+    }
+  };
+
+  downloadPDF = async () => {
+    try {
+      await this.getReport("pdf");
+    } catch (error) {
+      toastMessage("error", error);
+    }
+  };
+
+  readFileAndDownload(item) {
+    toastMessage("info", "Downloading...");
+
+    const { user } = this.state;
+    const { type, filePath, message } = item;
+
+    let url = ENDPOINT + "/file/read/" + type + "?file=" + filePath;
+
+    const options = {
+      method: "GET",
+      url,
+      responseType: "blob",
+      headers: {
+        authorization: "Bearer " + user.token,
+      },
+    };
+
     axios(options)
       .then((res) => {
         let data = res.data;
 
-        saveDownload({
-          file: data,
-          identifier: request_body.identifier,
-          user: item.respondent_name + " " + item.respondent_phone_number,
-        });
+        console.log(data);
+
+        toastMessage("success", message);
+
+        // create file link in browser's memory
+        const href = URL.createObjectURL(data);
+
+        // create "a" HTML element with href to file & click
+        const link = document.createElement("a");
+        link.href = href;
+        link.setAttribute("download",new Date().getTime() + "surveyResponses." + type); //or any other extension
+        document.body.appendChild(link);
+        link.click();
+
+        // clean up "a" element & remove ObjectURL
+        document.body.removeChild(link);
+        URL.revokeObjectURL(href);
       })
       .catch((error) => {
+        console.log(error)
         this.setState({
-          ["isSubmitting_" + item.index]: false,
+          isLoading: false,
         });
 
         toastMessage("error", error);
@@ -324,16 +271,15 @@ class Report extends React.Component {
           handleSearch={this.handleSearch.bind(this)}
           totalPageCount={this.state.totalPageCount}
           handlePagination={this.handlePagination.bind(this)}
-          handleDownloadFilePdf={(item) => {
-            this.onDownloadQuestionnaire(item);
-          }}
           page={this.state.page}
           limit={this.state.limit}
           isLoading={this.state.isLoading}
-          headers={this.returnTableHeaders()}
-          rowPress={(item) => {
-            this.onDownloadQuestionnaire(item);
-          }}
+          headers={this.state.headers.map((el) => {
+            return {
+              title: el,
+              key: el,
+            };
+          })}
           filters={[
             {
               type: "refresh",
@@ -359,17 +305,6 @@ class Report extends React.Component {
             },
           ]}
         />
-        <Modal
-          handleClose={this.handleCloseModal.bind(this, "showModal")}
-          show={this.state.showModal}
-          title={this.state.modalTitle}
-          showHeaderBottomBorder={false}
-        >
-          <ReportDownload
-            {...this.state.selected_data}
-            handleCloseModal={this.handleCloseModal.bind(this, "showModal")}
-          />
-        </Modal>
         <CSVLink
           ref="csvDownload"
           filename={reportFileName(this.props.filters)}

@@ -222,10 +222,6 @@ class Surveys extends React.Component {
         key: "introduction",
       },
       {
-        title: "Created By",
-        key: "user.firstname",
-      },
-      {
         title: "Created At",
         key: "createdAt",
         isMoment: true,
