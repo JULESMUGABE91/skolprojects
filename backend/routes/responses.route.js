@@ -2,10 +2,10 @@ const express = require("express");
 const { protect } = require("../middleware/authMiddleware");
 const app = express();
 
-const responses = require("../controller/answer/responses.controller");
+const responses = require("../controller/responses/responses");
 
-app.post("/answer/stats", protect, (req, res) => {
-  responses.httpFetchInfo(req, res);
+app.post("/responses/export", protect, (req, res) => {
+  responses.httpGenerateResponse(req, res);
 });
 
 module.exports = app;

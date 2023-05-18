@@ -31,7 +31,6 @@ const {
 } = require("../../validation/answer.validation.js");
 const socket = require("../../utils/socket");
 const { httpAnswerPDFReport } = require("../report/report.controller");
-const updateAllAnswers = require("../../model/answer/updateAllAnswers");
 
 const addInfo = async (req, res) => {
   const { answers, question, survey, organization, identifier } = req.body;
@@ -246,16 +245,6 @@ const httpIncomplete = async (req, res) => {
   }
 };
 
-const httpUpdateAll = async (req, res) => {
-  try {
-    const answerInfo = await updateAllAnswers(req.body);
-
-    res.status(200).json(answerInfo);
-  } catch (error) {
-    res.status(400).json(error.stack);
-  }
-};
-
 const httpFetchResponses = async (req, res) => {
   try {
     const answerInfo = await fetchResponses(req.body);
@@ -303,7 +292,6 @@ module.exports = {
   httpRespondentPerAgeGroup,
   httpGroupByUser,
   httpIncomplete,
-  httpUpdateAll,
   httpFetchResponses,
   httpFetchIncompleteResponses,
   httpFetchClosedInterview,

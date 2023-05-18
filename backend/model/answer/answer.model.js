@@ -6,7 +6,8 @@ const surveyMongo = require("../survey/survey.mongo");
 const userMongo = require("../users/user.mongo");
 const answerMongo = require("./answer.mongo");
 const { findQuestion } = require("../question/question.model");
-const { createResponse } = require("./responses.model");
+const { Parser } = require("json2csv");
+const fs = require("fs");
 
 const createAnswer = async (params) => {
   delete params._id;
@@ -797,89 +798,135 @@ const fetchResponses = async (params) => {
   let skip = limit * (page - 1);
 
   try {
-    const answers = await answerMongo.aggregate([
-      {
-        $lookup: {
-          from: "questions",
-          localField: "question",
-          foreignField: "_id",
-          as: "question",
-        },
-      },
-      {
-        $match: {
-          ...answerCommonFilters(params),
-          status: { $ne: "incomplete" },
-          ["answers.option"]: {
-            $ne: "Hashize ukwezi kurenga",
+    const answers = await answerMongo.aggregate(
+      [
+        {
+          $match: {
+            ...answerCommonFilters(params),
+            status: { $ne: "incomplete" },
           },
-          $and: [
-            {
-              $or: [
-                {
-                  ["question.type"]: "respondent_gender",
-                },
-                { ["question.type"]: "respondent_region" },
-                {
-                  ["question.type"]: "respondent_age_group",
-                },
-                {
-                  ["question.type"]: "respondent_last_time_consumer",
-                },
-                {
-                  ["question.type"]: "respondent_favorite",
-                },
-                {
-                  ["question.type"]: "respondent_seg",
-                },
-                {
-                  ["question.type"]: "respondent_first_brand",
-                },
-              ],
+        },
+        {
+          $lookup: {
+            from: "questions",
+            localField: "question",
+            foreignField: "_id",
+            as: "question",
+          },
+        },
+        {
+          $unwind: "$question",
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "user",
+            foreignField: "_id",
+            as: "user",
+          },
+        },
+        {
+          $unwind: "$user",
+        },
+        {
+          $group: {
+            _id: {
+              identifier: "$identifier",
+              user: "$user",
             },
-          ],
+            answers: {
+              $push: {
+                start_interview: "$start_interview",
+                end_interview: "$end_interview",
+                option: "$answers.option",
+                value: "$answers.value",
+                selection: "$answers.selection",
+                question: {
+                  $cond: {
+                    if: { $gt: ["$question.english_question", null] },
+                    then: "$question.english_question",
+                    else: "$question.question",
+                  },
+                },
+                questionType: "$question.type",
+                questionOptions: "$question.options",
+              },
+            },
+          },
         },
-      },
-      {
-        $project: {
-          _id: 0,
-          question: { $arrayElemAt: ["$question.question", 0] },
-          answer: { $arrayElemAt: ["$answers.option", 0] },
-          identifier: 1,
+        {
+          $project: {
+            _id: 0,
+            identifier: "$_id.identifier",
+            user: {
+              firstname: "$_id.user.firstname",
+              lastname: "$_id.user.lastname",
+              phone: "$_id.user.phone",
+            },
+            answers: 1,
+          },
         },
-      },
-      {
-        $limit: limit,
-      },
-      {
-        $skip: skip,
-      },
-    ]);
+        {
+          $skip: skip,
+        },
+        {
+          $limit: limit,
+        },
+      ],
+      { allowDiskUse: true }
+    );
 
-    let data = {};
+    const expected_result = answers.map((obj) => {
+      const userResult = {
+        identifier: obj.identifier,
+      };
+      obj.answers.forEach((answer) => {
+        for (let option of answer.option) {
+          let keyOption = "",
+            question = answer.question.replace(/[^a-zA-Z0-9]/g, "_");
 
-    for (let el of answers) {
-      if (!data[el.identifier]) {
-        data[el.identifier] = [];
-      }
-      data[el.identifier].push(el);
-    }
+          for (let questionOption of answer.questionOptions) {
+            if (
+              questionOption.option_english === option ||
+              questionOption.option === option
+            ) {
+              keyOption = (
+                questionOption.option_english || questionOption.option
+              ).replace(/[^a-zA-Z0-9]/g, "_");
 
-    const result = Object.entries(data).reduce((acc, [identifier, answers]) => {
-      const obj = { identifier };
-      for (let answer of answers) {
-        obj[answer.question] = answer.answer.trim();
-      }
-      acc.push(obj);
-      return acc;
-    }, []);
+              break;
+            }
+          }
+
+          if (answer.value && answer.value.length > 0) {
+            for (let value of answer.value) {
+              userResult[question] = value;
+            }
+          } else if (answer.selection && answer.selection.length > 0) {
+            for (let selectionOption of answer.selection) {
+              for (let selectionOptionOption of selectionOption) {
+                userResult[keyOption] = selectionOptionOption.value;
+              }
+            }
+          } else {
+            userResult[question] = keyOption;
+          }
+        }
+      });
+      return userResult;
+    });
+
+    const fields = [
+      ...new Set(expected_result.flatMap((obj) => Object.keys(obj))),
+    ];
 
     return {
-      data: result,
+      data: expected_result,
+      headers: fields,
       totalCount: "many",
     };
   } catch (error) {
-    console.log(error);
+    return error.stack;
   }
 };
 
@@ -918,6 +965,38 @@ const fetchClosedInterviews = async (params) => {
   }
 };
 
+const generateResponseReport = async (params) => {
+  try {
+    const { data, headers } = await fetchResponses(params);
+    const json2csvParser = new Parser({ fields: headers });
+    const csv = json2csvParser.parse(data);
+
+    const filePath =
+      __dirname +
+      "/../../reports/csv/" +
+      new Date().getTime() +
+      "_surveyResponses.csv";
+    return new Promise((resolve, reject) => {
+      fs.writeFile(filePath, csv, (err) => {
+        if (err) {
+          console.error("Error saving CSV file:", err);
+          reject({ error: err });
+        } else {
+          const successMessage = "CSV file saved successfully!";
+          console.log(successMessage);
+
+          resolve({
+            message: successMessage,
+            filePath,
+          });
+        }
+      });
+    });
+  } catch (error) {
+    return error;
+  }
+};
+
 module.exports = {
   createAnswer,
   findAndUpdateAnswer,
@@ -941,4 +1020,5 @@ module.exports = {
   fetchResponses,
   fetchIncompleteResponses,
   fetchClosedInterviews,
+  generateResponseReport,
 };

@@ -68,10 +68,6 @@ app.post("/answer/incomplete", protect, (req, res) => {
   answer.httpIncomplete(req, res);
 });
 
-app.post("/answer/updateall", (req, res) => {
-  answer.httpUpdateAll(req, res);
-});
-
 app.post("/answer/responses", protect, (req, res) => {
   answer.httpFetchResponses(req, res);
 });
