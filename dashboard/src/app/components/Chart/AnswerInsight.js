@@ -13,24 +13,24 @@ import { Select } from "../Input";
 import { onFilter } from "../../action/Filters";
 
 const questions = [
-  // { label: "Do you have 15 min to answer some questions" },
-  // { label: "Gender" },
-  // { label: "Where? Specify" },
-  // { label: "Age group" },
-  // { label: "What else you certainly never drink?" },
-  // {
-  //   label:
-  //     "When was the last time you drunk bottled beer? NOTE: Close interview if the answer is more than one month",
-  // },
-  // { label: "What is your third choice?" },
-  // {
-  //   label:
-  //     "Think about beer brands, could you please tell me the brand that comes to your mind FIRST? INTERVIEW: RECORD FIRST MENTIONED ON THE TOM COLUMN (a) SINGLE RESPONSE",
-  // },
-  // {
-  //   label:
-  //     "You have understood now we can start to describe different beers:SHOW CARD 1: BRAND...... SPECIFY ",
-  // },
+  { label: "Do you have 15 min to answer some questions" },
+  { label: "Gender" },
+  { label: "Where? Specify" },
+  { label: "Age group" },
+  { label: "What else you certainly never drink?" },
+  {
+    label:
+      "When was the last time you drunk bottled beer? NOTE: Close interview if the answer is more than one month",
+  },
+  { label: "What is your third choice?" },
+  {
+    label:
+      "Think about beer brands, could you please tell me the brand that comes to your mind FIRST? INTERVIEW: RECORD FIRST MENTIONED ON THE TOM COLUMN (a) SINGLE RESPONSE",
+  },
+  {
+    label:
+      "You have understood now we can start to describe different beers:SHOW CARD 1: BRAND...... SPECIFY ",
+  },
   { label: "Show card 5 (Old/ Young)" },
   { label: "Which beer you certainly never drink?" },
   {
