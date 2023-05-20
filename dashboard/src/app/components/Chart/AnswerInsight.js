@@ -142,23 +142,22 @@ class AnswerInsight extends React.Component {
         .then((res) => {
           const data = res.data;
 
-          results.push(data);
 
-          // for (let key of Object.keys(data)) {
-          //   // if (data[key].question_type === "dropdown") {
-          //   //   results[key] = data[key];
-          //   // } else {
-          //   //   results[key] = this.formatChart(data[key], key);
-          //   // }
-          //   results.push({
-          //     identifier: key,
-          //     ...data[key],
-          //   });
-          // }
+          for (let key of Object.keys(data)) {
+            if (data[key].question_type === "dropdown") {
+              results[key] = data[key];
+            } else {
+              results[key] = this.formatChart(data[key], key);
+            }
+            results.push({
+              identifier: key,
+              ...data[key],
+            });
+          }
 
           this.setState({
             isLoading: false,
-            // data: results,
+            data: results,
           });
         })
         .catch((error) => {
