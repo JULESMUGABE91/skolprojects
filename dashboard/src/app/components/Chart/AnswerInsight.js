@@ -161,10 +161,6 @@ class AnswerInsight extends React.Component {
           this.setState({ isLoading: false });
         });
     }
-
-    console.log("====================================");
-    console.log({ results: JSON.stringify(results) });
-    console.log("====================================");
   };
 
   formatChart(data, key) {
