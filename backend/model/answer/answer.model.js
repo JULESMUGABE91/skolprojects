@@ -455,8 +455,8 @@ const percentagePerAnswer = (question, answers, total_respondent) => {
     let count = answers[el].count;
 
     answers[el]["percentage"] = parseFloat(
-      ((count / total_respondent.total) * 100).toFixed(2)
-    );
+      (count / total_respondent.total) * 100
+    ).toFixed(2);
   }
 
   return answers;
@@ -547,8 +547,8 @@ const fetchRespondentsByGender = async (params) => {
     }
 
     for (let el of Object.keys(groupGender)) {
-      groupGender[el]["percentage"] = Math.round(
-        (groupGender[el].count / total_respondent.total) * 100
+      groupGender[el]["percentage"] = parseFloat(
+        ((groupGender[el].count / total_respondent.total) * 100).toFixed(2)
       );
     }
 
@@ -603,9 +603,9 @@ const fetchRespondentsByRegion = async (params) => {
     }
 
     for (let el of Object.keys(groupRegion)) {
-      groupRegion[el]["percentage"] = Math.round(
+      groupRegion[el]["percentage"] = parseFloat(
         (groupRegion[el].count / total_respondent.total) * 100
-      );
+      ).toFixed(2);
     }
 
     return groupRegion;
@@ -675,9 +675,9 @@ const fetchRespondentsByAgeGroup = async (params) => {
     }
 
     for (let el of Object.keys(groupAgeGroup)) {
-      groupAgeGroup[el]["percentage"] = Math.round(
+      groupAgeGroup[el]["percentage"] = parseFloat(
         (groupAgeGroup[el].count / total_respondent.total) * 100
-      );
+      ).toFixed(2);
     }
 
     return groupAgeGroup;
