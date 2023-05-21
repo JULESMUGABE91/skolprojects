@@ -61,7 +61,7 @@ class Table extends React.Component {
       headers,
       totalPageCount,
       actions,
-      rowPress,
+      rowPress = null,
       no_bordered,
       filters,
       showAdd,
@@ -243,7 +243,7 @@ class Table extends React.Component {
                   headers.map((item, i) => {
                     return (
                       <th key={i} title={item.title}>
-                        {item.title}
+                        {item.title.replaceAll('_', ' ')}
                         {item.sort && (
                           <button
                             className="sort-btn"
@@ -379,11 +379,11 @@ class Table extends React.Component {
                                 header.type !== "link" && (
                                   <td
                                     className="data"
-                                    onClick={() =>
-                                      header.key !== "action"
-                                        ? rowPress(item)
-                                        : null
-                                    }
+                                    // onClick={() =>
+                                    //   header.key !== "action"
+                                    //     ? rowPress(item)
+                                    //     : null
+                                    // }
                                     // title={text}
                                     style={{
                                       whiteSpace: "nowrap",
@@ -392,7 +392,7 @@ class Table extends React.Component {
                                       overflow: "hidden",
                                     }}
                                   >
-                                    <span>{text + ""}</span>
+                                    <span>{(text + "").replaceAll('_', ' ')}</span>
                                   </td>
                                 )}
                             </>
