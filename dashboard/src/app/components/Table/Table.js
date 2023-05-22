@@ -61,7 +61,7 @@ class Table extends React.Component {
       headers,
       totalPageCount,
       actions,
-      rowPress = null,
+      rowPress,
       no_bordered,
       filters,
       showAdd,
@@ -243,7 +243,7 @@ class Table extends React.Component {
                   headers.map((item, i) => {
                     return (
                       <th key={i} title={item.title}>
-                        {item.title.replaceAll('_', ' ')}
+                        {item.title.replaceAll("_", " ")}
                         {item.sort && (
                           <button
                             className="sort-btn"
@@ -379,12 +379,12 @@ class Table extends React.Component {
                                 header.type !== "link" && (
                                   <td
                                     className="data"
-                                    // onClick={() =>
-                                    //   header.key !== "action"
-                                    //     ? rowPress(item)
-                                    //     : null
-                                    // }
-                                    // title={text}
+                                    onClick={() =>
+                                      header.key !== "action"
+                                        ? rowPress(item)
+                                        : null
+                                    }
+                                    title={text}
                                     style={{
                                       whiteSpace: "nowrap",
                                       textOverflow: "ellipsis",
@@ -392,7 +392,9 @@ class Table extends React.Component {
                                       overflow: "hidden",
                                     }}
                                   >
-                                    <span>{(text + "").replaceAll('_', ' ')}</span>
+                                    <span>
+                                      {(text + "").replaceAll("_", " ")}
+                                    </span>
                                   </td>
                                 )}
                             </>
