@@ -242,7 +242,10 @@ class Report extends React.Component {
         // create "a" HTML element with href to file & click
         const link = document.createElement("a");
         link.href = href;
-        link.setAttribute("download",new Date().getTime() + "surveyResponses." + type); //or any other extension
+        link.setAttribute(
+          "download",
+          new Date().getTime() + "surveyResponses." + type
+        ); //or any other extension
         document.body.appendChild(link);
         link.click();
 
@@ -251,13 +254,19 @@ class Report extends React.Component {
         URL.revokeObjectURL(href);
       })
       .catch((error) => {
-        console.log(error)
+        console.log(error);
         this.setState({
           isLoading: false,
         });
 
         toastMessage("error", error);
       });
+  }
+
+  handleChangeLimit(e) {
+    this.setState({
+      limit: e.target.value === "" ? 10 : Number(e.target.value),
+    });
   }
 
   render() {
@@ -274,6 +283,8 @@ class Report extends React.Component {
           page={this.state.page}
           limit={this.state.limit}
           isLoading={this.state.isLoading}
+          controlPagination
+          handleChangeLimit={this.handleChangeLimit.bind(this)}
           headers={this.state.headers.map((el) => {
             return {
               title: el,
@@ -293,10 +304,10 @@ class Report extends React.Component {
               button_type: "dropdown",
               icon: "bx bxs-download",
               options: [
-                {
-                  name: "PDF",
-                  onPress: this.downloadPDF.bind(this),
-                },
+                // {
+                //   name: "PDF",
+                //   onPress: this.downloadPDF.bind(this),
+                // },
                 {
                   name: "CSV",
                   onPress: this.downloadExcel.bind(this),

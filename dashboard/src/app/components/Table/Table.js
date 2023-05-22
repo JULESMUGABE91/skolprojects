@@ -74,7 +74,9 @@ class Table extends React.Component {
       sortOrder,
       sortColumn,
       tab,
+      controlPagination,
       handleDownloadFilePdf,
+      handleChangeLimit,
     } = this.props;
 
     const { limit, data } = this.state;
@@ -218,6 +220,14 @@ class Table extends React.Component {
                       );
                     }
                   })}
+                {controlPagination && (
+                  <Input
+                    type="number"
+                    // value={limit}
+                    onChange={handleChangeLimit}
+                    placeholder={`Limit (Default 10)`}
+                  />
+                )}
                 {showAdd && (
                   <Button
                     className="btn-primary btn-sm"
