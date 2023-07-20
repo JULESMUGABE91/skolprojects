@@ -285,6 +285,7 @@ class Report extends React.Component {
           isLoading={this.state.isLoading}
           controlPagination
           handleChangeLimit={this.handleChangeLimit.bind(this)}
+          rowPress={() => console.log("Nothing to do")}
           headers={this.state.headers.map((el) => {
             return {
               title: el,
